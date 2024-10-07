@@ -13,3 +13,6 @@ HomeMaid is a system for monitoring and managing devices and conditions in smart
 | Regina Tavares - 114129     | Architect       |
 | Hugo Castro - 114220        | DevOps Master   |
 
+## HomeMaid Bookmarks:
+- [Technical Report - Product specification](https://docs.google.com/document/d/16_9yoN_G7V7Le3iXELJSOmXPy8zNDtbS/edit?usp=sharing&ouid=113931485348628095672&rtpof=true&sd=true)
+

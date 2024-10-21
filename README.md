@@ -16,3 +16,4 @@ HomeMaid is a system for monitoring and managing devices and conditions in smart
 ## HomeMaid Bookmarks:
 - [Technical Report - Product specification](https://docs.google.com/document/d/16_9yoN_G7V7Le3iXELJSOmXPy8zNDtbS/edit?usp=sharing&ouid=113931485348628095672&rtpof=true&sd=true)
 
+- [Project Prototype on Figma](https://www.figma.com/design/n16XUMfPdKDEpclR5a7mAj/HomeMaid?node-id=0-1&t=gj160MrT3jHejBbO-1)

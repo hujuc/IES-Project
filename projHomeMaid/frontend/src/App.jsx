@@ -1,5 +1,6 @@
 import NavBar from "./components/NavBar"
 import PhotoCard from "./components/PhotoCard"
+import Stats from "./components/Stats";
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
         <div className="w-full md:w-1/2 flex-grow">
           <PhotoCard />
         </div>
+      </div>
+      <div>
+        <Stats></Stats>
       </div>
     </>
   )

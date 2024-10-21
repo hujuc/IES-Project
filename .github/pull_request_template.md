@@ -1,29 +1,29 @@
-## Descrição
-<!-- Descrição das alterações feitas neste PR. Inclua o motivo das mudanças e o problema a resolver. -->
+## Description
+<!-- Description of the changes made in this PR. Include the reason for the changes and the issue it addresses. -->
 
-## Tipo de Alteração
+## Type of Change
 - [ ] Bugfix
-- [ ] Nova funcionalidade
-- [ ] Mudança de funcionalidade existente
-- [ ] Melhorias de performance
-- [ ] Refatoração
-- [ ] Documentação
-- [ ] Outros (especifique):
+- [ ] New feature
+- [ ] Change to existing functionality
+- [ ] Performance improvements
+- [ ] Refactoring
+- [ ] Documentation
+- [ ] Other (specify):
 
-## Como Testar
-<!-- Instruções para testar este PR. Liste os passos necessários para reproduzir o problema e/ou verificar se a funcionalidade está a funcionar conforme é suposto. -->
+## How to Test
+<!-- Instructions for testing this PR. List the necessary steps to reproduce the issue and/or verify if the functionality is working as expected. -->
 
 ## Checklist
-<!-- Certifique-se de que o PR atende aos seguintes requisitos -->
-- [ ] O código segue as **guidelines** de estilo e padrões da equipa
-- [ ] As mudanças foram testadas num ambiente de desenvolvimento
-- [ ] Todas as dependências relevantes foram atualizadas e incluídas no `package.json` ou equivalente
-- [ ] A documentação foi atualizada conforme necessário
+<!-- Ensure that the PR meets the following requirements -->
+- [ ] Code follows the team's **style guidelines** and standards
+- [ ] Changes have been tested in a development environment
+- [ ] All relevant dependencies have been updated and included in `package.json` or equivalent
+- [ ] Documentation has been updated as needed
 
-## Referências
-<!-- Referências ou issues relacionados -->
-- Issue # (especifique o número da issue, se aplicável)
-- Outros links relevantes: [Documentação externa, diagramas, etc.]
+## References
+<!-- Related references or issues -->
+- Issue # (specify issue number, if applicable)
+- Other relevant links: [External documentation, diagrams, etc.]
 
-## Notas Adicionais
-<!-- Informação adicional que possa ajudar a entender o PR, como limitações ou questões pendentes. -->
+## Additional Notes
+<!-- Additional information that may help understand the PR, such as limitations or pending issues. -->

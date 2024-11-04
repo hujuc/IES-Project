@@ -9,24 +9,24 @@ import java.util.List;
 public class House {
 
     @Id
-    private String id;
+    private String houseId;
     private List<String> rooms;
     private List<String> devices;
 
     public House() {}
 
-    public House(String id, List<String> rooms, List<String> devices) {
-        this.id = id;
+    public House(String houseId, List<String> rooms, List<String> devices) {
+        this.houseId = houseId;
         this.rooms = rooms;
         this.devices = devices;
     }
 
-    public String getId() {
-        return id;
+    public String getHouseId() {
+        return houseId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setHouseId(String houseId) {
+        this.houseId = houseId;
     }
 
     public List<String> getRooms() {
@@ -48,7 +48,7 @@ public class House {
     @Override
     public String toString() {
         return "House{" +
-                "id='" + id + '\'' +
+                "houseId='" + houseId + '\'' +
                 ", rooms=" + rooms +
                 ", devices=" + devices +
                 '}';

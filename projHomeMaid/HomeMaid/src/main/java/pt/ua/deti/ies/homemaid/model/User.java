@@ -25,8 +25,8 @@ public class User {
         return userName;
     }
 
-    public void setName(String name) {
-        this.userName = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getEmail() {

@@ -17,6 +17,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Buscar todos os usuários
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
     // Buscar usuário por ID (userName)
     @GetMapping("/{userName}")
     public ResponseEntity<User> getUserById(@PathVariable String userName) {

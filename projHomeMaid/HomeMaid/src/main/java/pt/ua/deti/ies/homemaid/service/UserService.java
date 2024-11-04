@@ -1,7 +1,7 @@
 package pt.ua.deti.ies.homemaid.service;
 
 import pt.ua.deti.ies.homemaid.model.User;
-import pt.ua.deti.ies.homemaid.repository.UserRepository;;
+import pt.ua.deti.ies.homemaid.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +13,10 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     public Optional<User> getUserById(String userName) {

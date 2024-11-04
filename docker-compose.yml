@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: projHomeMaid/HomeMaid
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - cassandra
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/smart_home_mongodb
+      - SPRING_DATA_CASSANDRA_CONTACT_POINTS=cassandra
+      - SPRING_DATA_CASSANDRA_PORT=9042
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  cassandra:
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+
+volumes:
+  mongodb_data:

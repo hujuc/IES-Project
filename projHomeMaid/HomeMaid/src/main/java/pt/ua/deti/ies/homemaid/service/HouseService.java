@@ -33,6 +33,17 @@ public class HouseService {
         this.deviceStatisticsRepository = deviceStatisticsRepository;
     }
 
+    public Optional<House> getHouseById(String id) {
+        logger.info("Attempting to retrieve house with ID: {}", id);
+        Optional<House> house = houseRepository.findById(id);
+        if (house.isPresent()) {
+            logger.info("House found: {}", house.get());
+        } else {
+            logger.warn("House with ID {} not found", id);
+        }
+        return house;
+    }
+
     public Optional<HouseStatisticsResponse> getHouseStatistics(String houseId) {
         logger.info("Fetching house statistics for ID: {}", houseId);
         Optional<House> houseOpt = houseRepository.findById(houseId);

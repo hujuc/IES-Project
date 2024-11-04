@@ -1,7 +1,7 @@
 package pt.ua.deti.ies.homemaid.service;
 
 import pt.ua.deti.ies.homemaid.model.House;
-import com.ua.deti.ies.repository.HouseRepository;
+import pt.ua.deti.ies.homemaid.repository.HouseRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

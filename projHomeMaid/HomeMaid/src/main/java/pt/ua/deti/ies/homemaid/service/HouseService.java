@@ -2,6 +2,8 @@ package pt.ua.deti.ies.homemaid.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pt.ua.deti.ies.homemaid.model.House;
+import pt.ua.deti.ies.homemaid.repository.HouseRepository;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.List;

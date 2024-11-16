@@ -1,13 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
-import NavBar from "./components/NavBar";
-import Home from "./pages/Home.jsx";
+import NavBar from "./components/global/NavBar.jsx";
+import Welcome from "./pages/Welcome.jsx";
 
 function App() {
   return (
     <>
-      <NavBar />
       <Routes>
-        <Route path="/" element={<Home />} /> {/* Definir a rota para a homepage */}
+        <Route path="/" element={<Welcome />} />
       </Routes>
     </>
   )

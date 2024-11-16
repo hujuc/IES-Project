@@ -143,4 +143,23 @@ public class Device {
     public void setAirFluxRate(Integer airFluxRate) {
         this.airFluxRate = airFluxRate;
     }
+
+    @java.lang.Override
+    public java.lang.String toString() {
+        return "Device{" +
+                "deviceId='" + deviceId + '\'' +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", state=" + state +
+                ", brightness=" + brightness +
+                ", color='" + color + '\'' +
+                ", openPercentage=" + openPercentage +
+                ", volume=" + volume +
+                ", temperature=" + temperature +
+                ", mode='" + mode + '\'' +
+                ", ringing=" + ringing +
+                ", airFluxDirection='" + airFluxDirection + '\'' +
+                ", airFluxRate=" + airFluxRate +
+                '}';
+    }
 }

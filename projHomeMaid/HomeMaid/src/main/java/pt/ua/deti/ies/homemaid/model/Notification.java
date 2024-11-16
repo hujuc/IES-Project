@@ -7,10 +7,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Notification {
 
     @Id
-    private String notificationId; // Atualizado para notificationId
-    private String userName; // Nome do usuário a quem pertence a notificação
-    private String notificationText; // Texto da notificação
-    private boolean isRead; // Indicador se a notificação foi lida ou não
+    private String notificationId;
+    private String userName;
+    private String notificationText;
+    private boolean isRead;
 
     public Notification() {}
 
@@ -20,7 +20,6 @@ public class Notification {
         this.isRead = false; // Define como não lida por padrão
     }
 
-    // Getters e Setters
     public String getNotificationId() {
         return notificationId;
     }

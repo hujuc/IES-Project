@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public User updateUser(String userName, User updatedUser) {
-        updatedUser.setUserName(userName); // garante que o ID está correto
+        updatedUser.setUserName(userName);
         return userRepository.save(updatedUser);
     }
 

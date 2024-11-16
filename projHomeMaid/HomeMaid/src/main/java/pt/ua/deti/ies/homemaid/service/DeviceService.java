@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 @Service
 public class DeviceService {
     private final DeviceRepository deviceRepository;
-    private final RoomRepository roomRepository;
     private final HouseRepository houseRepository;
+    private final RoomRepository roomRepository;
 
     public DeviceService(DeviceRepository deviceRepository, RoomRepository roomRepository, HouseRepository houseRepository) {
         this.deviceRepository = deviceRepository;

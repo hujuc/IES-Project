@@ -4,6 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+    <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/model/Room.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/repository/RoomRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/service/RoomService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/HELP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/HouseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/HouseController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/RoomController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/model/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/model/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/service/DeviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/java/pt/ua/deti/ies/homemaid/service/DeviceService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/HomeMaid/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
+    </list>
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,9 +52,15 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projHomeMaid" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

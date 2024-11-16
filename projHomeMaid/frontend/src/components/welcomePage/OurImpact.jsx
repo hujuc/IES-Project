@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-=======
-// src/components/WelcomePage/OurImpact.jsx
-
->>>>>>> Stashed changes
 function OurImpact() {
     return (
         <div className="w-full bg-gray-100 py-6"> {/* Ensures full width */}

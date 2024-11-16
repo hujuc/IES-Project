@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-=======
-// src/components/Global/NavBar.jsx
->>>>>>> Stashed changes
 function NavBar() {
     return (
         <div className="navbar bg-white shadow-lg px-2 py-2 sticky top-0 z-50">

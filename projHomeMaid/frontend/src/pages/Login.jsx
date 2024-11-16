@@ -1,6 +1,5 @@
-// src/pages/Login.jsx
 import React from 'react';
-import Layout from '../components/Global/Layout';
+import Layout from '../components/global/Layout';
 import LoginForm from '../components/loginPage/LoginForm';
 
 function Login() {

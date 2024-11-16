@@ -19,4 +19,8 @@ function Layout({ children }) {
     );
 }
 
+<<<<<<< Updated upstream
 export default Layout;
+=======
+export default Layout;
+>>>>>>> Stashed changes

@@ -1,16 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
-import NavBar from "./components/global/NavBar.jsx";
-import Welcome from "./pages/Welcome.jsx";
+import NavBar from "./components/NavBar";
+import Home from "./pages/Home.jsx";
 
 function App() {
   return (
     <>
+      <NavBar />
       <Routes>
-<<<<<<< Updated upstream
-        <Route path="/" element={<Welcome />} />
-=======
-        <Route path="/" element={<Welcome />} /> {/* Definir a rota para a homepage */}
->>>>>>> Stashed changes
+        <Route path="/" element={<Home />} /> {/* Definir a rota para a homepage */}
       </Routes>
     </>
   )

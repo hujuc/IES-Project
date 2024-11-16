@@ -23,9 +23,4 @@ public class HouseController {
                 .map(house -> ResponseEntity.ok(house))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello World");
-    }
 }

@@ -1,11 +1,11 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.deviceservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import pt.ua.deti.ies.homemaid.model.Device;
-import pt.ua.deti.ies.homemaid.service.DeviceService;
+import pt.ua.deti.ies.deviceservice.model.Device;
+import pt.ua.deti.ies.deviceservice.service.DeviceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

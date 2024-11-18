@@ -1,8 +1,8 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.houseservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import pt.ua.deti.ies.homemaid.model.House;
-import pt.ua.deti.ies.homemaid.service.HouseService;
+import pt.ua.deti.ies.houseservice.model.House;
+import pt.ua.deti.ies.houseservice.service.HouseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

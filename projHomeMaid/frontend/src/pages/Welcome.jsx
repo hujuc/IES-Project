@@ -1,6 +1,8 @@
+// src/pages/Welcome.jsx
+import React from 'react';
+import Layout from '../components/global/Layout';
 import PhotoCard from '../components/welcomePage/PhotoCard';
 import OurImpact from '../components/welcomePage/OurImpact';
-import Layout from "../components/global/Layout.jsx";
 
 function Welcome() {
     return (

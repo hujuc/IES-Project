@@ -1,12 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
+import Home from "./pages/Welcome.jsx";
 import Welcome from "./pages/Welcome.jsx";
-import Login from "./pages/Login.jsx";
+import HomePage from "./pages/HomePage.jsx";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<HomePage />} /> {/* Definir a rota para a homepage */}
       </Routes>
     </>
   )

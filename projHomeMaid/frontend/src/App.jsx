@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home.jsx";
 import AirConditionerControl from "./pages/AirConditionerControl.jsx";
 import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
+import ClockControl from "./pages/ClockControl.jsx";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
     // </>
 
       <>
-        <AirConditionerControl />
+        <ClockControl />
       </>
   )
 }

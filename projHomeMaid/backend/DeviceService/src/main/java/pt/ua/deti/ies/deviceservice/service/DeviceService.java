@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.deviceservice.service;
 
-import pt.ua.deti.ies.homemaid.model.Device;
-import pt.ua.deti.ies.homemaid.repository.DeviceRepository;
-import pt.ua.deti.ies.homemaid.repository.HouseRepository;
+import pt.ua.deti.ies.deviceservice.model.Device;
+import pt.ua.deti.ies.deviceservice.repository.DeviceRepository;
+// import pt.ua.deti.ies.deviceservice.repository.HouseRepository;
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.repository.RoomRepository;
+// import pt.ua.deti.ies.deviceservice.repository.RoomRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 @Service
 public class DeviceService {
     private final DeviceRepository deviceRepository;
-    private final HouseRepository houseRepository;
-    private final RoomRepository roomRepository;
+    // private final HouseRepository houseRepository;
+    // private final RoomRepository roomRepository;
 
-    public DeviceService(DeviceRepository deviceRepository, RoomRepository roomRepository, HouseRepository houseRepository) {
+    public DeviceService(DeviceRepository deviceRepository) {
         this.deviceRepository = deviceRepository;
-        this.roomRepository = roomRepository;
-        this.houseRepository = houseRepository;
+        // this.roomRepository = roomRepository;
+        // this.houseRepository = houseRepository;
     }
 
     public Optional<Device> getDeviceById(String deviceId) {
@@ -40,18 +40,20 @@ public class DeviceService {
     }
 
     public List<Device> getDevicesByRoomId(String roomId) {
-        return roomRepository.findById(roomId)
-                .map(room -> deviceRepository.findAllById(room.getDevices())) // Busca dispositivos pelos IDs em Room
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+        // return roomRepository.findById(roomId)
+        //         .map(room -> deviceRepository.findAllById(room.getDevices())) // Busca dispositivos pelos IDs em Room
+        //         .orElseThrow(() -> new RuntimeException("Room not found"));
+        return null;
     }
 
     public List<Device> getDevicesByHouseId(String houseId) {
-        return houseRepository.findById(houseId)
-                .map(house -> house.getRooms().stream()
-                        .flatMap(roomId -> roomRepository.findById(roomId)
-                                .map(room -> deviceRepository.findAllById(room.getDevices())).stream())
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList()))
-                .orElseThrow(() -> new RuntimeException("House not found"));
+        // return houseRepository.findById(houseId)
+        //         .map(house -> house.getRooms().stream()
+        //                 .flatMap(roomId -> roomRepository.findById(roomId)
+        //                         .map(room -> deviceRepository.findAllById(room.getDevices())).stream())
+        //                 .flatMap(List::stream)
+        //                 .collect(Collectors.toList()))
+        //         .orElseThrow(() -> new RuntimeException("House not found"));
+        return null;
     }
 }

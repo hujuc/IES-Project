@@ -74,35 +74,37 @@ function LoginForm() {
 
             {/* Password Input */}
             {!showResetEmail && (
-                <div className="form-control w-full mb-6 relative">
-                    <label className="label">
-                        <span className="label-text text-gray-700">Password</span>
+                <div className="form-control w-full mb-6 relative flex">
+                    <label className="label w-full">
+                        <span className="label-text text-gray-700 w-full">Password</span>
                     </label>
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Enter your password"
-                        className="input input-bordered w-full bg-gray-50"
-                    />
-                    <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                    >
-                        {showPassword ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.307-3.376m3.823-2.53A10.052 10.052 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-2.307 3.376m-3.823 2.53A10.052 10.052 0 0112 19c-4.478 0-8.268-2.943-9.542-7" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 01-6 0 3 3 0 016 0z" />
-                            </svg>
-                        )}
-                    </button>
+                    <div className="flex w-full">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Enter your password"
+                            className="input input-bordered bg-gray-50 flex-grow"
+                        />
+                        <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="flex items-center justify-center w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-r-md shadow"
+                        >
+                            {showPassword ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.307-3.376m3.823-2.53A10.052 10.052 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-2.307 3.376m-3.823 2.53A10.052 10.052 0 0112 19c-4.478 0-8.268-2.943-9.542-7" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 01-6 0 3 3 0 016 0z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
             )}
 

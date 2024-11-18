@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.houseservice.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pt.ua.deti.ies.homemaid.model.Room;
-import pt.ua.deti.ies.homemaid.service.RoomService;
+import pt.ua.deti.ies.houseservice.model.Room;
+import pt.ua.deti.ies.houseservice.service.RoomService;
 
 import java.util.List;
 

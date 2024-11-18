@@ -1,7 +1,7 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.userservice.service;
 
-import pt.ua.deti.ies.homemaid.model.User;
-import pt.ua.deti.ies.homemaid.repository.UserRepository;
+import pt.ua.deti.ies.userservice.model.User;
+import pt.ua.deti.ies.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public User updateUser(String userName, User updatedUser) {
-        updatedUser.setUserName(userName);
+        // updatedUser.setUserName(userName);
         return userRepository.save(updatedUser);
     }
 

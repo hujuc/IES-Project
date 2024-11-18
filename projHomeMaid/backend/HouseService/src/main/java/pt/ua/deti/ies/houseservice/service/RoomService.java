@@ -1,8 +1,8 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.houseservice.service;
 
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.model.Room;
-import pt.ua.deti.ies.homemaid.repository.RoomRepository;
+import pt.ua.deti.ies.houseservice.model.Room;
+import pt.ua.deti.ies.houseservice.repository.RoomRepository;
 
 import java.util.List;
 import java.util.Optional;

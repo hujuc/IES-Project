@@ -6,6 +6,7 @@ function App() {
   return (
     <>
       <Routes>
+        <Route path="/" element={<Welcome />} />
         <Route path="/" element={<Login />} /> {/* Definir a rota para a homepage */}
       </Routes>
     </>

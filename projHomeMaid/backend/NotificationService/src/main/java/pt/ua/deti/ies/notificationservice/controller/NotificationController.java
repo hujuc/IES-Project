@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.notificationservice.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pt.ua.deti.ies.homemaid.model.Notification;
-import pt.ua.deti.ies.homemaid.service.NotificationService;
+import pt.ua.deti.ies.notificationservice.model.Notification;
+import pt.ua.deti.ies.notificationservice.service.NotificationService;
 
 import java.util.List;
 

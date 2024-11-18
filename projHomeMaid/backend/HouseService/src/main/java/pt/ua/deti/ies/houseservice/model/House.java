@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.homemaid.model;
+package pt.ua.deti.ies.houseservice.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

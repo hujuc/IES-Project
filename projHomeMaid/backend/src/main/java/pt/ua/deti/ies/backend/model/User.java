@@ -6,27 +6,27 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "users")
 public class User {
     @Id
-    private String userName;
+    private String houseId;
     private String email;
     private String password;
-    private String houseId;
+    private String profilePicture;
 
-    public User(String name, String email, String password, String houseId) {
-        this.userName = name;
+    public User(String houseId, String email, String password, String profilePicture) {
+        this.houseId = houseId;
         this.email = email;
         this.password = password;
-        this.houseId = houseId;
+        this.profilePicture = profilePicture;
     }
 
     public User() {
     }
 
-    public String getName() {
-        return userName;
+    public String getHouseId() {
+        return houseId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setHouseId(String houseId) {
+        this.houseId = houseId;
     }
 
     public String getEmail() {
@@ -45,21 +45,21 @@ public class User {
         this.password = password;
     }
 
-    public String getHouseId() {
-        return houseId;
+    public String getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setHouseId(String houseId) {
-        this.houseId = houseId;
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "userName='" + userName + '\'' +
+                "houseId='" + houseId + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", houseId='" + houseId + '\'' +
+                ", profilePicture='" + profilePicture + '\'' +
                 '}';
     }
 }

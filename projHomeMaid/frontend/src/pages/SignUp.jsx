@@ -1,5 +1,5 @@
 import React from 'react';
-import Layout from '../components/Global/Layout';
+import Layout from '../components/global/Layout';
 import SignUpForm from '../components/SignUpPage/SignUpForm';
 
 function SignUp() {

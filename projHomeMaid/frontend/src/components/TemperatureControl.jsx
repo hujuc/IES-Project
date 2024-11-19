@@ -1,14 +1,37 @@
 import React, { useState } from "react";
 
-export default function TemperatureControl() {
-    const [temperature, setTemperature] = useState(24);
+export default function TemperatureControl({ deviceId, initialTemperature }) {
+    const [temperature, setTemperature] = useState(initialTemperature);
 
-    const increaseTemperature = () => {
-        if (temperature < 32) setTemperature(temperature + 1);
+    const updateTemperature = (newTemperature) => {
+        fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ temperature: newTemperature }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Updated temperature:", data.temperature);
+            })
+            .catch((error) => console.error("Erro ao atualizar temperatura:", error));
     };
 
+    const increaseTemperature = () => {
+        if (temperature < 32){
+            const newTemperature = temperature + 1;
+            setTemperature(newTemperature);
+            updateTemperature( newTemperature);
+    }
+};
+
     const decreaseTemperature = () => {
-        if (temperature > 12) setTemperature(temperature - 1);
+        if (temperature > 12) {
+            const newTemperature = temperature - 1;
+            setTemperature(newTemperature);
+            updateTemperature(newTemperature);
+        }
     };
 
     return (

@@ -6,6 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/DeviceService/src/main/java/pt/ua/deti/ies/deviceservice/model/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/DeviceService/src/main/java/pt/ua/deti/ies/deviceservice/model/Device.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/AirConditionerControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/AirConditionerControl.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,9 +31,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "feature/fullStack-automationpages-57",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/ugo/Desktop/UA/3ano/1semestre/IES/projeto",
+    "last_opened_file_path": "/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -54,6 +59,7 @@
       <updated>1730730775625</updated>
       <workItem from="1730730776829" duration="50000" />
       <workItem from="1731772791962" duration="1640000" />
+      <workItem from="1731968553203" duration="4455000" />
     </task>
     <servers />
   </component>

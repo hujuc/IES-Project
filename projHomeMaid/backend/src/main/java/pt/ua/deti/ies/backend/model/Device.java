@@ -28,13 +28,14 @@ public class Device {
     private Integer conditionerPercentage;
     private Integer detergentPercentage;
     private Integer shuttersPercentage;
+    private String airType
 
     // Constructor with all parameters
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
                   String airFluxDirection, Integer airFluxRate, String alarmSong, String coffeeType, Float cycleTime,
                   String dryingMode, String washingMode, Integer waterPercentage, Integer conditionerPercentage,
-                  Integer detergentPercentage, Integer shuttersPercentage) {
+                  Integer detergentPercentage, Integer shuttersPercentage, String airType) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -57,6 +58,7 @@ public class Device {
         this.conditionerPercentage = conditionerPercentage;
         this.detergentPercentage = detergentPercentage;
         this.shuttersPercentage = shuttersPercentage;
+        this.airType = airType;
     }
 
     // Default constructor
@@ -237,6 +239,14 @@ public class Device {
 
     public void setShuttersPercentage(Integer shuttersPercentage) {
         this.shuttersPercentage = shuttersPercentage;
+    }
+
+    public String getAirType() {
+        return airType;
+    }
+
+    public void setAirType(String airType) {
+        this.airType = airType;
     }
 
     @Override

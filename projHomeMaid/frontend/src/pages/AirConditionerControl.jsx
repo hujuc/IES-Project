@@ -3,6 +3,7 @@ import EllipsisButton from "../components/EllipsisButton.jsx";
 import TemperatureControl from "../components/TemperatureControl.jsx";
 import AirFluxControl from "../components/AirFluxControl.jsx";
 import Automatize from "../components/AutomatizeAirCond.jsx";
+import React, { useEffect, useState } from "react";
 import "../index.css";
 
 export default function AirConditionerControl() {

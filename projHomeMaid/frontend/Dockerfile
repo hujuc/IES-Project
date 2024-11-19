@@ -1,20 +1,16 @@
-# Stage 1: Build the application with Node.js
-FROM node:18-alpine3.17 AS build
+# Build vite project and put it in a nginx container
+FROM node:20 AS build-stage
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files first to install dependencies
-COPY package.json package-lock.json ./
+COPY package.json .
 
-# Install the dependencies (including axios)
 RUN npm install
 
-# Copy the rest of your application files into the container
 COPY . .
 
-# Expose the necessary port (for your dev server)
-EXPOSE 5173
+RUN npm run build
 
-# Command to run the application (dev server in this case)
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+FROM nginx:latest
+
+COPY --from=build-stage /app/dist /usr/share/nginx/html

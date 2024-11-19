@@ -1,0 +1,12 @@
+services:
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongodb_dev:/data/db
+    ports:
+      - "27017:27017"
+    #healthcheck:
+    #  test:
+volumes:
+  mongodb_dev:

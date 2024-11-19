@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivos e diretórios relacionados ao ambiente virtual
+.env
+.env.*
+venv/
+env/
+ENV/
+*.env
+**/env/
+**/venv/
+**/.env
+**/.venv

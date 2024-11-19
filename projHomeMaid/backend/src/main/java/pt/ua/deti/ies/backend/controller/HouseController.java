@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import pt.ua.deti.ies.homemaid.model.House;

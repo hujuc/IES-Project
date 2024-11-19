@@ -1,46 +1,42 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: projHomeMaid/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/smart_home_mongodb
+
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    restart: always
 
-  deviceservice:
+  frontend:
     build:
-      context: ./projHomeMaid/backend/DeviceService
+      context: ./projHomeMaid/frontend
       dockerfile: Dockerfile
     ports:
-      - "4000:4000"
+      - "5173:5173"
     depends_on:
-      - userservice
+      - backend
 
-  houseservice:
-    build:
-      context: ./projHomeMaid/backend/HouseService
-      dockerfile: Dockerfile
+  nginx:
+    image: nginx:alpine
     ports:
-      - "4001:4001"
+      - "80:80" # Expose NGINX on port 80
     depends_on:
-      - deviceservice
-
-  notificationservice:
-    build:
-      context: ./projHomeMaid/backend/NotificationService
-      dockerfile: Dockerfile
-    ports:
-      - "4002:4002"
-
-  userservice:
-    build:
-      context: ./projHomeMaid/backend/UserService
-      dockerfile: Dockerfile
-    ports:
-      - "4003:4003"
-
+      - backend
+      - frontend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
 
 volumes:
   mongodb_data:

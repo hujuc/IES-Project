@@ -28,7 +28,7 @@ public class Device {
     private Integer conditionerPercentage;
     private Integer detergentPercentage;
     private Integer shuttersPercentage;
-    private String airType
+    private String airType;
 
     // Constructor with all parameters
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,

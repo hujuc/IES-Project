@@ -8,12 +8,14 @@ public class User {
     @Id
     private String houseId;
     private String email;
+    private String name;
     private String password;
     private String profilePicture;
 
-    public User(String houseId, String email, String password, String profilePicture) {
+    public User(String houseId, String email, String name, String password, String profilePicture) {
         this.houseId = houseId;
         this.email = email;
+        this.name = name;
         this.password = password;
         this.profilePicture = profilePicture;
     }
@@ -37,6 +39,14 @@ public class User {
         this.email = email;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -53,11 +63,12 @@ public class User {
         this.profilePicture = profilePicture;
     }
 
-    @Override
-    public String toString() {
+    @java.lang.Override
+    public java.lang.String toString() {
         return "User{" +
                 "houseId='" + houseId + '\'' +
                 ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", profilePicture='" + profilePicture + '\'' +
                 '}';

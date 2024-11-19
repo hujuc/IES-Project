@@ -23,22 +23,33 @@ public class UserController {
     @PostMapping("/signUp")
     public ResponseEntity<?> signUpUser(@RequestBody User user) {
         try {
-            User createdUser = userService.signUpUser(user);
-            return ResponseEntity.ok(createdUser);
+            userService.signUpUser(user);
+            return ResponseEntity.ok("User successfully registered.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro interno do servidor.");
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User user) {
+        try {
+            String token = userService.loginUser(user.getEmail(), user.getPassword());
+            return ResponseEntity.ok(token);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal server error.");
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
         try {
-            List<User> users = userService.getAllUsers();
-            return ResponseEntity.ok(users);
+            return ResponseEntity.ok(userService.getAllUsers());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body("Internal server error.");
         }
     }
 }

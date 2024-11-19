@@ -7,6 +7,20 @@ import React, { useEffect, useState } from "react";
 import "../index.css";
 
 export default function AirConditionerControl() {
+    // Estado para armazenar os dados do dispositivo
+    const [deviceData, setDeviceData] = useState({});
+
+    // Buscar dados do dispositivo da API
+    useEffect(() => {
+        fetch(`http://localhost:8080/api/devices/AC001`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Device data:", data);
+                setDeviceData(data);
+            })
+            .catch((error) => console.error("Erro ao buscar dados:", error));
+    }, []);
+
     return (
         <div
             className="flex flex-col items-center w-screen min-h-screen"
@@ -14,11 +28,9 @@ export default function AirConditionerControl() {
         >
             {/* Top Bar */}
             <div className="w-full flex justify-between px-4 py-4">
-                {/* Back Button */}
                 <div className="h-16 w-16">
                     <GetBackButton />
                 </div>
-                {/* Three Dots Button */}
                 <div className="h-12 w-14">
                     <EllipsisButton />
                 </div>
@@ -34,7 +46,8 @@ export default function AirConditionerControl() {
                         <input
                             type="checkbox"
                             className="toggle bg-gray-300 checked:bg-orange-500"
-                            checked="checked"
+                            checked={deviceData.state || false} // Ajuste conforme sua API
+                            readOnly
                         />
                     </label>
                 </div>
@@ -42,7 +55,10 @@ export default function AirConditionerControl() {
 
             {/* Temperature Control */}
             <div className="mt-8">
-                <TemperatureControl />
+                <TemperatureControl
+                    initialTemperature={deviceData.temperature || 24} // Fallback para 24
+                    deviceId={"AC001"} // Passando AC001 diretamente
+                />
             </div>
 
             {/* Air Flux Control */}

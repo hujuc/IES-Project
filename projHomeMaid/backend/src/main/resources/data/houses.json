@@ -1,0 +1,7 @@
+[
+  {
+    "_id": "house123",
+    "rooms": ["room1", "room2"],
+    "devices": ["device1", "device2"]
+  }
+]

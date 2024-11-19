@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/ies-24-25-group-project-304.iml" filepath="$PROJECT_DIR$/.idea/ies-24-25-group-project-304.iml" />
-      <module fileurl="file://$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/main.iml" filepath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/main/main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/projHomeMaid/HomeMaid/src/test/test.iml" filepath="$PROJECT_DIR$/projHomeMaid/HomeMaid/src/test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/projHomeMaid/backend/src/main/main.iml" filepath="$PROJECT_DIR$/projHomeMaid/backend/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/projHomeMaid/backend/src/test/test.iml" filepath="$PROJECT_DIR$/projHomeMaid/backend/src/test/test.iml" />
     </modules>
   </component>
 </project>

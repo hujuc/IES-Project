@@ -27,6 +27,9 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    volumes:
+      - ./projHomeMaid/frontend:/app # Mapeia o código do host para o contêiner
+      - /app/node_modules # Ignora o node_modules para evitar conflitos
 
   nginx:
     image: nginx:alpine

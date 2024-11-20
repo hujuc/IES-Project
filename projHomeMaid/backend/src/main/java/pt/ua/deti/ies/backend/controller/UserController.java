@@ -43,10 +43,10 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         try {
-            String houseId = userService.loginUser(user.getEmail(), user.getPassword());
-            return ResponseEntity.ok().body(Map.of("houseId", houseId));
+            String token = userService.loginUser(user.getEmail(), user.getPassword());
+            return ResponseEntity.ok(token);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Internal server error.");
         }

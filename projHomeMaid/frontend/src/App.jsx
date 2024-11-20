@@ -1,11 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
+import Welcome from "./pages/Welcome.jsx";
 import Login from "./pages/Login.jsx";
 import SignUp from "./pages/SignUp.jsx";
-import HomePage from "./pages/HomePage.jsx";
-import Welcome from "./pages/Welcome.jsx";
-import AboutUs from "./pages/AboutUs.jsx";
-import Help from "./pages/Help.jsx";
-import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
 
 function App() {
   return (

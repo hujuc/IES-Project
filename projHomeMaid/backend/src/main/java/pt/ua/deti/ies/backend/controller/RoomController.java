@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.backend.controller;
+package pt.ua.deti.ies.homemaid.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

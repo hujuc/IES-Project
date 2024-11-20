@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.backend.controller;
+package pt.ua.deti.ies.homemaid.controller;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

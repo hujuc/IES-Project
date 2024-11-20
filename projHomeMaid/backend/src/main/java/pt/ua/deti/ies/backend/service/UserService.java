@@ -44,31 +44,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public String loginUser(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("Email does not exist.");
-        }
-
-        User user = userOpt.get();
-        String encryptedPassword = DigestUtils.sha256Hex(password);
-
-        if (!user.getPassword().equals(encryptedPassword)) {
-            throw new IllegalArgumentException("Incorrect password.");
-        }
-
-        // Generate JWT token
-        return Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("houseId", user.getHouseId())
-                .claim("name", user.getName())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1-hour validity
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
-    }
-
     public void deleteUserByHouseId(String houseId) {
         Optional<User> userOpt = userRepository.findByHouseId(houseId);
 
@@ -83,4 +58,20 @@ public class UserService {
         return userRepository.findByHouseId(houseId).orElse(null);
     }
 
+    public String loginUser(String email, String password) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("Invalid email.");
+        }
+
+        User user = userOptional.get();
+
+        String encryptedPassword = DigestUtils.sha256Hex(password);
+        if (!user.getPassword().equals(encryptedPassword)) {
+            throw new IllegalArgumentException("Incorrect password.");
+        }
+
+        return user.getHouseId();
+    }
 }

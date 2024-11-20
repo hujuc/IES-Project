@@ -1,0 +1,74 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom"; // Import React Router to access URL params
+import NotificationDropdown from "./NotificationDropdown";
+import SettingsDropdown from "./SettingsDropdown";
+
+function UserHeader() {
+    const { houseId } = useParams(); // Get the houseId from the URL
+    const [userData, setUserData] = useState(null); // Store user data
+    const [loading, setLoading] = useState(true); // Loading state
+
+    useEffect(() => {
+        // Fetch user data based on houseId
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/users/${houseId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserData(data);
+                } else {
+                    console.error("User not found or server error");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [houseId]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!userData) {
+        return <div>User not found</div>;
+    }
+
+    return (
+        <div className="bg-transparent text-gray-300 p-5">
+            <div className="flex justify-between items-start">
+                <div>
+                    <div className="w-20 h-20 rounded-full overflow-hidden">
+                        <img
+                            src={userData.profilePicture || "https://via.placeholder.com/150"} // Default image if not available
+                            alt="User Avatar"
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex space-x-4">
+                    {/* Notification Dropdown */}
+                    <NotificationDropdown />
+
+                    {/* Settings Dropdown */}
+                    <SettingsDropdown />
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <h1 className="text-xl font-semibold text-white">
+                    Hi, {userData.name}
+                </h1>
+                <p className="text-sm text-gray-400">
+                    Monitor and Control your house
+                </p>
+            </div>
+        </div>
+    );
+}
+
+export default UserHeader;

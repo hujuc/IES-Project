@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongodb_data:/data/db
+    #healthcheck:
+    #  test:
+
+  backend:
+    build:
+      context: ../backend
+    depends_on:
+      - mongo
+      #mongo:
+        #condition: service_healthy
+    environment:
+      SPRING_APPLICATION_JSON: '{
+      "spring.data.mongodb.uri":"mongodb://mongo:27017/smart_home_mongodb",
+      "spring.data.mongodb.database":"smart_home_mongodb",
+      "server.port":"8080",
+      "logging.level.root":"WARN",
+      "logging.level.org.springframework":"INFO",
+      "spring.main.web-application-type":"servlet"
+      }'
+
+  frontend:
+    build:
+      context: ../frontend
+    depends_on:
+      - backend
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+volumes:
+  mongodb_data:

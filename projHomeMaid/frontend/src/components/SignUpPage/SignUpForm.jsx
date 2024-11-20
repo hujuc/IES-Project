@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 
 function SignUpForm() {
     const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ function SignUpForm() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [profilePic, setProfilePic] = useState(null);
+    const navigate = useNavigate(); // Inicializar useNavigate
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,7 +32,7 @@ function SignUpForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(import.meta.env.VITE_API_URL+"/users/signUp", {
+            const response = await axios.post(import.meta.env.VITE_API_URL + "/users/signUp", {
                 houseId: formData.contractCode,
                 name: formData.name,
                 email: formData.email,
@@ -39,19 +41,9 @@ function SignUpForm() {
             });
 
             console.log("User created:", response.data);
-
-            // Optional: Automatically log in the user after signup
-            const loginResponse = await axios.post(import.meta.env.VITE_API_URL+"/users/login", {
-                email: formData.email,
-                password: formData.password,
-            });
-
-            // Store JWT in localStorage
-            localStorage.setItem("accessToken", loginResponse.data.accessToken);
-            alert("Signed up and logged in successfully!");
+            navigate("/login"); // Redirecionar para a página de login
         } catch (error) {
             console.error("Error signing up:", error);
-            alert("Sign-up failed. Please try again.");
         }
     };
 

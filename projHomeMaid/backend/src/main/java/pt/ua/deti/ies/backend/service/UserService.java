@@ -68,4 +68,15 @@ public class UserService {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+
+    public void deleteUserByHouseId(String houseId) {
+        Optional<User> userOpt = userRepository.findByHouseId(houseId);
+
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User with the given houseId does not exist.");
+        }
+
+        userRepository.delete(userOpt.get());
+    }
+
 }

@@ -1,18 +1,27 @@
-import GetBackButton from "../components/GetBackButton.jsx";
-import EllipsisButton from "../components/EllipsisButton.jsx";
-import TemperatureControl from "../components/TemperatureControl.jsx";
-import AirFluxControl from "../components/AirFluxControl.jsx";
-import Automatize from "../components/AutomatizeAirCond.jsx";
+import GetBackButton from "../components/AirConditionerPage/GetBackButton.jsx";
+import EllipsisButton from "../components/AirConditionerPage/EllipsisButton.jsx";
+import TemperatureControl from "../components/AirConditionerPage/TemperatureControl.jsx";
+import AirFluxControl from "../components/AirConditionerPage/AirFluxControl.jsx";
+import Automatize from "../components/AirConditionerPage/AutomatizeAirCond.jsx";
 import React, { useEffect, useState } from "react";
 import "../index.css";
+
+//get device id from the url
+//const url = window.location.href;
+//console.log("URL completa:", url);
+//const urlParts = url.split("/");
+//console.log("Partes do URL:", urlParts);
+//const deviceId = urlParts[urlParts.length - 1];
+//console.log("Device ID:", deviceId);
 
 export default function AirConditionerControl() {
     // Estado para armazenar os dados do dispositivo
     const [deviceData, setDeviceData] = useState({});
+    const deviceId = "AC001"; // para testar
 
     // Buscar dados do dispositivo da API
     useEffect(() => {
-        fetch(`http://localhost:8080/api/devices/AC001`)
+        fetch(`http://localhost:8080/api/devices/AC001`) //para testar ${deviceId} -> AC001
             .then((response) => response.json())
             .then((data) => {
                 console.log("Device data:", data);
@@ -56,8 +65,8 @@ export default function AirConditionerControl() {
             {/* Temperature Control */}
             <div className="mt-8">
                 <TemperatureControl
-                    initialTemperature={deviceData.temperature || 24} // Fallback para 24
-                    deviceId={"AC001"} // Passando AC001 diretamente
+                    initialTemperature={deviceData.temperature || 20} // Fallback para 20
+                    deviceId={deviceId} // para testar deviceId -> AC001
                 />
             </div>
 
@@ -73,3 +82,5 @@ export default function AirConditionerControl() {
         </div>
     );
 }
+
+

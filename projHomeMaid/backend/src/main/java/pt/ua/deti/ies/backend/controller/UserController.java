@@ -53,4 +53,17 @@ public class UserController {
             return ResponseEntity.status(500).body("Internal server error.");
         }
     }
+
+    @DeleteMapping("/{houseId}")
+    public ResponseEntity<?> deleteUserByHouseId(@PathVariable String houseId) {
+        try {
+            userService.deleteUserByHouseId(houseId);
+            return ResponseEntity.ok("User successfully deleted.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
+
 }

@@ -79,4 +79,8 @@ public class UserService {
         userRepository.delete(userOpt.get());
     }
 
+    public User getUserByHouseId(String houseId) {
+        return userRepository.findByHouseId(houseId).orElse(null);
+    }
+
 }

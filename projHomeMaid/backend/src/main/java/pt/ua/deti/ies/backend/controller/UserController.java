@@ -66,4 +66,17 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{houseId}")
+    public ResponseEntity<?> getUserByHouseId(@PathVariable String houseId) {
+        try {
+            User user = userService.getUserByHouseId(houseId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
+
 }

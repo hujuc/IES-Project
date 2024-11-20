@@ -1,4 +1,5 @@
 package pt.ua.deti.ies.homemaid.controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import pt.ua.deti.ies.homemaid.model.House;

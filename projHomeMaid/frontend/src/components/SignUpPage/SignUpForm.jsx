@@ -30,7 +30,7 @@ function SignUpForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(import.meta.env.VITE_API_URL+"/users", {
+            const response = await axios.post(import.meta.env.VITE_API_URL+"/users/signUp", {
                 houseId: formData.contractCode,
                 name: formData.name,
                 email: formData.email,
@@ -41,7 +41,7 @@ function SignUpForm() {
             console.log("User created:", response.data);
 
             // Optional: Automatically log in the user after signup
-            const loginResponse = await axios.post(import.meta.env.VITE_API_URL+"/login", {
+            const loginResponse = await axios.post(import.meta.env.VITE_API_URL+"/users/login", {
                 email: formData.email,
                 password: formData.password,
             });

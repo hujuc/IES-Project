@@ -1,17 +1,16 @@
-# Stage 1: Build the application with Node.js
-FROM node:18-alpine3.17 AS build
+# Build vite project and put it in a nginx container
+FROM node:20 AS build-stage
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the source files
-COPY package.json package-lock.json ./
+COPY package.json .
 
 RUN npm install
 
 COPY . .
 
-EXPOSE 5173
+RUN npm run build
 
-# Install dependencies and build the application
-CMD npm run dev -- --host 0.0.0.0
+FROM nginx:latest
+
+COPY --from=build-stage /app/dist /usr/share/nginx/html

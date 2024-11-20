@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage.jsx";
 import Welcome from "./pages/Welcome.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Help from "./pages/Help.jsx";
+import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
 
 function App() {
   return (
@@ -27,6 +28,9 @@ function App() {
 
           {/* Rota para a HomePage  */}
           <Route path="/homePage/:houseId" element={<HomePage />} />
+
+          <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
+
       </Routes>
     </>
   )

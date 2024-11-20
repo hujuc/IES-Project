@@ -5,10 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/EllipsisButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/GetBackButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/AutomatizeCoffee.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/CentralControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/DrinkOptions.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/CoffeeMachineControl.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/global/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/global/Footer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/global/NavBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/global/NavBar.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,6 +40,9 @@
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="2oOBWnaxSaCeIl2htkMsJ3fXpPs" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -38,7 +50,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature/frontend-welcomepage-55",
+    "git-widget-placeholder": "feature/fullStack-automationpages-57",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/rita/Desktop/3_ano/IES/ies-24-25-group-project-304/projHomeMaid/backend",
     "node.js.detected.package.eslint": "true",

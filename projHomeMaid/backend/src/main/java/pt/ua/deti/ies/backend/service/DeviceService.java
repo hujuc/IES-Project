@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.backend.service;
 
-import pt.ua.deti.ies.homemaid.model.Device;
-import pt.ua.deti.ies.homemaid.repository.DeviceRepository;
-import pt.ua.deti.ies.homemaid.repository.HouseRepository;
+import pt.ua.deti.ies.backend.model.Device;
+import pt.ua.deti.ies.backend.repository.DeviceRepository;
+import pt.ua.deti.ies.backend.repository.HouseRepository;
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.repository.RoomRepository;
+import pt.ua.deti.ies.backend.repository.RoomRepository;
 
 import java.util.List;
 import java.util.Optional;

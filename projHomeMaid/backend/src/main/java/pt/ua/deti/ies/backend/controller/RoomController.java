@@ -1,11 +1,13 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pt.ua.deti.ies.homemaid.model.Room;
-import pt.ua.deti.ies.homemaid.service.RoomService;
+import pt.ua.deti.ies.backend.model.Room;
+import pt.ua.deti.ies.backend.service.RoomService;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -31,4 +33,27 @@ public class RoomController {
                 .map(room -> ResponseEntity.ok(room.getDevices()))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+    @PostMapping
+    public ResponseEntity<?> createRoom(@RequestBody Room room) {
+        try {
+            Room createdRoom = roomService.saveRoom(room);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdRoom);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating room.");
+        }
+    }
+
+    @PutMapping("/{roomId}/updateImage")
+    public ResponseEntity<?> updateRoomImage(@PathVariable String roomId, @RequestParam("image") MultipartFile image) {
+        try {
+            String imageUrl = roomService.updateRoomImage(roomId, image);
+            return ResponseEntity.ok().body(imageUrl);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save image");
+        }
+    }
+
 }

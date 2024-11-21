@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function TemperatureControl({ deviceId, initialTemperature }) {
     const [temperature, setTemperature] = useState(initialTemperature);
+
+    // Sincronizar o estado local com o valor inicial sempre que `initialTemperature` mudar
+    useEffect(() => {
+        setTemperature(initialTemperature);
+    }, [initialTemperature]);
 
     const updateTemperature = (newTemperature) => {
         fetch(`http://localhost:8080/api/devices/${deviceId}`, {

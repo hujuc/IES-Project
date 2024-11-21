@@ -1,10 +1,12 @@
-import GetBackButton from "../components/GetBackButton.jsx";
-import EllipsisButton from "../components/EllipsisButton.jsx";
-import CentralControl from "../components/CentralControl.jsx";
-import DrinkOptions from "../components/DrinkOptions.jsx";
-import Automatize from "../components/AutomatizeCoffe.jsx";
+import GetBackButton from "../components/buttons/GetBackButton.jsx";
+import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
+import CentralControl from "../components/coffeeMachinePage/CentralControl.jsx";
+import DrinkOptions from "../components/coffeeMachinePage/DrinkOptions.jsx";
+import Automatize from "../components/coffeeMachinePage/AutomatizeCoffee.jsx";
+import { useParams } from "react-router-dom";
 
 export default function CoffeeMachineControl() {
+    const { deviceId } = useParams(); // Extract deviceId from the URL
     return (
         <div
             className="relative flex flex-col items-center w-screen min-h-screen"
@@ -38,12 +40,12 @@ export default function CoffeeMachineControl() {
 
             {/* Central Control */}
             <div className="mt-8">
-                <CentralControl />
+                <CentralControl deviceId={deviceId}/>
             </div>
 
             {/* Drink Options */}
             <div className="mt-8">
-                <DrinkOptions />
+                <DrinkOptions deviceId={deviceId} />
             </div>
 
             {/* Automatize */}
@@ -52,7 +54,7 @@ export default function CoffeeMachineControl() {
                     className="w-full bg-[#383634] text-white p-4 rounded-lg shadow-md"
                     style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }} // Subtle shadow for depth
                 >
-                    <Automatize />
+                    <Automatize deviceId={deviceId}/>
                 </div>
             </div>
         </div>

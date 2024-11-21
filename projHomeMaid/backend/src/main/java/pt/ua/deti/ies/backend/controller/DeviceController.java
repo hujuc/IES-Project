@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import java.util.Optional;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import java.util.List;
 
@@ -105,4 +109,35 @@ public class DeviceController {
             @Parameter(description = "ID da casa", required = true) @PathVariable String houseId) {
         return deviceService.getDevicesByHouseId(houseId);
     }
+
+    @PostMapping("/{deviceId}/toggle")
+    public ResponseEntity<?> toggleDeviceState(@PathVariable String deviceId) {
+        Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId); // Handle Optional here
+
+        if (optionalDevice.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found.");
+        }
+
+        Device device = optionalDevice.get(); // Extract the Device from Optional
+
+        if (device.getState()) { // Ensure the `getState()` method matches the getter in the `Device` class
+            return ResponseEntity.badRequest().body("Device is already on.");
+        }
+
+        // Turn on the device
+        device.setState(true);
+        deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
+
+        // Schedule state reset after 30 seconds
+        new Timer().schedule(new TimerTask() { // Ensure Timer and TimerTask are imported
+            @Override
+            public void run() {
+                device.setState(false);
+                deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
+            }
+        }, 30000); // 30 seconds
+
+        return ResponseEntity.ok(device);
+    }
+
 }

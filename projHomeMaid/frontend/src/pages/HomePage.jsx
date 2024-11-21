@@ -1,6 +1,5 @@
 import UserHeader from "../components/homePage/UserHeader.jsx";
 import CardSlider from "../components/homePage/CardSlider.jsx";
-import Footer from "../components/global/Footer.jsx";
 
 function HomePage() {
     return (

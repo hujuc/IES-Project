@@ -1,18 +1,31 @@
-import React from 'react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
+    const navigate = useNavigate(); // Hook para redirecionamento
+
     return (
         <div
             className="bg-white py-4 flex justify-center space-x-6 text-gray-600 text-sm"
-            style={{ boxShadow: '0 -4px 6px -2px rgba(0, 0, 0, 0.1)' }} // Custom top shadow
+            style={{ boxShadow: "0 -4px 6px -2px rgba(0, 0, 0, 0.1)" }} // Custom top shadow
         >
-            <a href="#help" className="flex items-center hover:text-orange-500">
+            {/* Link para Help */}
+            <button
+                onClick={() => navigate("/help")}
+                className="flex items-center hover:text-orange-500"
+            >
                 <span className="mr-1">❓</span> Help
-            </a>
+            </button>
+
             <span className="border-l border-gray-300 h-5"></span>
-            <a href="#about" className="flex items-center hover:text-orange-500">
+
+            {/* Link para About Us */}
+            <button
+                onClick={() => navigate("/aboutUs")}
+                className="flex items-center hover:text-orange-500"
+            >
                 <span className="mr-1">ℹ️</span> About Us
-            </a>
+            </button>
         </div>
     );
 }

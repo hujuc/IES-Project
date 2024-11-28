@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import GetBackButton from "../components/GetBackButton.jsx";
-import EllipsisButton from "../components/EllipsisButton.jsx";
+import GetBackButton from "../components/buttons/GetBackButton.jsx";
+import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import ClockCentralControl from "../components/ClockCentralControl.jsx";
 import Automatize from "../components/AutomatizeAlarmClock.jsx";
 

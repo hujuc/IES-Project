@@ -5,19 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/EllipsisButton.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/GetBackButton.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/AutomatizeCoffee.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/CentralControl.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/DrinkOptions.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/CoffeeMachineControl.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/ClockControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/ClockControl.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +48,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "/home/rita/.nvm/versions/node/v20.18.0/bin/node",
+    "nodejs_interpreter_path": "node",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "configurable.tailwindcss",
     "vue.rearranger.settings.migration": "true"
@@ -77,8 +69,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23726.103" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23726.103" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.22855.74" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.22855.74" />
       </set>
     </attachedChunks>
   </component>
@@ -93,6 +85,7 @@
       <workItem from="1730730776829" duration="50000" />
       <workItem from="1731982815509" duration="377000" />
       <workItem from="1732116515830" duration="805000" />
+      <workItem from="1732786045195" duration="3803000" />
     </task>
     <servers />
   </component>

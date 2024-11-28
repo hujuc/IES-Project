@@ -7,6 +7,7 @@ import AboutUs from "./pages/AboutUs.jsx";
 import Help from "./pages/Help.jsx";
 import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
 import AirConditionerControl from "./pages/AirConditionerControl.jsx";
+import ClockControl from "./pages/ClockControl.jsx";
 
 function App() {
   return (
@@ -30,9 +31,11 @@ function App() {
           {/* Rota para a HomePage  */}
           <Route path="/homePage/:houseId" element={<HomePage />} />
 
-          <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
+          <Route path="/coffeemachine/" element={<CoffeeMachineControl />} />
 
             <Route path="/airconditioner" element={<AirConditionerControl />} />
+
+          <Route path={"/clock"} element={<ClockControl />} />
 
       </Routes>
     </>

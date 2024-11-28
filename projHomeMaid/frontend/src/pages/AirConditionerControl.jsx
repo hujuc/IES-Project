@@ -65,7 +65,7 @@ export default function AirConditionerControl() {
             {/* Temperature Control */}
             <div className="mt-8">
                 <TemperatureControl
-                    initialTemperature={deviceData.temperature || 20} // Fallback para 20
+                    initialTemperature={deviceData.temperature || 27} // Fallback para 20
                     deviceId={deviceId} // para testar deviceId -> AC001
                 />
             </div>

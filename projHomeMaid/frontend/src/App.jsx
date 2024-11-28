@@ -2,6 +2,11 @@ import { Routes, Route } from 'react-router-dom';
 import Welcome from "./pages/Welcome.jsx";
 import Login from "./pages/Login.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
+import Help from "./pages/Help.jsx";
+import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
+import AirConditionerControl from "./pages/AirConditionerControl.jsx";
 
 function App() {
   return (
@@ -26,6 +31,8 @@ function App() {
           <Route path="/homePage/:houseId" element={<HomePage />} />
 
           <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
+
+            <Route path="/airconditioner" element={<AirConditionerControl />} />
 
       </Routes>
     </>

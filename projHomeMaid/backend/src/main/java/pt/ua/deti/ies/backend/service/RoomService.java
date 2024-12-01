@@ -26,12 +26,4 @@ public class RoomService {
     public Room saveRoom(Room room) {
         return roomRepository.save(room);
     }
-
-    public String updateRoomImage(String roomId, MultipartFile image) throws IOException {
-        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-        String imageUrl = imageStorageService.saveImage(image); // Salva a imagem e retorna a URL
-        room.setImageUrl(imageUrl);
-        roomRepository.save(room);
-        return imageUrl;
-    }
 }

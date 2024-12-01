@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // Para redirecionar o usuário
-import { IoMdSettings } from "react-icons/io";
+import React, {useEffect, useRef, useState} from "react";
+import {useNavigate} from "react-router-dom"; // Para redirecionar o usuário
+import {IoMdSettings} from "react-icons/io";
 
 function SettingsDropdown() {
     const [isOpen, setIsOpen] = useState(false);

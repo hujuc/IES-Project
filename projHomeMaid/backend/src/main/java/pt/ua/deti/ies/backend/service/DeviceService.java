@@ -26,13 +26,18 @@ public class DeviceService {
         return deviceRepository.findById(deviceId);
     }
 
+    public List<Device> getDevicesByIds(List<String> deviceIds) {
+        return deviceRepository.findAllById(deviceIds);
+    }
+
+
     public Device createDevice(Device device) {
         return deviceRepository.save(device);
     }
 
     public Device updateDevice(String deviceId, Device updatedDevice) {
-        updatedDevice.setDeviceId(deviceId);
-        return deviceRepository.save(updatedDevice);
+        updatedDevice.setDeviceId(deviceId); // Garantir que o ID do dispositivo não seja alterado
+        return deviceRepository.save(updatedDevice); // Salva a atualização no banco
     }
 
     public void deleteDevice(String deviceId) {
@@ -54,4 +59,9 @@ public class DeviceService {
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("House not found"));
     }
+
+    public Device updateDevice(Device device) {
+        return deviceRepository.save(device);
+    }
+
 }

@@ -37,12 +37,4 @@ public class HouseService {
         return houseRepository.save(house);
     }
 
-    public String updateHouseImage(String houseId, MultipartFile image) throws IOException {
-        House house = houseRepository.findById(houseId).orElseThrow(() -> new IllegalArgumentException("House not found"));
-        String imageUrl = imageStorageService.saveImage(image); // Salva a imagem e retorna a URL
-        house.setImageUrl(imageUrl);
-        houseRepository.save(house);
-        return imageUrl;
-    }
-
 }

@@ -12,17 +12,15 @@ public class House {
     private String houseId;
     private List<String> rooms;
     private List<String> devices;
-    private String imageUrl;
     private Double temperature; // Temperatura associada à casa
     private Double humidity; // Umidade associada à casa
 
     public House() {}
 
-    public House(String houseId, List<String> rooms, List<String> devices, String imageUrl, Double temperature, Double humidity) {
+    public House(String houseId, List<String> rooms, List<String> devices, Double temperature, Double humidity) {
         this.houseId = houseId;
         this.rooms = rooms;
         this.devices = devices;
-        this.imageUrl = imageUrl;
         this.temperature = temperature;
         this.humidity = humidity;
     }
@@ -51,14 +49,6 @@ public class House {
         this.devices = devices;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     public Double getTemperature() {
         return temperature;
     }
@@ -80,8 +70,7 @@ public class House {
         return "House{" +
                 "houseId='" + houseId + '\'' +
                 ", rooms=" + rooms +
-                ", devices=" + devices +
-                ", imageUrl='" + imageUrl + '\'' +
+                ", devices=" + devices + '\'' +
                 ", temperature=" + temperature +
                 ", humidity=" + humidity +
                 '}';

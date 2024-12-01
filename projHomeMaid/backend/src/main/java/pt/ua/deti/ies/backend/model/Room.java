@@ -2,6 +2,7 @@ package pt.ua.deti.ies.backend.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -10,20 +11,19 @@ public class Room {
     @Id
     private String roomId;
     private List<String> devices;
+    private List<Device> deviceObjects; // Lista dos dispositivos completos
     private Double temperature;
     private Double humidity;
     private String type;
-    private String imageUrl;
 
     public Room() {}
 
-    public Room(String roomId, List<String> devices, Double temperature, Double humidity, String type, String imageUrl) {
+    public Room(String roomId, List<String> devices, Double temperature, Double humidity, String type) {
         this.roomId = roomId;
         this.devices = devices;
         this.temperature = temperature;
         this.humidity = humidity;
         this.type = type;
-        this.imageUrl = imageUrl;
     }
 
     // Getters and setters
@@ -41,6 +41,20 @@ public class Room {
 
     public void setDevices(List<String> devices) {
         this.devices = devices;
+    }
+
+    // Este método agora recebe uma lista de objetos Device
+    public void setDeviceObjects(List<Device> devices) {
+        this.deviceObjects = devices;
+
+        // Se você quiser, ainda pode manter os IDs em devices
+        this.devices = devices.stream()
+                .map(Device::getDeviceId) // Supondo que Device tem o método getDeviceId
+                .collect(Collectors.toList());
+    }
+
+    public List<Device> getDeviceObjects() {
+        return deviceObjects;
     }
 
     public Double getTemperature() {
@@ -67,14 +81,6 @@ public class Room {
         this.type = type;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     @java.lang.Override
     public java.lang.String toString() {
         return "Room{" +
@@ -83,7 +89,6 @@ public class Room {
                 ", temperature=" + temperature +
                 ", humidity=" + humidity +
                 ", type='" + type + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 }

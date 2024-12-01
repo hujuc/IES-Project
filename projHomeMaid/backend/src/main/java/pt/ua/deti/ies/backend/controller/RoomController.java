@@ -44,16 +44,5 @@ public class RoomController {
         }
     }
 
-    @PutMapping("/{roomId}/updateImage")
-    public ResponseEntity<?> updateRoomImage(@PathVariable String roomId, @RequestParam("image") MultipartFile image) {
-        try {
-            String imageUrl = roomService.updateRoomImage(roomId, image);
-            return ResponseEntity.ok().body(imageUrl);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save image");
-        }
-    }
 
 }

@@ -2,24 +2,27 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
 
-// Import das imagens padrão
-import defaultHouseImage from "../../assets/default_house.jpg";
-import defaultBedroomImage from "../../assets/default_bedroom.jpg";
-import defaultKitchenImage from "../../assets/default_kitchen.jpg";
-import defaultLivingRoomImage from "../../assets/default_living_room.jpg";
+// Imagens padrão para cada tipo de divisão
+import HouseImage from "../../assets/default_house.jpg";
+import BedroomImage from "../../assets/default_bedroom.jpg";
+import KitchenImage from "../../assets/default_kitchen.jpg";
+import LivingRoomImage from "../../assets/default_living_room.jpg";
+import HallImage from "../../assets/default_hall.jpg";
+import LaundryImage from "../../assets/default_laundry.jpg";
+import OfficeImage from "../../assets/default_office.jpg";
+import BathroomImage from "../../assets/default_bathroom.jpg";
 
 function CardSlider() {
     const { houseId } = useParams(); // Obter houseId do URL
     const [cards, setCards] = useState([]); // Armazena os dados dos cards
     const [currentIndex, setCurrentIndex] = useState(0); // Índice atual do slider
     const [loading, setLoading] = useState(true);
-    const dropdownRef = useRef(null); // Referência para o dropdown aberto
-    const [dropdownOpen, setDropdownOpen] = useState(false); // Estado para o dropdown
 
+    // UseEffect para buscar os dados da casa e quartos do backend
     useEffect(() => {
-        // Buscar informações da casa e dos quartos
         const fetchHouseData = async () => {
             try {
+                // Requisição ao backend para obter os dados da casa
                 const response = await fetch(
                     `${import.meta.env.VITE_API_URL}/houses/${houseId}`
                 );
@@ -32,20 +35,24 @@ function CardSlider() {
                         label: "Home",
                         temperature: data.temperature,
                         humidity: data.humidity,
-                        image: data.imageUrl || defaultHouseImage, // Usar imagem padrão se `imageUrl` for null
+                        image: HouseImage, // Usar imagem padrão para a casa
                         type: "House",
+                        deviceObjects: data.devices, // Passar os dispositivos da casa
                     };
 
+                    // Adicionar os cards dos quartos
                     const roomCards = data.rooms.map((room) => ({
                         id: room.roomId,
                         label: room.type,
                         temperature: room.temperature,
                         humidity: room.humidity,
-                        image: getDefaultImage(room.type, room.imageUrl), // Verificar imagem padrão
+                        image: getDefaultImage(room.type),
                         type: room.type,
+                        deviceObjects: room.deviceObjects, // AQUI também usamos deviceObjects
                     }));
 
-                    setCards([houseCard, ...roomCards]); // Primeiro a casa, depois os quartos
+                    // Adicionar o card da casa e os quartos
+                    setCards([houseCard, ...roomCards]);
                 } else {
                     console.error("Failed to fetch house data");
                 }
@@ -59,88 +66,31 @@ function CardSlider() {
         fetchHouseData();
     }, [houseId]);
 
-    // Fechar o dropdown ao clicar fora
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setDropdownOpen(false);
-            }
-        };
+    // Função para verificar e retornar a imagem padrão com base no tipo de divisão
+    const getDefaultImage = (type) => {
+        const roomType = type.toLowerCase();
 
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
-    // Função para verificar e retornar a imagem padrão
-    const getDefaultImage = (type, imageUrl) => {
-        if (imageUrl) {
-            return imageUrl;
-        }
-
-        switch (type.toLowerCase()) {
+        switch (roomType) {
             case "bedroom":
-                return defaultBedroomImage;
+                return BedroomImage;
             case "kitchen":
-                return defaultKitchenImage;
+                return KitchenImage;
             case "living room":
-                return defaultLivingRoomImage;
+                return LivingRoomImage;
+            case "hall":
+                return HallImage;
+            case "laundry":
+                return LaundryImage;
+            case "office":
+                return OfficeImage;
+            case "bathroom":
+                return BathroomImage;
             default:
-                return defaultHouseImage;
+                return HouseImage; // Imagem padrão para a casa
         }
     };
 
-    // Atualizar a imagem do card no backend
-    const handleChangeImage = async (roomId) => {
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "image/*";
-        fileInput.onchange = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append("image", file);
-
-            try {
-                const endpoint =
-                    roomId === "house"
-                        ? `${import.meta.env.VITE_API_URL}/houses/${houseId}/updateImage`
-                        : `${import.meta.env.VITE_API_URL}/rooms/${roomId}/updateImage`;
-
-                const response = await fetch(endpoint, {
-                    method: "PUT",
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    const updatedItem = await response.json();
-                    setCards((prevCards) =>
-                        prevCards.map((card) =>
-                            card.id === roomId
-                                ? { ...card, image: updatedItem.imageUrl }
-                                : card
-                        )
-                    );
-                } else {
-                    console.error("Failed to update image.");
-                }
-            } catch (error) {
-                console.error("Error updating image:", error);
-            }
-        };
-
-        fileInput.click();
-    };
-
-    // Alternar estado do dropdown
-    const toggleDropdown = () => {
-        setDropdownOpen((prev) => !prev);
-    };
-
-    // Funções para navegar nos cards
+    // Funções de navegação do slider
     const handlePrev = () => {
         setCurrentIndex((prevIndex) =>
             prevIndex === 0 ? cards.length - 1 : prevIndex - 1
@@ -153,6 +103,7 @@ function CardSlider() {
         );
     };
 
+    // Exibir mensagem de carregamento ou de dados não disponíveis
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -175,37 +126,10 @@ function CardSlider() {
                 {/* Informações no canto superior esquerdo */}
                 <div className="absolute top-4 left-4 flex flex-col space-y-1">
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        Temperature: {cards[currentIndex].temperature}°C
+                        <strong>Temperature:</strong> {cards[currentIndex].temperature}°C
                     </div>
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        Humidity: {cards[currentIndex].humidity}%
-                    </div>
-                </div>
-
-                {/* Ícone de configurações no canto superior direito */}
-                <div className="absolute top-4 right-4">
-                    <div className="relative" ref={dropdownRef}>
-                        <button
-                            onClick={toggleDropdown}
-                            className="p-2 rounded-full bg-gray-300 hover:bg-gray-400"
-                        >
-                            <span className="text-gray-700 text-lg">⚙️</span>
-                        </button>
-                        {dropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg">
-                                <ul className="py-2">
-                                    <li
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => {
-                                            setDropdownOpen(false);
-                                            handleChangeImage(cards[currentIndex].id);
-                                        }}
-                                    >
-                                        Change Image
-                                    </li>
-                                </ul>
-                            </div>
-                        )}
+                        <strong>Humidity:</strong> {cards[currentIndex].humidity}%
                     </div>
                 </div>
 

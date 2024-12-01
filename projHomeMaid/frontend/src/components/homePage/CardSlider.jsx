@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
 
@@ -145,13 +145,35 @@ function CardSlider() {
             <div className="flex space-x-4">
                 <button
                     onClick={handlePrev}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                    style={{
+                        backgroundColor: "#d1d5db", // bg-gray-300
+                        color: "#374151", // text-gray-700
+                        padding: "0.5rem 1rem",
+                        borderRadius: "0.5rem",
+                        border: "none",
+                        outline: "none",
+                        boxShadow: "none",
+                        cursor: "pointer",
+                    }}
+                    onMouseDown={(e) => e.preventDefault()} // Prevent active state on click
+                    onFocus={(e) => e.target.blur()} // Remove focus after click
                 >
                     Prev
                 </button>
                 <button
                     onClick={handleNext}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                    style={{
+                        backgroundColor: "#d1d5db", // bg-gray-300
+                        color: "#374151", // text-gray-700
+                        padding: "0.5rem 1rem",
+                        borderRadius: "0.5rem",
+                        border: "none",
+                        outline: "none",
+                        boxShadow: "none",
+                        cursor: "pointer",
+                    }}
+                    onMouseDown={(e) => e.preventDefault()} // Prevent active state on click
+                    onFocus={(e) => e.target.blur()} // Remove focus after click
                 >
                     Next
                 </button>

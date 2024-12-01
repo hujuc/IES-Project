@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 import axios from "axios";
 
 // Importing images for devices
@@ -15,6 +16,7 @@ function RoomInfo({ room }) {
     const [deviceObjects, setDeviceObjects] = useState([]); // Initializing as an empty array
     const [loadingDeviceId, setLoadingDeviceId] = useState(null); // State to manage loading for devices
     const [filter, setFilter] = useState("all"); // Device filter (all, on, off)
+    const navigate = useNavigate(); // Initialize useNavigate
 
     // useEffect to synchronize initial state with received data
     useEffect(() => {
@@ -94,7 +96,7 @@ function RoomInfo({ room }) {
     // Function to render the devices in the room
     const renderDevices = () => {
         if (!filteredDevices || filteredDevices.length === 0) {
-            return <p className="text-gray-600">No devices in this room.</p>;
+            return <p className="text-gray-600"></p>;
         }
 
         return (
@@ -102,7 +104,8 @@ function RoomInfo({ room }) {
                 {filteredDevices.map((device) => (
                     <div
                         key={device.deviceId}
-                        className="bg-white rounded-lg shadow-lg p-4 space-y-4 flex flex-col items-center transition-all duration-300 hover:shadow-xl"
+                        className="bg-white rounded-lg shadow-lg p-4 space-y-4 flex flex-col items-center transition-all duration-300 hover:shadow-xl cursor-pointer"
+                        onClick={() => navigate(`/${device.type}/${device.deviceId}`)} // Navigate to the automations page
                     >
                         {/* Device Name */}
                         <h4 className="text-lg font-semibold text-gray-800 mb-2">
@@ -119,7 +122,10 @@ function RoomInfo({ room }) {
                         {/* Toggle Switch */}
                         <div className="flex items-center space-x-2">
                             <div
-                                onClick={() => toggleDeviceState(device.deviceId, device.state)}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent navigation on toggle click
+                                    toggleDeviceState(device.deviceId, device.state);
+                                }}
                                 className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
                                     device.state ? "bg-orange-500" : "bg-gray-300"
                                 }`}

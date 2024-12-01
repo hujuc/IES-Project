@@ -31,7 +31,7 @@ function App() {
           {/* Rota para a HomePage  */}
           <Route path="/homePage/:houseId" element={<HomePage />} />
 
-          <Route path="/coffeemachine/" element={<CoffeeMachineControl />} />
+          <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
 
             <Route path="/airconditioner" element={<AirConditionerControl />} />
 

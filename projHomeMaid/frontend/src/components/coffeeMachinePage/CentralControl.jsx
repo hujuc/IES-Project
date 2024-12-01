@@ -35,25 +35,25 @@ export default function CentralControl({ deviceId }) {
 
         try {
             const updatedState = true; // Always set to true when toggling
-            const response = await axios.put(`http://localhost:8080/api/devices/${deviceId}`, {
-                ...device,
-                state: updatedState,
+            // Update the state to true
+            const response = await axios.patch(`http://localhost:8080/api/devices/${deviceId}`, {
+                state: updatedState, // Send only the state field
             });
 
             setLightOn(updatedState); // Update the light state locally
-            setDevice(response.data); // Update the device data in state
+            setDevice((prevDevice) => ({ ...prevDevice, state: updatedState })); // Update the device state locally
             setIsLocked(true); // Lock the toggle
 
             // Automatically turn off the light after 30 seconds
             setTimeout(async () => {
                 try {
-                    const resetResponse = await axios.put(`http://localhost:8080/api/devices/${deviceId}`, {
-                        ...device,
-                        state: false, // Reset the state to false
+                    // Update the state to false after 30 seconds
+                    const resetResponse = await axios.patch(`http://localhost:8080/api/devices/${deviceId}`, {
+                        state: false, // Send only the state field
                     });
 
                     setLightOn(false); // Update the light state locally
-                    setDevice(resetResponse.data); // Update the device data in state
+                    setDevice((prevDevice) => ({ ...prevDevice, state: false })); // Update the device state locally
                     setIsLocked(false); // Unlock the toggle
                 } catch (resetError) {
                     setError("Failed to reset device state.");

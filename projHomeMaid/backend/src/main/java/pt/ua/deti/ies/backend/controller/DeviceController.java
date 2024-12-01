@@ -69,7 +69,7 @@ public class DeviceController {
             @ApiResponse(responseCode = "404", description = "Dispositivo não encontrado"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida")
     })
-    @PutMapping("/{deviceId}")
+    @PatchMapping("/{deviceId}")
     public ResponseEntity<Device> updateDevice(
             @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
             @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {

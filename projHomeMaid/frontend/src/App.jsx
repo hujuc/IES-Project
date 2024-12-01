@@ -8,6 +8,7 @@ import Help from "./pages/Help.jsx";
 import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
 import AirConditionerControl from "./pages/AirConditionerControl.jsx";
 import ClockControl from "./pages/ClockControl.jsx";
+import LightBulbControl from "./pages/LightBulbControl.jsx";
 
 function App() {
   return (
@@ -36,6 +37,10 @@ function App() {
             <Route path="/airconditioner" element={<AirConditionerControl />} />
 
           <Route path={"/clock"} element={<ClockControl />} />
+
+          <Route path="/lightbulb" element={<LightBulbControl />} />
+
+
 
       </Routes>
     </>

@@ -20,10 +20,11 @@ public class Device {
     private String airFluxDirection;
     private String airFluxRate;
     private String drinkType;
+    private String alarmSound;
 
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, String airFluxRate, String drinkType) {
+                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -38,6 +39,7 @@ public class Device {
         this.airFluxDirection = airFluxDirection;
         this.airFluxRate = airFluxRate;
         this.drinkType = drinkType;
+        this.alarmSound = alarmSound;
     }
 
     public Device() {}
@@ -154,6 +156,14 @@ public class Device {
         this.drinkType = drinkType;
     }
 
+    public String getAlarmSound() {
+        return alarmSound;
+    }
+
+    public void setAlarmSound(String alarmSound) {
+        this.alarmSound = alarmSound;
+    }
+
     @java.lang.Override
     public java.lang.String toString() {
         return "Device{" +
@@ -171,6 +181,7 @@ public class Device {
                 ", airFluxDirection='" + airFluxDirection + '\'' +
                 ", airFluxRate=" + airFluxRate +
                 ", drinkTYpe =" + drinkType +
+                ", alarmSound =" + alarmSound +
                 '}';
     }
 }

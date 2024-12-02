@@ -54,4 +54,9 @@ public class DeviceService {
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("House not found"));
     }
+
+    // getAllDevices:
+    public List<Device> getAllDevices() {
+        return deviceRepository.findAll();
+    }
 }

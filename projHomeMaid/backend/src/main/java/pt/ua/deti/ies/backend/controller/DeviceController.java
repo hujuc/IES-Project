@@ -1,32 +1,23 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import pt.ua.deti.ies.homemaid.model.Device;
-import pt.ua.deti.ies.homemaid.service.DeviceService;
+import pt.ua.deti.ies.backend.model.Device;
+import pt.ua.deti.ies.backend.service.DeviceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.Optional;
+import java.util.Optional;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import java.util.List;
+import java.util.*;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.PUT,
-                RequestMethod.DELETE,
-                RequestMethod.POST
-        })
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceController {
@@ -62,20 +53,6 @@ public class DeviceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
     }
 
-    @Operation(summary = "Atualizar dispositivo", description = "Atualiza as informações de um dispositivo já existente.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Dispositivo atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Dispositivo não encontrado"),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida")
-    })
-    @PutMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDevice(
-            @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
-            @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
-        Device updatedDevice = deviceService.updateDevice(deviceId, device);
-        return ResponseEntity.ok(updatedDevice);
-    }
-
     @Operation(summary = "Deletar dispositivo", description = "Remove um dispositivo do sistema com base no ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Dispositivo deletado com sucesso"),
@@ -108,6 +85,14 @@ public class DeviceController {
     public List<Device> getDevicesByHouseId(
             @Parameter(description = "ID da casa", required = true) @PathVariable String houseId) {
         return deviceService.getDevicesByHouseId(houseId);
+    }
+
+    @PatchMapping("/{deviceId}")
+    public ResponseEntity<Device> updateDevice(
+            @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
+            @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
+        Device updatedDevice = deviceService.updateDevice(deviceId, device);
+        return ResponseEntity.ok(updatedDevice);
     }
 
     @PostMapping("/{deviceId}/toggle")

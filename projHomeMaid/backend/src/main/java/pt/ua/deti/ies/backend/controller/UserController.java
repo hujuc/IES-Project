@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
-import pt.ua.deti.ies.homemaid.model.User;
-import pt.ua.deti.ies.homemaid.service.UserService;
+import pt.ua.deti.ies.backend.model.User;
+import pt.ua.deti.ies.backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,16 +12,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.*;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.PUT,
-                RequestMethod.DELETE,
-                RequestMethod.POST
-        })
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

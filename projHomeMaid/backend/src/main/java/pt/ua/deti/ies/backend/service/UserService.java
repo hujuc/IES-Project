@@ -1,8 +1,8 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.backend.service;
 
 import org.apache.commons.codec.digest.DigestUtils; // Ensure this import is present
-import pt.ua.deti.ies.homemaid.model.User;
-import pt.ua.deti.ies.homemaid.repository.UserRepository;
+import pt.ua.deti.ies.backend.model.User;
+import pt.ua.deti.ies.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,7 +26,6 @@ public class UserService {
     }
 
     public User signUpUser(User user) {
-        // Check if email is already in use
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already in use.");
         }

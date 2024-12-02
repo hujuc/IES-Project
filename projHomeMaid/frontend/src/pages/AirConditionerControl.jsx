@@ -1,34 +1,43 @@
+import React, { useState, useEffect } from "react";
 import GetBackButton from "../components/AirConditionerPage/GetBackButton.jsx";
 import EllipsisButton from "../components/AirConditionerPage/EllipsisButton.jsx";
 import TemperatureControl from "../components/AirConditionerPage/TemperatureControl.jsx";
 import AirFluxControl from "../components/AirConditionerPage/AirFluxControl.jsx";
 import Automatize from "../components/AirConditionerPage/AutomatizeAirCond.jsx";
-import React, { useEffect, useState } from "react";
-import "../index.css";
-
-//get device id from the url
-//const url = window.location.href;
-//console.log("URL completa:", url);
-//const urlParts = url.split("/");
-//console.log("Partes do URL:", urlParts);
-//const deviceId = urlParts[urlParts.length - 1];
-//console.log("Device ID:", deviceId);
 
 export default function AirConditionerControl() {
-    // Estado para armazenar os dados do dispositivo
-    const [deviceData, setDeviceData] = useState({});
-    const deviceId = "AC001"; // para testar
+    const [deviceData, setDeviceData] = useState(null);
 
-    // Buscar dados do dispositivo da API
+    //get device id from the url
+    const url = window.location.href;
+    console.log("URL completa:", url);
+    const urlParts = url.split("/");
+    console.log("Partes do URL:", urlParts);
+    const deviceId = urlParts[urlParts.length - 1];
+    console.log("Device ID:", deviceId);
+
+    // Fetch device data from API
     useEffect(() => {
-        fetch(`http://localhost:8080/api/devices/AC001`) //para testar ${deviceId} -> AC001
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("Device data:", data);
+        const fetchDeviceData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const data = await response.json();
                 setDeviceData(data);
-            })
-            .catch((error) => console.error("Erro ao buscar dados:", error));
-    }, []);
+            } catch (error) {
+                console.error("Error fetching device data:", error);
+            }
+        };
+
+        fetchDeviceData();
+    }, [deviceId]);
+
+    if (!deviceData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-white">Loading...</p>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -55,7 +64,7 @@ export default function AirConditionerControl() {
                         <input
                             type="checkbox"
                             className="toggle bg-gray-300 checked:bg-orange-500"
-                            checked={deviceData.state || false} // Ajuste conforme sua API
+                            checked={deviceData.state || false}
                             readOnly
                         />
                     </label>
@@ -65,14 +74,14 @@ export default function AirConditionerControl() {
             {/* Temperature Control */}
             <div className="mt-8">
                 <TemperatureControl
-                    initialTemperature={deviceData.temperature || 27} // Fallback para 20
-                    deviceId={deviceId} // para testar deviceId -> AC001
+                    deviceId={deviceId}
+                    initialTemperature={deviceData.temperature}
                 />
             </div>
 
             {/* Air Flux Control */}
             <div className="mt-8">
-                <AirFluxControl />
+                <AirFluxControl deviceId={deviceId} deviceData={deviceData} />
             </div>
 
             {/* Automatize */}
@@ -82,5 +91,3 @@ export default function AirConditionerControl() {
         </div>
     );
 }
-
-

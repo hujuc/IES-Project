@@ -9,6 +9,7 @@ import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
 import AirConditionerControl from "./pages/AirConditionerControl.jsx";
 import ClockControl from "./pages/ClockControl.jsx";
 import LightBulbControl from "./pages/LightBulbControl.jsx";
+import ShutterControl from "./pages/ShutterControl.jsx";
 
 function App() {
   return (
@@ -34,11 +35,13 @@ function App() {
 
           <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
 
-          <Route path="/airconditioner/:deviceId" element={<AirConditionerControl />} />
+          <Route path="/airConditioner/:deviceId" element={<AirConditionerControl />} />
 
           <Route path="/clock/:deviceId" element={<ClockControl />} />
 
-          <Route path="/lightbulb/:deviceId" element={<LightBulbControl />} />
+          <Route path="/lamp/:deviceId" element={<LightBulbControl />} />
+
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
 
 
 

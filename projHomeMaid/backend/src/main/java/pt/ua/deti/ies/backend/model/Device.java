@@ -18,13 +18,13 @@ public class Device {
     private String mode;
     private Boolean ringing;
     private String airFluxDirection;
-    private Integer airFluxRate;
+    private String airFluxRate;
     private String drinkType;
     private String alarmSound;
 
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, Integer airFluxRate, String drinkType, String alarmSound) {
+                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -140,11 +140,11 @@ public class Device {
         this.airFluxDirection = airFluxDirection;
     }
 
-    public Integer getAirFluxRate() {
+    public String getAirFluxRate() {
         return airFluxRate;
     }
 
-    public void setAirFluxRate(Integer airFluxRate) {
+    public void setAirFluxRate(String airFluxRate) {
         this.airFluxRate = airFluxRate;
     }
 

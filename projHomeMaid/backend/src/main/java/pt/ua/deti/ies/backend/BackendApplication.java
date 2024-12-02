@@ -1,13 +1,13 @@
-package pt.ua.deti.ies.homemaid;
+package pt.ua.deti.ies.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HomeMaidApplication {
+public class BackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HomeMaidApplication.class, args);
+        SpringApplication.run(BackendApplication.class, args);
     }
 
 }

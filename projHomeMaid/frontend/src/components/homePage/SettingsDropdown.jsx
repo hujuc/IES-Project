@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
-import { IoMdSettings } from "react-icons/io";
+import React, {useEffect, useRef, useState} from "react";
+import {useNavigate} from "react-router-dom"; // Para redirecionar o usuário
+import {IoMdSettings} from "react-icons/io";
 
 function SettingsDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const navigate = useNavigate(); // Hook para redirecionar
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
-    // Close dropdown when clicking outside
+    // Fechar dropdown ao clicar fora
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -22,9 +24,14 @@ function SettingsDropdown() {
         };
     }, []);
 
+    const handleLogOut = () => {
+        // Adicione qualquer lógica de logout aqui, como limpar tokens ou estados globais
+        navigate("/"); // Redireciona para a página Welcome
+    };
+
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Settings Button */}
+            {/* Botão de configurações */}
             <button
                 onClick={toggleDropdown}
                 className="p-2 rounded-full hover:bg-gray-600"
@@ -32,16 +39,19 @@ function SettingsDropdown() {
                 <IoMdSettings className="w-8 h-8 text-gray-300 hover:text-white" />
             </button>
 
-            {/* Dropdown Content */}
+            {/* Conteúdo do Dropdown */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-[#E7E7E7] text-gray-800 rounded-lg shadow-lg">
                     <ul className="py-2">
                         <li className="px-4 py-2 hover:bg-gray-300 cursor-pointer">
                             Edit My Profile
                         </li>
-                        {/* Divider */}
+                        {/* Divisor */}
                         <hr className="border-t border-[#B0B0B0] mx-4" />
-                        <li className="px-4 py-2 hover:bg-gray-300 cursor-pointer text-red-500">
+                        <li
+                            onClick={handleLogOut}
+                            className="px-4 py-2 hover:bg-gray-300 cursor-pointer text-red-500"
+                        >
                             Log Out
                         </li>
                     </ul>

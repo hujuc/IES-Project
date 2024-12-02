@@ -1,8 +1,8 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.backend.service;
 
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.model.Notification;
-import pt.ua.deti.ies.homemaid.repository.NotificationRepository;
+import pt.ua.deti.ies.backend.model.Notification;
+import pt.ua.deti.ies.backend.repository.NotificationRepository;
 
 import java.util.List;
 

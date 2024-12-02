@@ -1,10 +1,10 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.backend.service;
 
-import pt.ua.deti.ies.homemaid.model.Device;
-import pt.ua.deti.ies.homemaid.repository.DeviceRepository;
-import pt.ua.deti.ies.homemaid.repository.HouseRepository;
+import pt.ua.deti.ies.backend.model.Device;
+import pt.ua.deti.ies.backend.repository.DeviceRepository;
+import pt.ua.deti.ies.backend.repository.HouseRepository;
+import pt.ua.deti.ies.backend.repository.RoomRepository;
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.repository.RoomRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.beans.FeatureDescriptor;
+import java.util.*;
 
 @Service
 public class DeviceService {
@@ -34,29 +35,13 @@ public class DeviceService {
         return deviceRepository.findById(deviceId);
     }
 
+    public List<Device> getDevicesByIds(List<String> deviceIds) {
+        return deviceRepository.findAllById(deviceIds);
+    }
+
+
     public Device createDevice(Device device) {
         return deviceRepository.save(device);
-    }
-
-    public Device updateDevice(String deviceId, Device updatedDevice) {
-        // Buscar o dispositivo existente
-        Device existingDevice = deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new RuntimeException("Device not found with ID: " + deviceId));
-
-        // Mesclar os campos não-nulos do dispositivo atualizado
-        BeanUtils.copyProperties(updatedDevice, existingDevice, getNullPropertyNames(updatedDevice));
-
-        // Salvar o dispositivo atualizado no banco de dados
-        return deviceRepository.save(existingDevice);
-    }
-
-    // Método utilitário para obter os campos nulos
-    private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
-        return Arrays.stream(wrappedSource.getPropertyDescriptors())
-                .map(FeatureDescriptor::getName)
-                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
-                .toArray(String[]::new);
     }
 
     public void deleteDevice(String deviceId) {
@@ -78,4 +63,22 @@ public class DeviceService {
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("House not found"));
     }
+
+    public Device updateDevice(String deviceId, Device updatedDevice) {
+        Device existingDevice = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found with ID: " + deviceId));
+
+        BeanUtils.copyProperties(updatedDevice, existingDevice, getNullPropertyNames(updatedDevice));
+
+        return deviceRepository.save(existingDevice);
+    }
+
+    private String[] getNullPropertyNames(Object source) {
+        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+        return Arrays.stream(wrappedSource.getPropertyDescriptors())
+                .map(FeatureDescriptor::getName)
+                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+                .toArray(String[]::new);
+    }
+
 }

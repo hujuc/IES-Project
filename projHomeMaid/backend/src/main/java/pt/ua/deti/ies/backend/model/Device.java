@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.homemaid.model;
+package pt.ua.deti.ies.backend.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,13 +18,13 @@ public class Device {
     private String mode;
     private Boolean ringing;
     private String airFluxDirection;
-    private String airFluxRate;
+    private Integer airFluxRate;
     private String drinkType;
     private String alarmSound;
 
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
+                  String airFluxDirection, Integer airFluxRate, String drinkType, String alarmSound) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -140,11 +140,11 @@ public class Device {
         this.airFluxDirection = airFluxDirection;
     }
 
-    public String getAirFluxRate() {
+    public Integer getAirFluxRate() {
         return airFluxRate;
     }
 
-    public void setAirFluxRate(String airFluxRate) {
+    public void setAirFluxRate(Integer airFluxRate) {
         this.airFluxRate = airFluxRate;
     }
 

@@ -53,20 +53,6 @@ public class DeviceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
     }
 
-    @Operation(summary = "Atualizar dispositivo", description = "Atualiza as informações de um dispositivo já existente.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Dispositivo atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Dispositivo não encontrado"),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida")
-    })
-    @PutMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDevice(
-            @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
-            @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
-        Device updatedDevice = deviceService.updateDevice(deviceId, device);
-        return ResponseEntity.ok(updatedDevice);
-    }
-
     @Operation(summary = "Deletar dispositivo", description = "Remove um dispositivo do sistema com base no ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Dispositivo deletado com sucesso"),
@@ -107,36 +93,6 @@ public class DeviceController {
             @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
         Device updatedDevice = deviceService.updateDevice(deviceId, device);
         return ResponseEntity.ok(updatedDevice);
-    }
-
-    @PostMapping("/{deviceId}/toggle")
-    public ResponseEntity<?> toggleDeviceState(@PathVariable String deviceId) {
-        Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId); // Handle Optional here
-
-        if (optionalDevice.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found.");
-        }
-
-        Device device = optionalDevice.get(); // Extract the Device from Optional
-
-        if (device.getState()) { // Ensure the `getState()` method matches the getter in the `Device` class
-            return ResponseEntity.badRequest().body("Device is already on.");
-        }
-
-        // Turn on the device
-        device.setState(true);
-        deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
-
-        // Schedule state reset after 30 seconds
-        new Timer().schedule(new TimerTask() { // Ensure Timer and TimerTask are imported
-            @Override
-            public void run() {
-                device.setState(false);
-                deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
-            }
-        }, 30000); // 30 seconds
-
-        return ResponseEntity.ok(device);
     }
 
     @PostMapping("/{deviceId}/toggle")

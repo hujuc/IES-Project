@@ -34,11 +34,11 @@ function App() {
 
           <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
 
-            <Route path="/airconditioner" element={<AirConditionerControl />} />
+            <Route path="/airconditioner/:deviceId" element={<AirConditionerControl />} />
 
-          <Route path={"/clock"} element={<ClockControl />} />
+          <Route path="/clock/:deviceId" element={<ClockControl />} />
 
-          <Route path="/lightbulb" element={<LightBulbControl />} />
+          <Route path="/lightbulb/:deviceId" element={<LightBulbControl />} />
 
 
 

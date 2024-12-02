@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.backend.controller;
+package pt.ua.deti.ies.homemaid.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,16 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
 @RestController
 @RequestMapping("/api/rooms")
 public class RoomController {

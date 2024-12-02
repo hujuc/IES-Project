@@ -11,19 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.Optional;
+import java.util.Optional;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import java.util.*;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceController {
@@ -48,6 +42,25 @@ public class DeviceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
     }
 
+    @Operation(summary = "Atualizar dispositivo", description = "Atualiza as informações de um dispositivo já existente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dispositivo atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dispositivo não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Requisição inválida")
+    })
+    @PutMapping("/{deviceId}")
+    public ResponseEntity<Device> updateDevice(
+            @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
+            @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
+        Device updatedDevice = deviceService.updateDevice(deviceId, device);
+        return ResponseEntity.ok(updatedDevice);
+    }
+
+    @Operation(summary = "Deletar dispositivo", description = "Remove um dispositivo do sistema com base no ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Dispositivo deletado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dispositivo não encontrado")
+    })
     @DeleteMapping("/{deviceId}")
     public ResponseEntity<Void> deleteDevice(
             @Parameter(description = "ID do dispositivo a ser deletado", required = true) @PathVariable String deviceId) {

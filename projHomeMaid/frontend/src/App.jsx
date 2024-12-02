@@ -10,6 +10,7 @@ import AirConditionerControl from "./pages/AirConditionerControl.jsx";
 import ClockControl from "./pages/ClockControl.jsx";
 import LightBulbControl from "./pages/LightBulbControl.jsx";
 import ShutterControl from "./pages/ShutterControl.jsx";
+import TVControl from "./pages/TVControl.jsx";
 
 function App() {
   return (
@@ -44,6 +45,8 @@ function App() {
           <Route path="/shutter/:deviceId" element={<ShutterControl />} />
 
           <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
+          <Route path="/television/:deviceId" element={<TVControl />} />
 
 
 

@@ -7,7 +7,14 @@ import Automatize from "../components/AirConditionerPage/AutomatizeAirCond.jsx";
 
 export default function AirConditionerControl() {
     const [deviceData, setDeviceData] = useState(null);
-    const deviceId = "AC001"; // Substitua por um ID dinâmico, se necessário.
+
+    //get device id from the url
+    const url = window.location.href;
+    console.log("URL completa:", url);
+    const urlParts = url.split("/");
+    console.log("Partes do URL:", urlParts);
+    const deviceId = urlParts[urlParts.length - 1];
+    console.log("Device ID:", deviceId);
 
     // Fetch device data from API
     useEffect(() => {

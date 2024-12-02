@@ -43,6 +43,8 @@ function App() {
 
           <Route path="/shutter/:deviceId" element={<ShutterControl />} />
 
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
 
 
       </Routes>

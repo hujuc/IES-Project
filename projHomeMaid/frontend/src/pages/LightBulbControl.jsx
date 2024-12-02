@@ -11,7 +11,14 @@
         const [isLightOn, setIsLightOn] = useState(false);
         const [brightness, setBrightness] = useState(50); // Brilho padrão (50%)
         const [error, setError] = useState(null);
-        const deviceId = "Light001";
+
+        //get device id from the url
+        const url = window.location.href;
+        console.log("URL completa:", url);
+        const urlParts = url.split("/");
+        console.log("Partes do URL:", urlParts);
+        const deviceId = urlParts[urlParts.length - 1];
+        console.log("Device ID:", deviceId);
 
         // Buscar o estado inicial da lâmpada e o brilho
         useEffect(() => {

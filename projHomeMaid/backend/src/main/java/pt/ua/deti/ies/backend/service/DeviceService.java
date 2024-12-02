@@ -64,6 +64,11 @@ public class DeviceService {
                 .orElseThrow(() -> new RuntimeException("House not found"));
     }
 
+    // getAllDevices:
+    public List<Device> getAllDevices() {
+        return deviceRepository.findAll();
+    }
+
     public Device updateDevice(String deviceId, Device updatedDevice) {
         Device existingDevice = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found with ID: " + deviceId));

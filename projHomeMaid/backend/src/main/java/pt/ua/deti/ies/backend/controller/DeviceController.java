@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.Optional;
-import java.util.Optional;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -85,6 +84,15 @@ public class DeviceController {
     public List<Device> getDevicesByHouseId(
             @Parameter(description = "ID da casa", required = true) @PathVariable String houseId) {
         return deviceService.getDevicesByHouseId(houseId);
+    }
+
+    @Operation(summary = "Listar todos os dispositivos", description = "Retorna uma lista de todos os dispositivos no sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de dispositivos retornada com sucesso")
+    })
+    @GetMapping
+    public ResponseEntity<List<Device>> getAllDevices() {
+        return ResponseEntity.ok(deviceService.getAllDevices());
     }
 
     @PatchMapping("/{deviceId}")

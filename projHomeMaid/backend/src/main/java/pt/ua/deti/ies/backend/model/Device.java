@@ -18,11 +18,13 @@ public class Device {
     private String mode;
     private Boolean ringing;
     private String airFluxDirection;
-    private Integer airFluxRate;
+    private String airFluxRate;
+    private String drinkType;
+    private String alarmSound;
 
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, Integer airFluxRate) {
+                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -36,6 +38,8 @@ public class Device {
         this.ringing = ringing;
         this.airFluxDirection = airFluxDirection;
         this.airFluxRate = airFluxRate;
+        this.drinkType = drinkType;
+        this.alarmSound = alarmSound;
     }
 
     public Device() {}
@@ -136,12 +140,28 @@ public class Device {
         this.airFluxDirection = airFluxDirection;
     }
 
-    public Integer getAirFluxRate() {
+    public String getAirFluxRate() {
         return airFluxRate;
     }
 
-    public void setAirFluxRate(Integer airFluxRate) {
+    public void setAirFluxRate(String airFluxRate) {
         this.airFluxRate = airFluxRate;
+    }
+
+    public String getDrinkType() {
+        return drinkType;
+    }
+
+    public void setDrinkType(String drinkType) {
+        this.drinkType = drinkType;
+    }
+
+    public String getAlarmSound() {
+        return alarmSound;
+    }
+
+    public void setAlarmSound(String alarmSound) {
+        this.alarmSound = alarmSound;
     }
 
     @java.lang.Override
@@ -160,6 +180,8 @@ public class Device {
                 ", ringing=" + ringing +
                 ", airFluxDirection='" + airFluxDirection + '\'' +
                 ", airFluxRate=" + airFluxRate +
+                ", drinkTYpe =" + drinkType +
+                ", alarmSound =" + alarmSound +
                 '}';
     }
 }

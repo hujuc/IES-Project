@@ -68,62 +68,40 @@ public class DeviceController {
     }
 
     @PatchMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDeviceField(
-            @PathVariable String deviceId,
-            @RequestBody Map<String, Object> updates) {
-        Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId);
+    public ResponseEntity<Device> updateDevice(
+            @Parameter(description = "ID do dispositivo a ser atualizado", required = true) @PathVariable String deviceId,
+            @Parameter(description = "Dados atualizados do dispositivo", required = true) @RequestBody Device device) {
+        Device updatedDevice = deviceService.updateDevice(deviceId, device);
+        return ResponseEntity.ok(updatedDevice);
+    }
+
+    @PostMapping("/{deviceId}/toggle")
+    public ResponseEntity<?> toggleDeviceState(@PathVariable String deviceId) {
+        Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId); // Handle Optional here
 
         if (optionalDevice.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found.");
         }
 
-        Device device = optionalDevice.get();
+        Device device = optionalDevice.get(); // Extract the Device from Optional
 
-        updates.forEach((field, value) -> {
-            switch (field) {
-                case "name":
-                    device.setName((String) value);
-                    break;
-                case "type":
-                    device.setType((String) value);
-                    break;
-                case "state":
-                    device.setState((Boolean) value);
-                    break;
-                case "brightness":
-                    device.setBrightness((Integer) value);
-                    break;
-                case "color":
-                    device.setColor((String) value);
-                    break;
-                case "openPercentage":
-                    device.setOpenPercentage((Integer) value);
-                    break;
-                case "volume":
-                    device.setVolume((Integer) value);
-                    break;
-                case "temperature":
-                    device.setTemperature((Double) value);
-                    break;
-                case "mode":
-                    device.setMode((String) value);
-                    break;
-                case "ringing":
-                    device.setRinging((Boolean) value);
-                    break;
-                case "airFluxDirection":
-                    device.setAirFluxDirection((String) value);
-                    break;
-                case "airFluxRate":
-                    device.setAirFluxRate((Integer) value);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Campo desconhecido: " + field);
+        if (device.getState()) { // Ensure the `getState()` method matches the getter in the `Device` class
+            return ResponseEntity.badRequest().body("Device is already on.");
+        }
+
+        // Turn on the device
+        device.setState(true);
+        deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
+
+        // Schedule state reset after 30 seconds
+        new Timer().schedule(new TimerTask() { // Ensure Timer and TimerTask are imported
+            @Override
+            public void run() {
+                device.setState(false);
+                deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
             }
-        });
+        }, 30000); // 30 seconds
 
-        Device updatedDevice = deviceService.updateDevice(device);
-
-        return ResponseEntity.ok(updatedDevice);
+        return ResponseEntity.ok(device);
     }
 }

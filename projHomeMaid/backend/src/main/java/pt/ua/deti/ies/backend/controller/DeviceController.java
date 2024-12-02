@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.Optional;
-import java.util.Optional;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -88,6 +87,15 @@ public class DeviceController {
         return ResponseEntity.ok(updatedDevice);
     }
 
+    @Operation(summary = "Listar todos os dispositivos", description = "Retorna uma lista de todos os dispositivos no sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de dispositivos retornada com sucesso")
+    })
+    @GetMapping
+    public ResponseEntity<List<Device>> getAllDevices() {
+        return ResponseEntity.ok(deviceService.getAllDevices());
+    }
+
     @PostMapping("/{deviceId}/toggle")
     public ResponseEntity<?> toggleDeviceState(@PathVariable String deviceId) {
         Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId); // Handle Optional here
@@ -117,4 +125,5 @@ public class DeviceController {
 
         return ResponseEntity.ok(device);
     }
+
 }

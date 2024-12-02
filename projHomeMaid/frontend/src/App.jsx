@@ -6,6 +6,10 @@ import Welcome from "./pages/Welcome.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Help from "./pages/Help.jsx";
 import CoffeeMachineControl from "./pages/CoffeeMachineControl.jsx";
+import AirConditionerControl from "./pages/AirConditionerControl.jsx";
+import ClockControl from "./pages/ClockControl.jsx";
+import LightBulbControl from "./pages/LightBulbControl.jsx";
+import ShutterControl from "./pages/ShutterControl.jsx";
 
 function App() {
   return (
@@ -30,6 +34,18 @@ function App() {
           <Route path="/homePage/:houseId" element={<HomePage />} />
 
           <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
+
+          <Route path="/airConditioner/:deviceId" element={<AirConditionerControl />} />
+
+          <Route path="/clock/:deviceId" element={<ClockControl />} />
+
+          <Route path="/lamp/:deviceId" element={<LightBulbControl />} />
+
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
+
 
       </Routes>
     </>

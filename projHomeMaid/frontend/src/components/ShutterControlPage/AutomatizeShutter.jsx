@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 
 const API_BASE_URL = "http://localhost:8080/api/automations";
 
-export default function Automatize({ deviceId }) {
-    const [automatizations, setAutomatizations] = useState([]); // Automatizations list
-    const [onTime, setOnTime] = useState("10:00"); // On Time (time input)
-    const [selectedType, setSelectedType] = useState("Espresso"); // Editable type
+export default function AutomatizeShutter({ deviceId }) {
+    const [automatizations, setAutomatizations] = useState([]); // Lista de automatizações
+    const [onTime, setOnTime] = useState("08:00"); // Hora de ativação
+    const [openPercentage, setOpenPercentage] = useState(50); // Percentagem de abertura
 
     // Fetch automatizations from backend
     useEffect(() => {
@@ -28,7 +28,7 @@ export default function Automatize({ deviceId }) {
         const newAutomatization = {
             deviceId: deviceId,
             executionTime: onTime,
-            changes: { drinkType: selectedType },
+            changes: { openPercentage: parseInt(openPercentage, 10) },
         };
 
         fetch(API_BASE_URL, {
@@ -59,17 +59,16 @@ export default function Automatize({ deviceId }) {
             .catch((err) => console.error("Error deleting automatization:", err));
     };
 
-
     return (
         <div className="flex flex-col items-center w-full">
-            {/* Automatize Container */}
+            {/* Contêiner de Automatização */}
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
                 </div>
 
                 <div className="space-y-4">
-                    {/* On Time Input */}
+                    {/* Entrada de Hora */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">On</label>
                         <input
@@ -80,23 +79,23 @@ export default function Automatize({ deviceId }) {
                         />
                     </div>
 
-                    {/* Type Dropdown */}
+                    {/* Controle de Percentagem de Abertura */}
                     <div className="flex items-center justify-between">
-                        <label className="text-gray-600 font-medium">Type</label>
-                        <select
-                            value={selectedType}
-                            onChange={(e) => setSelectedType(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 focus:ring-2 bg-white focus:ring-orange-500 focus:outline-none"
-                        >
-                            <option value="Espresso">Espresso</option>
-                            <option value="Tea">Tea</option>
-                            <option value="Latte">Latte</option>
-                        </select>
+                        <label className="text-gray-600 font-medium">Open Percentage</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={openPercentage}
+                            onChange={(e) => setOpenPercentage(e.target.value)}
+                            className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700 font-medium">{openPercentage}%</span>
                     </div>
                 </div>
             </div>
 
-            {/* List of Automatizations */}
+            {/* Lista de Automatizações */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -105,12 +104,11 @@ export default function Automatize({ deviceId }) {
                     >
                         <div className="text-sm">
                             <span className="block font-medium">
-                                Time:{" "}
-                                <span className="font-semibold">{item.executionTime}</span>
+                                Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
                             <span className="block font-medium">
-                                Type:{" "}
-                                <span className="font-semibold">{item.changes.drinkType}</span>
+                                Open Percentage:{" "}
+                                <span className="font-semibold">{item.changes.openPercentage}%</span>
                             </span>
                         </div>
                         <button
@@ -137,7 +135,7 @@ export default function Automatize({ deviceId }) {
                 ))}
             </div>
 
-            {/* Add Automatization Button */}
+            {/* Botão de Adicionar Automatização */}
             <button
                 onClick={addAutomatization}
                 className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"

@@ -5,9 +5,43 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Device.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minutes/Sixth Minute.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/public/HomeMaid.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/air.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/alarm-clock.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/coffee-icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/cold.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/fullSun.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/humid.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/outlineSun.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/sun.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AirConditionerPage/AirFluxControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AirConditionerPage/AutomatizeAirCond.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AirConditionerPage/EllipsisButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AirConditionerPage/GetBackButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AirConditionerPage/TemperatureControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AutomatizeAlarmClock.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/AutomatizeCoffe.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/CentralControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/ClockCentralControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/DrinkOptions.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/LightBulbPage/AutomatizeLight.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/EllipsisButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/buttons/GetBackButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/AutomatizeCoffee.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/CentralControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/coffeeMachinePage/DrinkOptions.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/AirConditionerControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/ClockControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/CoffeeMachineControl.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/LightBulbControl.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/tailwind.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,22 +71,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/fullStack-homepage-56&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/rita/Desktop/3_ano/IES/ies-24-25-group-project-304/projHomeMaid/backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;/home/rita/.nvm/versions/node/v20.18.0/bin/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.tailwindcss&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/opt/idea-ultimate/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Merging feature/fullStack-automation-services-63",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/rita/Desktop/3_ano/IES/ies-24-25-group-project-304/projHomeMaid/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "/home/rita/.nvm/versions/node/v20.18.0/bin/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "configurable.tailwindcss",
+    "ts.external.directory.path": "/opt/idea-ultimate/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/projHomeMaid" />

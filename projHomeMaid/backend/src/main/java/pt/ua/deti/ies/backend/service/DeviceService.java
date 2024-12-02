@@ -5,10 +5,18 @@ import pt.ua.deti.ies.homemaid.repository.DeviceRepository;
 import pt.ua.deti.ies.homemaid.repository.HouseRepository;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.homemaid.repository.RoomRepository;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.beans.FeatureDescriptor;
 
 @Service
 public class DeviceService {
@@ -31,8 +39,24 @@ public class DeviceService {
     }
 
     public Device updateDevice(String deviceId, Device updatedDevice) {
-        updatedDevice.setDeviceId(deviceId);
-        return deviceRepository.save(updatedDevice);
+        // Buscar o dispositivo existente
+        Device existingDevice = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found with ID: " + deviceId));
+
+        // Mesclar os campos não-nulos do dispositivo atualizado
+        BeanUtils.copyProperties(updatedDevice, existingDevice, getNullPropertyNames(updatedDevice));
+
+        // Salvar o dispositivo atualizado no banco de dados
+        return deviceRepository.save(existingDevice);
+    }
+
+    // Método utilitário para obter os campos nulos
+    private String[] getNullPropertyNames(Object source) {
+        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+        return Arrays.stream(wrappedSource.getPropertyDescriptors())
+                .map(FeatureDescriptor::getName)
+                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+                .toArray(String[]::new);
     }
 
     public void deleteDevice(String deviceId) {

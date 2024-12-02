@@ -31,7 +31,7 @@ export default function DrinkOptions({ deviceId }) {
     // Update the drinkType in the database
     const updateDrinkType = async (optionName) => {
         try {
-            await axios.put(`http://localhost:8080/api/devices/${deviceId}`, {
+            await axios.patch(`http://localhost:8080/api/devices/${deviceId}`, {
                 drinkType: optionName,
             });
             console.log("Drink type updated successfully");

@@ -18,6 +18,21 @@ export default function LightBulbControl() {
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
 
+    const predefinedColors = [
+        { name: "White", value: "#ffffff" },
+        { name: "Red", value: "#ff0000" },
+        { name: "Pink", value: "#ffc0cb" },
+        { name: "Orange", value: "#ffa500" },
+        { name: "Warm White", value: "#ffd700" },
+        { name: "Yellow", value: "#ffff00" },
+        { name: "Green", value: "#00ff00" },
+        { name: "Teal", value: "#008080" },
+        { name: "Light Blue", value: "#add8e6" },
+        { name: "Blue", value: "#0000ff" },
+        { name: "Purple", value: "#800080" },
+    ];
+
+
     // Buscar o estado inicial da lâmpada
     useEffect(() => {
         const fetchLightData = async () => {
@@ -54,6 +69,7 @@ export default function LightBulbControl() {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }
 
+            console.log(`Estado da lâmpada atualizado na API para: ${updatedState}`);
             setIsLightOn(updatedState);
         } catch (err) {
             console.error("Erro ao alternar a luz:", err);
@@ -78,6 +94,8 @@ export default function LightBulbControl() {
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
                 }
+
+                console.log(`Brilho atualizado na API para: ${newBrightness}`);
             }
         } catch (err) {
             console.error("Erro ao atualizar o brilho:", err);
@@ -102,6 +120,8 @@ export default function LightBulbControl() {
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
                 }
+
+                console.log(`Cor atualizada na API para: ${newColor}`);
             }
         } catch (err) {
             console.error("Erro ao atualizar a cor:", err);
@@ -114,10 +134,10 @@ export default function LightBulbControl() {
             {/* Top Bar */}
             <div className="w-full flex justify-between px-4 py-4">
                 <div className="h-16 w-16">
-                    <GetBackButton />
+                    <GetBackButton/>
                 </div>
                 <div className="h-12 w-14">
-                    <EllipsisButton />
+                    <EllipsisButton/>
                 </div>
             </div>
             {/* Title Section */}
@@ -133,17 +153,17 @@ export default function LightBulbControl() {
                 >
                     {/* Fundo da lâmpada */}
                     <div
-                        className={`absolute w-32 h-32 rounded-full ${
+                        className={`absolute w-32 h-32 rounded-full border-4 ${
                             isLightOn ? `bg-yellow-500 opacity-${Math.floor(brightness / 10)}` : "bg-gray-300"
                         }`}
-                        style={{ backgroundColor: isLightOn ? color : "#ccc" }}
+                        style={{backgroundColor: isLightOn ? color : "#ccc"}}
                     ></div>
                     {/* Ícone da lâmpada */}
                     <div className="z-10">
                         {isLightOn ? (
-                            <FiZap size={50} className="text-yellow-600" />
+                            <FiZap size={50} className="text-black"/>
                         ) : (
-                            <FiZapOff size={50} className="text-gray-400" />
+                            <FiZapOff size={50} className="text-gray-400"/>
                         )}
                     </div>
                 </button>
@@ -163,7 +183,7 @@ export default function LightBulbControl() {
             <div className={`mt-6 w-60 text-center ${isLightOn ? "" : "opacity-50 pointer-events-none"}`}>
                 <div className="flex justify-between items-center">
                     {/* Ícone para brilho mínimo */}
-                    <img src={outlineSunIcon} alt="Low Brightness" className="w-11 h-11" />
+                    <img src={outlineSunIcon} alt="Low Brightness" className="w-11 h-11"/>
 
                     {/* Slider */}
                     <input
@@ -178,7 +198,7 @@ export default function LightBulbControl() {
                         }}
                     />
                     {/* Ícone para brilho máximo */}
-                    <img src={fullSunIcon} alt="High Brightness" className="w-11 h-11" />
+                    <img src={fullSunIcon} alt="High Brightness" className="w-11 h-11"/>
                 </div>
                 <p className="text-white-500 mt-0">{brightness}%</p>
             </div>
@@ -186,21 +206,28 @@ export default function LightBulbControl() {
             {/* Controle de cor */}
             <div className={`mt-6 w-60 text-center ${isLightOn ? "" : "opacity-50 pointer-events-none"}`}>
                 <label className="text-lg font-medium mb-2 block">Color</label>
-                <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => updateColor(e.target.value)}
-                    className="w-full h-10 rounded-md border border-gray-300"
-                />
+                <div className="flex justify-center flex-wrap gap-2">
+                    {predefinedColors.map((colorOption) => (
+                        <button
+                            key={colorOption.value}
+                            style={{backgroundColor: colorOption.value}}
+                            className={`w-6 h-6 rounded-full border-2 ${
+                                color === colorOption.value ? "border-white" : "border-transparent"
+                            }`}
+                            onClick={() => updateColor(colorOption.value)}
+                        />
+                    ))}
+                </div>
             </div>
+
 
             {/* Automatização */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
                 <div
                     className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
+                    style={{boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)"}}
                 >
-                    <AutomatizeLight deviceId={deviceId} />
+                    <AutomatizeLight deviceId={deviceId}/>
                 </div>
             </div>
         </div>

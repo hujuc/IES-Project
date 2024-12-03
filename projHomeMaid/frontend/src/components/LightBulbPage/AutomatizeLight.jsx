@@ -1,21 +1,51 @@
 import React, { useState } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
 
 export default function AutomatizeLight() {
+    const predefinedColors = [
+        { name: "White", value: "#ffffff" },
+        { name: "Red", value: "#ff0000" },
+        { name: "Pink", value: "#ffc0cb" },
+        { name: "Orange", value: "#ffa500" },
+        { name: "Warm White", value: "#ffd700" },
+        { name: "Yellow", value: "#ffff00" },
+        { name: "Green", value: "#00ff00" },
+        { name: "Teal", value: "#008080" },
+        { name: "Light Blue", value: "#add8e6" },
+        { name: "Blue", value: "#0000ff" },
+        { name: "Purple", value: "#800080" },
+    ];
+
     const [automatizations, setAutomatizations] = useState([
-        { time: "08:00 AM", brightness: 50 }, // Automatização inicial
+        { time: "08:00 AM", brightness: 50, color: "White", action: "Turn On" }, // Automatização inicial
     ]);
     const [isAutomatizeOn, setIsAutomatizeOn] = useState(true); // Estado do toggle
     const [onTime, setOnTime] = useState("08:00"); // Tempo de ativação
     const [brightness, setBrightness] = useState(50); // Nível de brilho
+    const [colorIndex, setColorIndex] = useState(0); // Índice da cor selecionada
+    const [action, setAction] = useState("Turn On"); // Estado da ação
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
+    };
+
+    const handleNextColor = () => {
+        setColorIndex((prevIndex) => (prevIndex + 1) % predefinedColors.length);
+    };
+
+    const handlePreviousColor = () => {
+        setColorIndex((prevIndex) =>
+            prevIndex === 0 ? predefinedColors.length - 1 : prevIndex - 1
+        );
     };
 
     const addAutomatization = () => {
         const newAutomatization = {
             time: onTime,
             brightness,
+            color: predefinedColors[colorIndex].name,
+            action,
         };
         setAutomatizations([...automatizations, newAutomatization]);
     };
@@ -34,7 +64,6 @@ export default function AutomatizeLight() {
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
-
                 </div>
 
                 {isAutomatizeOn && (
@@ -48,6 +77,18 @@ export default function AutomatizeLight() {
                                 onChange={handleOnTimeChange}
                                 className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
+                        </div>
+                        {/* Ação Turn On/Off */}
+                        <div className="flex items-center justify-between">
+                            <label className="text-gray-600 font-medium">Action</label>
+                            <select
+                                value={action}
+                                onChange={(e) => setAction(e.target.value)}
+                                className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                            >
+                                <option value="Turn On">Turn On</option>
+                                <option value="Turn Off">Turn Off</option>
+                            </select>
                         </div>
 
                         {/* Controle de Brilho */}
@@ -63,6 +104,35 @@ export default function AutomatizeLight() {
                             />
                             <span className="text-gray-700 font-medium">{brightness}%</span>
                         </div>
+
+                        {/* Seleção de Cor com Setas */}
+                        <div className="flex items-center justify-between">
+                            <label className="text-gray-600 font-medium">Color</label>
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    className="text-gray-600 hover:text-gray-800 focus:outline-none w-8 h-8 flex items-center justify-center"
+                                    onClick={handlePreviousColor}
+                                >
+                                    <FaChevronLeft size={20} />
+                                </button>
+                                <div
+                                    //mete border cinza escuro
+                                    className="w-16 h-8 rounded-full border-2 border-gray-300"
+                                    style={{
+                                        backgroundColor: predefinedColors[colorIndex].value,
+                                    }}
+                                ></div>
+                                <button
+                                    className="text-gray-600 hover:text-gray-800 focus:outline-none w-8 h-8 flex items-center justify-center"
+                                    onClick={handleNextColor}
+                                >
+                                    <FaChevronRight size={20} />
+                                </button>
+
+                            </div>
+                        </div>
+
+
                     </div>
                 )}
             </div>
@@ -81,6 +151,12 @@ export default function AutomatizeLight() {
                                 </span>
                                 <span className="block font-medium">
                                     Brightness: <span className="font-semibold">{item.brightness}%</span>
+                                </span>
+                                <span className="block font-medium">
+                                    Color: <span className="font-semibold">{item.color}</span>
+                                </span>
+                                <span className="block font-medium">
+                                    Action: <span className="font-semibold">{item.action}</span>
                                 </span>
                             </div>
                             <button

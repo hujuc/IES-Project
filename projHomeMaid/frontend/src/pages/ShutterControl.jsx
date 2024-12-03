@@ -6,58 +6,47 @@ import PercentageControl from "../components/ShutterControlPage/PercentageContro
 import AutomatizeShutter from "../components/ShutterControlPage/AutomatizeShutter.jsx";
 
 export default function ShutterControl() {
-    const DEFAULT_OPEN_PERCENTAGE = 50;
     const [isShutterOpen, setIsShutterOpen] = useState(false);
-    const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
+    const [openPercentage, setOpenPercentage] = useState(null);
     const [error, setError] = useState(null);
 
     const url = window.location.href;
-    console.log("URL completa:", url);
-    const urlParts = url.split("/");
-    console.log("Partes do URL:", urlParts);
-    const deviceId = urlParts[urlParts.length - 1];
-    console.log("Device ID:", deviceId);
+    const deviceId = url.split("/").pop();
 
-    // Buscar o estado inicial
-    useEffect(() => {
-        const fetchShutterData = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
-                const data = await response.json();
+    const fetchShutterData = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+            const data = await response.json();
 
-                setIsShutterOpen(data.state || false);
-                const initialPercentage =
-                    data.openPercentage != null
-                        ? Number(data.openPercentage)
-                        : DEFAULT_OPEN_PERCENTAGE;
-                setOpenPercentage(initialPercentage);
-            } catch (err) {
-                console.error("Erro ao buscar o estado da persiana:", err);
-                setError("Falha ao buscar o estado da persiana.");
+            // Certifique-se de sincronizar os estados com o backend
+            if (data.state !== undefined) {
+                setIsShutterOpen(data.state);
             }
-        };
 
-        fetchShutterData();
-    }, [deviceId]);
+            if (data.openPercentage !== undefined) {
+                setOpenPercentage(data.openPercentage); // Atualize para o valor do backend
+            }
+        } catch (err) {
+            console.error("Erro ao buscar o estado da persiana:", err);
+            setError("Falha ao buscar o estado da persiana.");
+        }
+    };
 
     useEffect(() => {
-        if (openPercentage === 0 && isShutterOpen) {
-            saveStateToDatabase(false, 0);
-            setIsShutterOpen(false);
-        }
-    }, [openPercentage, isShutterOpen]);
+        fetchShutterData();
+        const intervalId = setInterval(fetchShutterData, 5000);
+
+        return () => clearInterval(intervalId);
+    }, [deviceId]);
 
     const toggleShutter = async (state) => {
         try {
             const updatedState = state !== undefined ? state : !isShutterOpen;
 
-            if (updatedState) {
-                setOpenPercentage(DEFAULT_OPEN_PERCENTAGE);
-                await saveStateToDatabase(updatedState, DEFAULT_OPEN_PERCENTAGE);
-            } else {
-                setOpenPercentage(0);
-                await saveStateToDatabase(updatedState, 0);
-            }
+            const targetPercentage = updatedState ? 100 : 0;
+
+            setOpenPercentage(targetPercentage);
+            await saveStateToDatabase(updatedState, targetPercentage);
 
             setIsShutterOpen(updatedState);
         } catch (err) {
@@ -113,17 +102,13 @@ export default function ShutterControl() {
                 </div>
             </div>
 
-            {/* State Control */}
             <StateControl isShutterOpen={isShutterOpen} toggleShutter={toggleShutter} />
-
-            {/* Percentage Control */}
             <PercentageControl
                 isShutterOpen={isShutterOpen}
                 openPercentage={openPercentage}
                 updateOpenPercentage={updateOpenPercentage}
             />
 
-            {/* Automatization Section */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
                 <div
                     className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 
 const API_BASE_URL = "http://localhost:8080/api/automations";
 
-export default function AutomatizeShutter({ deviceId }) {
+export default function AutomatizeSpeaker({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]); // Lista de automatizações
     const [onTime, setOnTime] = useState("08:00"); // Hora de ativação
-    const [openPercentage, setOpenPercentage] = useState(50); // Percentagem de abertura
-    const [action, setAction] = useState("Turn On"); // Ação (Turn On / Turn Off)
+    const [volume, setVolume] = useState(50); // Volume do speaker
+    const [action, setAction] = useState("Turn On"); // Ação (Ligar ou Desligar)
 
-    // Fetch automatizations from backend
+    // Buscar automatizações do backend
     useEffect(() => {
         fetch(`${API_BASE_URL}`)
             .then((res) => res.json())
@@ -26,13 +26,15 @@ export default function AutomatizeShutter({ deviceId }) {
     };
 
     const addAutomatization = () => {
+        const changes =
+            action === "Turn On"
+                ? { state: true, volume: parseInt(volume, 10) }
+                : { state: false };
+
         const newAutomatization = {
             deviceId: deviceId,
             executionTime: onTime,
-            changes:
-                action === "Turn On"
-                    ? { state: true, openPercentage: parseInt(openPercentage, 10) }
-                    : { state: false, openPercentage: 0 },
+            changes,
         };
 
         fetch(API_BASE_URL, {
@@ -65,14 +67,14 @@ export default function AutomatizeShutter({ deviceId }) {
 
     return (
         <div className="flex flex-col items-center w-full">
-            {/* Automatize Container */}
+            {/* Contêiner de Automatização */}
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
                 </div>
 
                 <div className="space-y-4">
-                    {/* Input Time */}
+                    {/* Entrada de Hora */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Time</label>
                         <input
@@ -83,7 +85,7 @@ export default function AutomatizeShutter({ deviceId }) {
                         />
                     </div>
 
-                    {/* Action Dropdown */}
+                    {/* Seletor de Ação */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Action</label>
                         <select
@@ -96,25 +98,25 @@ export default function AutomatizeShutter({ deviceId }) {
                         </select>
                     </div>
 
-                    {/* Open Percentage Slider */}
+                    {/* Controle de Volume (aparece apenas quando "Turn On" é selecionado) */}
                     {action === "Turn On" && (
                         <div className="flex items-center justify-between">
-                            <label className="text-gray-600 font-medium">Open Percentage</label>
+                            <label className="text-gray-600 font-medium">Volume</label>
                             <input
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={openPercentage}
-                                onChange={(e) => setOpenPercentage(e.target.value)}
+                                value={volume}
+                                onChange={(e) => setVolume(e.target.value)}
                                 className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
                             />
-                            <span className="text-gray-700 font-medium">{openPercentage}%</span>
+                            <span className="text-gray-700 font-medium">{volume}%</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* List of Automatizations */}
+            {/* Lista de Automatizações */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -125,14 +127,18 @@ export default function AutomatizeShutter({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.state ? (
+                            {item.changes.state && item.changes.volume !== undefined && (
                                 <span className="block font-medium">
-                                    Open Percentage:{" "}
-                                    <span className="font-semibold">{item.changes.openPercentage}%</span>
+                                    Volume:{" "}
+                                    <span className="font-semibold">{item.changes.volume}%</span>
                                 </span>
-                            ) : (
-                                <span className="block font-medium">Action: Turn Off</span>
                             )}
+                            <span className="block font-medium">
+                                Action:{" "}
+                                <span className="font-semibold">
+                                    {item.changes.state ? "Turn On" : "Turn Off"}
+                                </span>
+                            </span>
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
@@ -158,7 +164,7 @@ export default function AutomatizeShutter({ deviceId }) {
                 ))}
             </div>
 
-            {/* Add Automatization Button */}
+            {/* Botão de Adicionar Automatização */}
             <button
                 onClick={addAutomatization}
                 className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"

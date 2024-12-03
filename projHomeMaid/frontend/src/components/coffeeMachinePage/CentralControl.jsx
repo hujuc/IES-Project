@@ -86,4 +86,3 @@ export default function CentralControl({ deviceId }) {
         </div>
     );
 }
-// Compare this snippet from projHomeMaid/frontend/src/components/coffeeMachinePage/CentralControl.jsx:

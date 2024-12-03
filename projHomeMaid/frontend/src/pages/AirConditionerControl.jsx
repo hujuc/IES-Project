@@ -8,7 +8,6 @@ import Automatize from "../components/AirConditionerPage/AutomatizeAirCond.jsx";
 export default function AirConditionerControl() {
     const [deviceData, setDeviceData] = useState(null);
 
-    //get device id from the url
     const url = window.location.href;
     console.log("URL completa:", url);
     const urlParts = url.split("/");

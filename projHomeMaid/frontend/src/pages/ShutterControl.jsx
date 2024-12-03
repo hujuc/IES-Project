@@ -11,7 +11,6 @@ export default function ShutterControl() {
     const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
     const [error, setError] = useState(null);
 
-    //get device id from the url
     const url = window.location.href;
     console.log("URL completa:", url);
     const urlParts = url.split("/");
@@ -19,6 +18,7 @@ export default function ShutterControl() {
     const deviceId = urlParts[urlParts.length - 1];
     console.log("Device ID:", deviceId);
 
+    // Buscar o estado inicial
     useEffect(() => {
         const fetchShutterData = async () => {
             try {

@@ -36,11 +36,17 @@ function App() {
 
           <Route path="/coffeemachine/:deviceId" element={<CoffeeMachineControl />} />
 
-            <Route path="/airconditioner/:deviceId" element={<AirConditionerControl />} />
+          <Route path="/airConditioner/:deviceId" element={<AirConditionerControl />} />
 
           <Route path="/clock/:deviceId" element={<ClockControl />} />
 
-          <Route path="/lightbulb/:deviceId" element={<LightBulbControl />} />
+          <Route path="/lamp/:deviceId" element={<LightBulbControl />} />
+
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
+          <Route path="/shutter/:deviceId" element={<ShutterControl />} />
+
+          <Route path="/television/:deviceId" element={<TVControl />} />
 
           <Route path="/shutter/:deviceId" element={<ShutterControl />} />
 

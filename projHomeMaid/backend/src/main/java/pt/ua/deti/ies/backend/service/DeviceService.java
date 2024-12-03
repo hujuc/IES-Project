@@ -86,4 +86,9 @@ public class DeviceService {
                 .toArray(String[]::new);
     }
 
+
+    // getAllDevices:
+    public List<Device> getAllDevices() {
+        return deviceRepository.findAll();
+    }
 }

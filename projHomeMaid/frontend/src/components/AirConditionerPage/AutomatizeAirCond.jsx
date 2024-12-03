@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
-export default function Automatize() {
-    const [isAutomatizeEnabled, setIsAutomatizeEnabled] = useState(false);
-    const [onTime, setOnTime] = useState("10:00");
-    const [offTime, setOffTime] = useState("14:00");
-    const [temperature, setTemperature] = useState(20); // Default temperature
-    const [automatizations, setAutomatizations] = useState([]); // List of automations
+export default function AutomatizeAirConditioner() {
+    const [automatizations, setAutomatizations] = useState([]);
+    const [isAutomatizeOn, setIsAutomatizeOn] = useState(true);
+    const [onTime, setOnTime] = useState("08:00");
+    const [offTime, setOffTime] = useState("18:00");
+    const [temperature, setTemperature] = useState(24); // Temperatura padrão
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
@@ -20,110 +20,90 @@ export default function Automatize() {
     };
 
     const addAutomatization = () => {
-        const newAutomation = {
+        const newAutomatization = {
             onTime,
             offTime,
             temperature,
         };
-        setAutomatizations([...automatizations, newAutomation]);
+        setAutomatizations([...automatizations, newAutomatization]);
     };
 
     const deleteAutomatization = (index) => {
         setAutomatizations(automatizations.filter((_, i) => i !== index));
     };
 
-    // Generate an array of numbers from 12 to 32
+    // Gerar opções de temperatura (12 a 32 graus Celsius)
     const temperatureOptions = Array.from({ length: 32 - 12 + 1 }, (_, i) => 12 + i);
 
     return (
-        <div className="bg-white p-6 rounded-lg w-80 shadow-lg">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">Automatize</h2>
-                <label className="inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={isAutomatizeEnabled}
-                        onChange={() => setIsAutomatizeEnabled(!isAutomatizeEnabled)}
-                    />
-                    <div
-                        className={`w-12 h-6 rounded-full ${
-                            isAutomatizeEnabled ? "bg-orange-500" : "bg-gray-300"
-                        }`}
-                    >
-                        <div
-                            className={`w-6 h-6 bg-white rounded-full shadow transform ${
-                                isAutomatizeEnabled
-                                    ? "translate-x-6"
-                                    : "translate-x-0"
-                            } transition-all duration-300`}
-                        ></div>
+        <div className="flex flex-col items-center w-full">
+            {/* Contêiner de Automatização */}
+            <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
+                </div>
+
+                {isAutomatizeOn && (
+                    <div className="space-y-4">
+                        {/* Entrada de Hora - On e Off */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                                <label className="text-gray-600 font-medium">On</label>
+                                <input
+                                    type="time"
+                                    value={onTime}
+                                    onChange={handleOnTimeChange}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-gray-600 font-medium">Off</label>
+                                <input
+                                    type="time"
+                                    value={offTime}
+                                    onChange={handleOffTimeChange}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Controle de Temperatura */}
+                        <div className="flex flex-col items-center">
+                            <label className="text-gray-600 font-medium">Temperature</label>
+                            <select
+                                value={temperature}
+                                onChange={handleTemperatureChange}
+                                className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                            >
+                                {temperatureOptions.map((temp) => (
+                                    <option key={temp} value={temp}>
+                                        {temp}°C
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </label>
+                )}
             </div>
 
-            {/* On/Off Times and Temperature */}
-            {isAutomatizeEnabled && (
-                <div className="flex flex-col gap-6">
-                    {/* On and Off Times in the Same Line */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-700 font-medium">On</span>
-                            <input
-                                type="time"
-                                value={onTime}
-                                onChange={handleOnTimeChange}
-                                className="border border-gray-300 rounded-lg p-2 text-gray-900 font-medium w-28 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-700 font-medium">Off</span>
-                            <input
-                                type="time"
-                                value={offTime}
-                                onChange={handleOffTimeChange}
-                                className="border border-gray-300 rounded-lg p-2 text-gray-900 font-medium w-28 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Temperature Selector */}
-                    <div className="flex flex-col items-center">
-                        <span className="text-gray-700 font-medium mb-2">Temp</span>
-                        <select
-                            value={temperature}
-                            onChange={handleTemperatureChange}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-900 font-medium w-28 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                        >
-                            {temperatureOptions.map((temp) => (
-                                <option key={temp} value={temp}>
-                                    {temp}°C
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            )}
-
-            {/* List of Automatizations */}
-            {automatizations.length > 0 && (
-                <div className="mt-6 space-y-3">
+            {/* Lista de Automatizações */}
+            {isAutomatizeOn && automatizations.length > 0 && (
+                <div className="w-full space-y-3">
                     {automatizations.map((item, index) => (
                         <div
                             key={index}
-                            className="bg-gray-100 p-4 rounded-lg shadow-md flex items-center justify-between"
+                            className="bg-gray-100 text-gray-800 p-4 rounded-lg shadow-md flex items-center justify-between"
                         >
-                            <div>
-                                <p className="text-sm font-medium">
+                            <div className="text-sm">
+                                <span className="block font-medium">
                                     On: <span className="font-semibold">{item.onTime}</span>
-                                </p>
-                                <p className="text-sm font-medium">
+                                </span>
+                                <span className="block font-medium">
                                     Off: <span className="font-semibold">{item.offTime}</span>
-                                </p>
-                                <p className="text-sm font-medium">
+                                </span>
+                                <span className="block font-medium">
                                     Temp: <span className="font-semibold">{item.temperature}°C</span>
-                                </p>
+                                </span>
                             </div>
                             <button
                                 onClick={() => deleteAutomatization(index)}
@@ -150,16 +130,14 @@ export default function Automatize() {
                 </div>
             )}
 
-            {/* Add Automatization Button */}
-            {isAutomatizeEnabled && (
-                <div className="mt-6 flex justify-center">
-                    <button
-                        onClick={addAutomatization}
-                        className="w-14 h-14 bg-orange-500 text-white text-xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
-                    >
-                        +
-                    </button>
-                </div>
+            {/* Botão de Adicionar Automatização */}
+            {isAutomatizeOn && (
+                <button
+                    onClick={addAutomatization}
+                    className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
+                >
+                    +
+                </button>
             )}
         </div>
     );

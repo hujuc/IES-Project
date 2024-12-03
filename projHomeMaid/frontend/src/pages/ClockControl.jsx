@@ -57,18 +57,19 @@ export default function ClockControl() {
     };
 
     return (
-        <div
-            className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white"
-        >
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
             {/* Top Bar */}
-            <div className="w-full flex justify-between px-6 py-4 items-center">
+            <div className="w-full flex justify-between px-4 py-4">
                 <div className="h-16 w-16">
-                    <GetBackButton />
+                    <GetBackButton/>
                 </div>
-                <span className="text-3xl font-semibold">Clock</span>
                 <div className="h-12 w-14">
-                    <EllipsisButton />
+                    <EllipsisButton/>
                 </div>
+            </div>
+            {/* Title Section */}
+            <div className="flex flex-col items-center justify-center mt-4">
+                <span className="text-2xl font-semibold">Clock</span>
             </div>
 
             {/* Alarm Sound Selector */}
@@ -92,14 +93,14 @@ export default function ClockControl() {
 
             {/* Central Control */}
             <div className="mt-8 w-full px-4">
-                <ClockCentralControl alarmSound={alarmSound} />
+                <ClockCentralControl alarmSound={alarmSound}/>
             </div>
 
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
                 <div
                     className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
                 >
-                    <Automatize alarmSounds={automatizeSounds} selectedSound={alarmSound} />
+                    <Automatize alarmSounds={automatizeSounds} selectedSound={alarmSound}/>
                 </div>
             </div>
         </div>

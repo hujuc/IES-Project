@@ -14,12 +14,12 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ temperature: newTemperature }), // Atualiza apenas o campo de temperatura
+            body: JSON.stringify({ temperature: newTemperature }),
         })
             .then((response) => response.json())
             .then((data) => {
                 console.log("Updated temperature:", data);
-                setTemperature(data.temperature); // Atualiza o estado local com a nova temperatura
+                setTemperature(data.temperature);
             })
             .catch((error) =>
                 console.error("Error updating temperature:", error)
@@ -41,7 +41,7 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
     };
 
     return (
-        <div className="flex flex-col items-center bg-white p-6 rounded-lg w-80 h-60 relative">
+        <div className="flex flex-col items-center bg-white p-6 rounded-lg w-80 h-64 relative">
             {/* Half-Arch Radial Meter */}
             <div className="relative w-64 h-32">
                 <svg
@@ -81,7 +81,7 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
                 </svg>
 
                 {/* Temperature Value */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center mt-12">
+                <div className="absolute inset-0 flex flex-col items-center justify-center mt-8">
                     <h2 className="text-gray-700 text-sm mb-1">
                         {temperature < 18
                             ? "Cold"
@@ -94,10 +94,15 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
                     </h1>
                     <span className="text-gray-500 text-xs">°Celsius</span>
                 </div>
-            </div>
 
+                {/* Temperature Markers */}
+                <div className="absolute inset-0 flex justify-between items-center mt-40">
+                    <span className="text-gray-500 text-xs">12°C</span>
+                    <span className="text-gray-500 text-xs">32°C</span>
+                </div>
+            </div>
             {/* Controls */}
-            <div className="flex justify-between items-center mt-6 space-x-8">
+            <div className="flex justify-between items-center mt-8 space-x-8">
                 <button
                     className="text-white bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-600 text-3xl"
                     onClick={decreaseTemperature}

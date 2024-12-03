@@ -3,6 +3,8 @@ import StateControl from "../components/TVControlPage/StateControl.jsx";
 import VolumeControl from "../components/TVControlPage/VolumeControl.jsx";
 import BrightnessControl from "../components/TVControlPage/BrightnessControl.jsx";
 import AutomatizeTV from "../components/TVControlPage/AutomatizeTV.jsx";
+import GetBackButton from "../components/AirConditionerPage/GetBackButton.jsx";
+import EllipsisButton from "../components/AirConditionerPage/EllipsisButton.jsx";
 
 export default function TVControl() {
     const [isTVOn, setIsTVOn] = useState(false);
@@ -11,11 +13,8 @@ export default function TVControl() {
     const [error, setError] = useState(null);
 
     const url = window.location.href;
-    console.log("URL completa:", url);
     const urlParts = url.split("/");
-    console.log("Partes do URL:", urlParts);
     const deviceId = urlParts[urlParts.length - 1];
-    console.log("Device ID:", deviceId);
 
     // Carregar os dados iniciais da TV
     useEffect(() => {
@@ -24,7 +23,6 @@ export default function TVControl() {
                 const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
                 const data = await response.json();
 
-                // Atualizar estado, volume e brilho com os valores salvos na base de dados
                 setIsTVOn(data.state || false);
                 setVolume(data.volume != null ? data.volume : 50);
                 setBrightness(data.brightness != null ? data.brightness : 50);
@@ -37,13 +35,11 @@ export default function TVControl() {
         fetchTVData();
     }, [deviceId]);
 
-    // Alternar estado da TV
     const toggleTV = async () => {
         try {
-            const updatedState = !isTVOn; // Alternar estado
-            setIsTVOn(updatedState); // Atualizar localmente
+            const updatedState = !isTVOn;
+            setIsTVOn(updatedState);
 
-            // Salvar estado na base de dados
             await saveStateToDatabase(updatedState, volume, brightness);
         } catch (err) {
             console.error("Erro ao alternar a TV:", err);
@@ -51,12 +47,11 @@ export default function TVControl() {
         }
     };
 
-    // Atualizar volume
     const updateVolume = async (newVolume) => {
         try {
-            setVolume(newVolume); // Atualizar localmente
+            setVolume(newVolume);
             if (isTVOn) {
-                await saveStateToDatabase(isTVOn, newVolume, brightness); // Salvar apenas se a TV estiver ligada
+                await saveStateToDatabase(isTVOn, newVolume, brightness);
             }
         } catch (err) {
             console.error("Erro ao atualizar o volume:", err);
@@ -64,14 +59,13 @@ export default function TVControl() {
         }
     };
 
-    // Atualizar brilho
     const updateBrightness = async (newBrightness) => {
         try {
-            const brightnessValue = Math.max(10, Number(newBrightness)); // Garante que o valor mínimo seja 10%
-            setBrightness(brightnessValue); // Atualizar localmente
+            const brightnessValue = Math.max(10, Number(newBrightness));
+            setBrightness(brightnessValue);
 
             if (isTVOn) {
-                await saveStateToDatabase(isTVOn, volume, brightnessValue); // Salvar apenas se a TV estiver ligada
+                await saveStateToDatabase(isTVOn, volume, brightnessValue);
             }
         } catch (err) {
             console.error("Erro ao atualizar o brilho:", err);
@@ -79,8 +73,6 @@ export default function TVControl() {
         }
     };
 
-
-    // Salvar estado, volume e brilho na base de dados
     const saveStateToDatabase = async (state, volumeValue, brightnessValue) => {
         try {
             const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
@@ -108,6 +100,19 @@ export default function TVControl() {
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+            {/* Top Bar */}
+            <div className="w-full flex justify-between px-4 py-4">
+                <div className="h-16 w-16">
+                    <GetBackButton />
+                </div>
+                <div className="h-12 w-14">
+                    <EllipsisButton />
+                </div>
+            </div>
+            {/* Title Section */}
+            <div className="flex flex-col items-center justify-center mt-4">
+                <span className="text-2xl font-semibold">Television</span>
+            </div>
             {/* Estado da TV */}
             <StateControl isTVOn={isTVOn} toggleTV={toggleTV} />
 

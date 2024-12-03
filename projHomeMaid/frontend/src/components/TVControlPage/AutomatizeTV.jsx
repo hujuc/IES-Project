@@ -47,25 +47,7 @@ export default function AutomatizeTV() {
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
-                    <label className="inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={isAutomatizeOn}
-                            onChange={toggleAutomatization}
-                        />
-                        <div
-                            className={`w-12 h-6 rounded-full ${
-                                isAutomatizeOn ? "bg-orange-500" : "bg-gray-300"
-                            }`}
-                        >
-                            <div
-                                className={`w-6 h-6 bg-white rounded-full shadow transform ${
-                                    isAutomatizeOn ? "translate-x-6" : "translate-x-0"
-                                } transition-all duration-300`}
-                            ></div>
-                        </div>
-                    </label>
+
                 </div>
 
                 {isAutomatizeOn && (

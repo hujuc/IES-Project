@@ -22,7 +22,7 @@ export default function StateControl({ isSpeakerOn, toggleSpeaker }) {
             </button>
             {/* Seletor do estado */}
             <div className="mt-4 flex items-center">
-                <span className="text-lg font-medium mr-3">On</span>
+                <span className="text-lg font-medium mr-3">{isSpeakerOn ? "On" : "Off"}</span>
                 <input
                     type="checkbox"
                     className="toggle bg-gray-300 checked:bg-yellow-500"

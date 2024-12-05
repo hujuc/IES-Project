@@ -28,6 +28,22 @@ export default function AirConditionerControl() {
         };
 
         fetchDeviceData();
+
+        // Conectar ao WebSocket
+        const ws = new WebSocket("ws://localhost:8080/ws/devices");
+
+        ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                if (message.deviceId === deviceId) {
+                    setDeviceData((prev) => ({ ...prev, ...message })); // Atualiza os dados do dispositivo em tempo real
+                }
+            } catch (error) {
+                console.error("Error parsing WebSocket message:", error);
+            }
+        };
+
+        return () => ws.close(); // Fechar a conexão ao desmontar o componente
     }, [deviceId]);
 
     const toggleAirConditioner = async () => {

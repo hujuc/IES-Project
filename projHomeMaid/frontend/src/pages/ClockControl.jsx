@@ -1,34 +1,40 @@
 import React, { useState, useEffect } from "react";
 import GetBackButton from "../components/buttons/GetBackButton.jsx";
 import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
-import ClockCentralControl from "../components/ClockCentralControl.jsx";
-import Automatize from "../components/AutomatizeAlarmClock.jsx";
+import ClockCentralControl from "../components/clockPage/ClockCentralControl.jsx";
+import Automatize from "../components/clockPage/AutomatizeAlarmClock.jsx";
 
 export default function ClockControl() {
-    const deviceId = "Clock001";
+    const url = window.location.href;
+    const urlParts = url.split("/");
+    const deviceId = urlParts[urlParts.length - 1];
+
     const [alarmSound, setAlarmSound] = useState("sound1"); // Default alarm sound
     const [automatizeSounds, setAutomatizeSounds] = useState([
         { value: "sound1", label: "Alarm Sound 1" },
         { value: "sound2", label: "Alarm Sound 2" },
         { value: "sound3", label: "Alarm Sound 3" },
     ]);
+    const [volume, setVolume] = useState(50); // Default volume
     const [error, setError] = useState(null);
 
-    // Fetch the initial alarm sound from the API
+    // Fetch the initial alarm sound and volume from the API
     useEffect(() => {
-        const fetchAlarmSound = async () => {
+        const fetchClockData = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
                 const data = await response.json();
+
                 setAlarmSound(data.alarmSound || "sound1"); // Default to "sound1" if no sound is set
+                setVolume(data.volume || 50); // Default to 50 if no volume is set
             } catch (err) {
-                console.error("Error fetching alarm sound:", err);
-                setError("Failed to fetch the alarm sound.");
+                console.error("Error fetching clock data:", err);
+                setError("Failed to fetch the clock data.");
             }
         };
 
         if (deviceId) {
-            fetchAlarmSound();
+            fetchClockData();
         }
     }, [deviceId]);
 
@@ -40,9 +46,9 @@ export default function ClockControl() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ alarmSound: sound }), // Send only the alarmSound field
+                body: JSON.stringify({ alarmSound: sound }),
             });
-            setAlarmSound(sound); // Update the local state
+            setAlarmSound(sound);
             console.log("Alarm sound updated successfully.");
         } catch (err) {
             console.error("Error updating alarm sound:", err);
@@ -50,10 +56,35 @@ export default function ClockControl() {
         }
     };
 
+    // Update the volume in the database
+    const updateVolume = async (newVolume) => {
+        try {
+            const roundedVolume = Math.round(newVolume / 10) * 10;
+            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ volume: roundedVolume }),
+            });
+            setVolume(roundedVolume);
+            console.log("Volume updated successfully.");
+        } catch (err) {
+            console.error("Error updating volume:", err);
+            setError("Failed to update the volume.");
+        }
+    };
+
     const handleAlarmSoundChange = (e) => {
         const newSound = e.target.value;
-        setAlarmSound(newSound); // Update the local state
-        updateAlarmSound(newSound); // Update the database
+        setAlarmSound(newSound);
+        updateAlarmSound(newSound);
+    };
+
+    const handleVolumeChange = (e) => {
+        const newVolume = parseInt(e.target.value, 10);
+        setVolume(newVolume);
+        updateVolume(newVolume);
     };
 
     return (
@@ -61,10 +92,10 @@ export default function ClockControl() {
             {/* Top Bar */}
             <div className="w-full flex justify-between px-4 py-4">
                 <div className="h-16 w-16">
-                    <GetBackButton/>
+                    <GetBackButton />
                 </div>
                 <div className="h-12 w-14">
-                    <EllipsisButton/>
+                    <EllipsisButton />
                 </div>
             </div>
             {/* Title Section */}
@@ -91,16 +122,39 @@ export default function ClockControl() {
                 </div>
             </div>
 
+            {/* Volume Control */}
+            <div className="flex flex-col items-center justify-center mt-6 w-full px-4">
+                <label className="text-lg font-semibold mb-2">Volume</label>
+                <div className="flex flex-col items-center justify-between">
+                    <input
+                        type="range"
+                        min="10"
+                        max="100"
+                        step="10"
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        className="w-full bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                        style={{
+                            background: `linear-gradient(to right, #F97316 ${volume}%, #e5e7eb ${volume}%)`,
+                        }}
+                    />
+                    <div className="flex justify-between w-full px-2 mt-2 text-sm text-gray-500">
+                        <span>10</span>
+                        <span>50</span>
+                        <span>100</span>
+                    </div>
+                    <p className="text-gray-400 font-medium mt-2">Current Volume: {volume}</p>
+                </div>
+            </div>
+
             {/* Central Control */}
             <div className="mt-8 w-full px-4">
-                <ClockCentralControl alarmSound={alarmSound}/>
+                <ClockCentralControl alarmSound={alarmSound} deviceId={deviceId} />
             </div>
 
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                >
-                    <Automatize alarmSounds={automatizeSounds} selectedSound={alarmSound}/>
+                <div className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md">
+                    <Automatize deviceId={deviceId} alarmSounds={automatizeSounds} selectedSound={alarmSound} />
                 </div>
             </div>
         </div>

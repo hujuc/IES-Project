@@ -22,7 +22,7 @@ export default function StateControl({ isTVOn, toggleTV }) {
             </button>
             {/* Switch */}
             <div className="mt-4 flex items-center">
-                <span className="text-lg font-medium mr-3">ON</span>
+                <span className="text-lg font-medium mr-3">{isTVOn ? "On" : "Off"}</span>
                 <input
                     type="checkbox"
                     className="toggle bg-gray-300 checked:bg-yellow-500"

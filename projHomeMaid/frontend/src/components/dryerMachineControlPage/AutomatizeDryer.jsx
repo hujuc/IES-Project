@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 
 const API_BASE_URL = "http://localhost:8080/api/automations";
 
-export default function AutomatizeLight({ deviceId }) {
+export default function AutomatizeDryer({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [brightness, setBrightness] = useState(50); // Default brightness
-    const [color, setColor] = useState("#ffffff"); // Default color
-    const [action, setAction] = useState("Turn On");
+    const [temperature, setTemperature] = useState(60); // Default temperature for dryer
+    const [dryMode, setDryMode] = useState("Normal Dry"); // Default dry mode
 
     useEffect(() => {
         fetch(`${API_BASE_URL}`)
@@ -29,14 +28,11 @@ export default function AutomatizeLight({ deviceId }) {
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
-            changes:
-                action === "Turn On"
-                    ? {
-                        state: true,
-                        brightness: parseInt(brightness),
-                        color,
-                    }
-                    : { state: false },
+            changes: {
+                state: true,
+                temperature: parseFloat(temperature),
+                dryMode,
+            },
         };
 
         fetch(API_BASE_URL, {
@@ -70,11 +66,10 @@ export default function AutomatizeLight({ deviceId }) {
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize Light</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
                 </div>
 
                 <div className="space-y-4">
-                    {/* Set Time */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Time</label>
                         <input
@@ -85,48 +80,32 @@ export default function AutomatizeLight({ deviceId }) {
                         />
                     </div>
 
-                    {/* Set Action */}
                     <div className="flex items-center justify-between">
-                        <label className="text-gray-600 font-medium">Action</label>
-                        <select
-                            value={action}
-                            onChange={(e) => setAction(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                        >
-                            <option value="Turn On">Turn On</option>
-                            <option value="Turn Off">Turn Off</option>
-                        </select>
+                        <label className="text-gray-600 font-medium">Temperature</label>
+                        <input
+                            type="range"
+                            min="30"
+                            max="80"
+                            step="1"
+                            value={temperature}
+                            onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                            className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700 font-medium">{temperature.toFixed(0)}°C</span>
                     </div>
 
-                    {/* Brightness Control */}
-                    {action === "Turn On" && (
-                        <>
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Brightness</label>
-                                <input
-                                    type="range"
-                                    min="10"
-                                    max="100"
-                                    step="1"
-                                    value={brightness}
-                                    onChange={(e) => setBrightness(e.target.value)}
-                                    className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
-                                />
-                                <span className="text-gray-700 font-medium">{brightness}</span>
-                            </div>
-
-                            {/* Color Control */}
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Color</label>
-                                <input
-                                    type="color"
-                                    value={color}
-                                    onChange={(e) => setColor(e.target.value)}
-                                    className="w-12 h-12 p-1 border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-orange-500"
-                                />
-                            </div>
-                        </>
-                    )}
+                    <div className="flex items-center justify-between">
+                        <label className="text-gray-600 font-medium">Dry Mode</label>
+                        <select
+                            value={dryMode}
+                            onChange={(e) => setDryMode(e.target.value)}
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        >
+                            <option value="Normal Dry">Normal Dry</option>
+                            <option value="Delicate Dry">Delicate Dry</option>
+                            <option value="Heavy Dry">Heavy Dry</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -140,19 +119,17 @@ export default function AutomatizeLight({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.state ? (
+                            {item.changes.state && (
                                 <>
                                     <span className="block font-medium">
-                                        Brightness:{" "}
-                                        <span className="font-semibold">{item.changes.brightness}</span>
+                                        Temperature:{" "}
+                                        <span className="font-semibold">{item.changes.temperature}°C</span>
                                     </span>
                                     <span className="block font-medium">
-                                        Color:{" "}
-                                        <span className="font-semibold">{item.changes.color}</span>
+                                        Dry Mode:{" "}
+                                        <span className="font-semibold">{item.changes.dryMode}</span>
                                     </span>
                                 </>
-                            ) : (
-                                <span className="block font-medium">Action: Turn Off</span>
                             )}
                         </div>
                         <button

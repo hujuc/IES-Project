@@ -18,7 +18,7 @@ public class TVAutomationHandler implements DeviceAutomationHandler {
     @Override
     public void executeAutomation(Device device, Map<String, Object> changes) {
         if (changes.containsKey("state")) {
-            boolean state = (boolean) changes.get("state");
+            boolean statse = (boolean) changes.get("state");
 
             if (state) {
                 // Recupera o volume ou usa o volume atual do dispositivo

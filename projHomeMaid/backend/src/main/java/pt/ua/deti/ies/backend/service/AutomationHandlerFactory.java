@@ -44,7 +44,7 @@ public class AutomationHandlerFactory {
                 return coffeeMachineAutomationHandler;
             case "shutter":
                 return shutterAutomationHandler;
-            case "speaker":
+            case "stereo":
                 return speakerAutomationHandler;
             case "heatedFloor":
                 return heatedFloorsAutomationHandler;

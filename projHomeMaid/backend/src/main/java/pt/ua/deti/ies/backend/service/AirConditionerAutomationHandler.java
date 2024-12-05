@@ -60,6 +60,7 @@ public class AirConditionerAutomationHandler implements DeviceAutomationHandler 
 
             // Salva as alterações no repositório
             deviceRepository.save(device);
+//            webSocketHandler.broadcast(new ObjectMapper().writeValueAsString(device));
         } else {
             System.out.println("No state provided for Air Conditioner automation.");
         }

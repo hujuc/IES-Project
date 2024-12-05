@@ -5,7 +5,7 @@ import ClockCentralControl from "../components/ClockCentralControl.jsx";
 import Automatize from "../components/AutomatizeAlarmClock.jsx";
 
 export default function ClockControl() {
-    const deviceId = "Clock001";
+    const deviceId = "clock-001";
     const [alarmSound, setAlarmSound] = useState("sound1"); // Default alarm sound
     const [automatizeSounds, setAutomatizeSounds] = useState([
         { value: "sound1", label: "Alarm Sound 1" },

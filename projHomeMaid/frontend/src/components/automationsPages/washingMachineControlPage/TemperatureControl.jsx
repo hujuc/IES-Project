@@ -16,7 +16,7 @@ export default function TemperatureControl({ isWasherOn, temperature, updateTemp
                 {/* Slider */}
                 <input
                     type="range"
-                    min="20"
+                    min="50"
                     max="90"
                     step="1"
                     value={temperature}
@@ -25,9 +25,9 @@ export default function TemperatureControl({ isWasherOn, temperature, updateTemp
                     className="w-full mx-4 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
                     style={{
                         background: `linear-gradient(to right, #FFA726 ${
-                            ((temperature - 20) / 70) * 100
+                            ((temperature - 50) / 40) * 100
                         }%, #e5e7eb ${
-                            ((temperature - 20) / 70) * 100
+                            ((temperature - 50) / 40) * 100
                         }%)`, // Orange visual effect for slider
                     }}
                 />

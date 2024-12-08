@@ -4,6 +4,8 @@ import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import StateControl from "../components/speakersControlPage/StateControl.jsx";
 import VolumeControl from "../components/speakersControlPage/VolumeControl.jsx";
 import AutomatizeSpeaker from "../components/speakersControlPage/AutomatizeSpeaker.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function SpeakerControl() {
     const DEFAULT_VOLUME = 50;
@@ -14,26 +16,54 @@ export default function SpeakerControl() {
     const url = window.location.href;
     const deviceId = url.split("/").pop();
 
-    const fetchSpeakerData = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
-            const data = await response.json();
-
-            setIsSpeakerOn(data.state || false);
-            const initialVolume = data.volume != null ? Number(data.volume) : DEFAULT_VOLUME;
-            setVolume(initialVolume);
-        } catch (err) {
-            console.error("Erro ao buscar o estado do speaker:", err);
-            setError("Falha ao buscar o estado do speaker.");
-        }
-    };
-
-    // Buscar o estado inicial e configurar o intervalo de atualização
+    // Fetch speaker data from API
     useEffect(() => {
-        fetchSpeakerData(); // Busca inicial
-        const intervalId = setInterval(fetchSpeakerData, 5000); // Atualiza a cada 5 segundos
+        const fetchSpeakerData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const data = await response.json();
 
-        return () => clearInterval(intervalId); // Limpa o intervalo quando o componente é desmontado
+                setIsSpeakerOn(data.state || false);
+                setVolume(data.volume != null ? Number(data.volume) : DEFAULT_VOLUME);
+            } catch (err) {
+                console.error("Error fetching speaker data:", err);
+                setError("Failed to fetch speaker data.");
+            }
+        };
+
+        fetchSpeakerData();
+
+        // WebSocket setup
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+
+            // Subscribe to device updates
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.state !== undefined) setIsSpeakerOn(updatedData.state);
+                    if (updatedData.volume !== undefined) setVolume(Number(updatedData.volume));
+                    console.log("Speaker updated via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Cleanup WebSocket on component unmount
     }, [deviceId]);
 
     const toggleSpeaker = async () => {
@@ -43,8 +73,8 @@ export default function SpeakerControl() {
             await saveStateToDatabase(updatedState, volume);
             setIsSpeakerOn(updatedState);
         } catch (err) {
-            console.error("Erro ao alternar o estado do speaker:", err);
-            setError("Falha ao alternar o estado do speaker.");
+            console.error("Error toggling speaker:", err);
+            setError("Failed to toggle speaker.");
         }
     };
 
@@ -57,8 +87,8 @@ export default function SpeakerControl() {
                 await saveStateToDatabase(true, volumeNumber);
             }
         } catch (err) {
-            console.error("Erro ao atualizar o volume:", err);
-            setError("Falha ao atualizar o volume.");
+            console.error("Error updating volume:", err);
+            setError("Failed to update volume.");
         }
     };
 
@@ -73,13 +103,13 @@ export default function SpeakerControl() {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro na resposta da API: ${response.status}`);
+                throw new Error(`API response error: ${response.status}`);
             }
 
-            console.log("Estado e volume salvos com sucesso:", { state, volume });
+            console.log("State and volume saved successfully:", { state, volume });
         } catch (err) {
-            console.error("Erro ao salvar estado e volume na base de dados:", err);
-            setError("Falha ao salvar estado e volume na base de dados.");
+            console.error("Error saving state and volume to database:", err);
+            setError("Failed to save state and volume to database.");
         }
     };
 

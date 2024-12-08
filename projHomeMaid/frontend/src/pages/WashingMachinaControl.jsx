@@ -4,65 +4,140 @@ import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import StateControl from "../components/washingMachineControlPage/StateControl.jsx";
 import TemperatureControl from "../components/washingMachineControlPage/TemperatureControl.jsx";
 import AutomatizeWasher from "../components/washingMachineControlPage/AutomatizeWasher.jsx";
-
-const API_BASE_URL = "http://localhost:8080/api/devices";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function WashingMachineControl() {
     const [isWasherOn, setIsWasherOn] = useState(false);
     const [temperature, setTemperature] = useState(40); // Default temperature
     const [washMode, setWashMode] = useState("Regular Wash"); // Default wash mode
-    const [loading, setLoading] = useState(true); // Track loading state
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const url = window.location.href;
-    const deviceId = url.split("/").pop(); // Get deviceId from URL
+    const urlParts = url.split("/");
+    const deviceId = urlParts[urlParts.length - 1];
 
+    // Fetch data from API
     useEffect(() => {
-        // Fetch the current state of the washing machine when the component is loaded
-        const fetchDeviceState = async () => {
+        const fetchDeviceData = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/${deviceId}`);
+                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Set the state based on the fetched data
-                    setIsWasherOn(data.state);
-                    setTemperature(data.temperature);
-                    setWashMode(data.mode);
-                } else {
-                    console.error("Failed to fetch device state:", data);
-                }
-            } catch (error) {
-                console.error("Error fetching device state:", error);
+                setIsWasherOn(data.state || false);
+                setTemperature(data.temperature || 40);
+                setWashMode(data.mode || "Regular Wash");
+            } catch (err) {
+                console.error("Error fetching device data:", err);
+                setError("Failed to fetch washing machine data.");
             } finally {
-                setLoading(false); // Set loading to false once fetch is complete
+                setLoading(false);
             }
         };
 
-        fetchDeviceState();
-    }, [deviceId]); // Only fetch data when deviceId changes
+        fetchDeviceData();
 
-    const toggleWasher = () => {
-        // Toggle washer state
-        console.log("Toggling washer with mode:", washMode, "and temperature:", temperature);
-        setIsWasherOn((prevState) => !prevState);
+        // WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                if (updatedData.deviceId === deviceId) {
+                    setIsWasherOn(updatedData.state || false);
+                    setTemperature(updatedData.temperature || 40);
+                    setWashMode(updatedData.mode || "Regular Wash");
+                    console.log("Updated data received via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Cleanup WebSocket connection
+    }, [deviceId]);
+
+    const toggleWasher = async (state) => {
+        try {
+            setIsWasherOn(state);
+
+            await saveStateToDatabase(state, temperature, washMode);
+        } catch (err) {
+            console.error("Error toggling washer:", err);
+            setError("Failed to toggle washing machine.");
+        }
     };
 
-    const handleCycleComplete = () => {
-        // Handle the completion of the washing cycle
-        console.log("Washing cycle completed.");
-        setIsWasherOn(false);
+    const updateTemperature = async (newTemperature) => {
+        try {
+            const tempValue = Number(newTemperature);
+            setTemperature(tempValue);
+
+            if (isWasherOn) {
+                await saveStateToDatabase(isWasherOn, tempValue, washMode);
+            }
+        } catch (err) {
+            console.error("Error updating temperature:", err);
+            setError("Failed to update temperature.");
+        }
     };
 
-    const updateTemperature = (newTemperature) => {
-        setTemperature(newTemperature);
+    const updateWashMode = async (newMode) => {
+        try {
+            setWashMode(newMode);
+
+            if (isWasherOn) {
+                await saveStateToDatabase(isWasherOn, temperature, newMode);
+            }
+        } catch (err) {
+            console.error("Error updating wash mode:", err);
+            setError("Failed to update wash mode.");
+        }
     };
 
-    const updateWashMode = (newMode) => {
-        setWashMode(newMode);
+    const saveStateToDatabase = async (state, temp, mode) => {
+        try {
+            const payload = { state, temperature: temp, mode };
+
+            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update device state: ${response.status}`);
+            }
+
+            console.log("Device state saved successfully:", payload);
+        } catch (err) {
+            console.error("Error saving device state:", err);
+            setError("Failed to save device state to database.");
+        }
     };
 
     if (loading) {
-        return <p>Loading...</p>; // Show loading message while fetching
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-white">Loading...</p>
+            </div>
+        );
     }
 
     return (
@@ -77,26 +152,24 @@ export default function WashingMachineControl() {
                 </div>
             </div>
 
-            <div className="mt-8">
-                <StateControl
-                    deviceId={deviceId}
-                    isWasherOn={isWasherOn}
-                    toggleWasher={toggleWasher}
-                    onCycleComplete={handleCycleComplete}
-                    temperature={temperature}
-                    washMode={washMode}
-                />
-            </div>
+            {/* State Control */}
+            <StateControl
+                deviceId={deviceId}
+                isWasherOn={isWasherOn}
+                toggleWasher={toggleWasher}
+                temperature={temperature}
+                washMode={washMode}
+            />
 
-            <div className="mt-8">
-                <TemperatureControl
-                    isWasherOn={isWasherOn}
-                    temperature={temperature}
-                    updateTemperature={updateTemperature}
-                />
-            </div>
+            {/* Temperature Control */}
+            <TemperatureControl
+                isWasherOn={isWasherOn}
+                temperature={temperature}
+                updateTemperature={updateTemperature}
+            />
 
-            <div className="mt-8 w-60 text-center">
+            {/* Wash Mode Selector */}
+            <div className={`mt-8 w-60 text-center ${isWasherOn ? "opacity-50 pointer-events-none" : ""}`}>
                 <label className="text-lg font-medium">Wash Mode</label>
                 <select
                     value={washMode}
@@ -110,11 +183,9 @@ export default function WashingMachineControl() {
                 </select>
             </div>
 
+            {/* Automatization Section */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
+                <div className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md">
                     <AutomatizeWasher deviceId={deviceId} />
                 </div>
             </div>

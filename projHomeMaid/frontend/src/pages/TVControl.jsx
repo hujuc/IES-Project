@@ -5,6 +5,8 @@ import BrightnessControl from "../components/TVControlPage/BrightnessControl.jsx
 import AutomatizeTV from "../components/TVControlPage/AutomatizeTV.jsx";
 import GetBackButton from "../components/AirConditionerPage/GetBackButton.jsx";
 import EllipsisButton from "../components/AirConditionerPage/EllipsisButton.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function TVControl() {
     const [isTVOn, setIsTVOn] = useState(false);
@@ -16,7 +18,7 @@ export default function TVControl() {
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
 
-    // Carregar os dados iniciais da TV
+    // Fetch TV data from API and setup WebSocket
     useEffect(() => {
         const fetchTVData = async () => {
             try {
@@ -33,6 +35,39 @@ export default function TVControl() {
         };
 
         fetchTVData();
+
+        // Setup WebSocket
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Conectado ao WebSocket STOMP!");
+
+            // Subscribe to updates for this device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.state !== undefined) setIsTVOn(updatedData.state);
+                    if (updatedData.volume !== undefined) setVolume(updatedData.volume);
+                    if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
+                    console.log("Dados atualizados via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
+            console.error("Detalhes do erro:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Cleanup WebSocket on component unmount
     }, [deviceId]);
 
     const toggleTV = async () => {
@@ -120,7 +155,11 @@ export default function TVControl() {
             <VolumeControl volume={volume} updateVolume={updateVolume} isTVOn={isTVOn} />
 
             {/* Controle de Brilho */}
-            <BrightnessControl brightness={Math.max(brightness, 10)} updateBrightness={updateBrightness} isTVOn={isTVOn} />
+            <BrightnessControl
+                brightness={Math.max(brightness, 10)}
+                updateBrightness={updateBrightness}
+                isTVOn={isTVOn}
+            />
 
             {/* Seção de Automatização */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">

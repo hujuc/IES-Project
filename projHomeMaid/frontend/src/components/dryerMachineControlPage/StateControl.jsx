@@ -8,8 +8,8 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
     const [isRunning, setIsRunning] = useState(false);  // To track if the washer is running
     const [currentState, setCurrentState] = useState({
         isWasherOn: false,
-        temperature: 40.0,
-        washMode: "regular wash"
+        temperature: 50.0,
+        washMode: "Permanent Press"
     }); // To store the current state of the washer
     const [loading, setLoading] = useState(true); // Track loading state
 
@@ -56,11 +56,11 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
                 updateDeviceState(false, null, null);
 
                 toggleDryer(false); // Update the frontend state to match
-            }, 120000); // 2-minute cycle simulation
+            }, 2000); // 2-minute cycle simulation
 
             return () => clearTimeout(timer); // Cleanup the timer when component unmounts
         }
-    }, [currentState.isWasherOn, loading]);
+    }, [currentState.isWasherOn, loading, deviceId, toggleDryer, temperature, washMode]);
 
     // Update the device state in the backend (e.g., when the washer starts/stops)
     const updateDeviceState = async (state, temp, mode) => {

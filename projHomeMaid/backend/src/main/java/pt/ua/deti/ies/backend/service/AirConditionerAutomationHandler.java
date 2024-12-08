@@ -3,19 +3,20 @@ package pt.ua.deti.ies.backend.service;
 import org.springframework.stereotype.Component;
 import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
-import pt.ua.deti.ies.backend.websocket.DeviceWebSocketHandler;
 
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Component
 public class AirConditionerAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
-    private final DeviceWebSocketHandler webSocketHandler;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public AirConditionerAutomationHandler(DeviceRepository deviceRepository, DeviceWebSocketHandler webSocketHandler) {
+    public AirConditionerAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.deviceRepository = deviceRepository;
-        this.webSocketHandler = webSocketHandler;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -60,7 +61,14 @@ public class AirConditionerAutomationHandler implements DeviceAutomationHandler 
 
             // Salva as alterações no repositório
             deviceRepository.save(device);
-//            webSocketHandler.broadcast(new ObjectMapper().writeValueAsString(device));
+            try {
+                String deviceJson = new ObjectMapper().writeValueAsString(device);
+                System.out.println("Broadcasting update: " + deviceJson);
+                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         } else {
             System.out.println("No state provided for Air Conditioner automation.");
         }

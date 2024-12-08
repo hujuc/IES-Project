@@ -4,6 +4,8 @@ import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import StateControl from "../components/heatedFloorsControlPage/StateControl.jsx";
 import TemperatureControl from "../components/heatedFloorsControlPage/TemperatureControl.jsx";
 import AutomatizeHeatedFloors from "../components/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function HeatedFloorsControl() {
     const [isHeatedOn, setIsHeatedOn] = useState(false);
@@ -33,9 +35,39 @@ export default function HeatedFloorsControl() {
 
     useEffect(() => {
         fetchHeatedFloorsData();
-        const intervalId = setInterval(fetchHeatedFloorsData, 5000);
 
-        return () => clearInterval(intervalId);
+        // Setup WebSocket with SockJS
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000, // Retry connection every 5 seconds
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+
+            // Subscribe to updates for the specific device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Message received via WebSocket:", updatedData);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.state !== undefined) setIsHeatedOn(updatedData.state);
+                    if (updatedData.temperature !== undefined) setTemperature(updatedData.temperature);
+                    console.log("Updated data in frontend:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Disconnect on component unmount
     }, [deviceId]);
 
     const toggleHeatedFloors = async (state) => {

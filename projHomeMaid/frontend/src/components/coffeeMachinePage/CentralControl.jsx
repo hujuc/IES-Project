@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function CentralControl({ deviceId }) {
     const [device, setDevice] = useState(null);
@@ -24,7 +26,34 @@ export default function CentralControl({ deviceId }) {
         if (deviceId) fetchDevice();
     }, [deviceId]);
 
-    // Toggle light
+    // Subscribe to WebSocket updates
+    useEffect(() => {
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedDevice = JSON.parse(message.body);
+
+                if (updatedDevice.deviceId === deviceId) {
+                    setLightOn(updatedDevice.state || false);
+                    setIsLocked(updatedDevice.state || false);
+                    console.log("Received update via WebSocket:", updatedDevice);
+                }
+            });
+        };
+
+        client.activate();
+
+        return () => client.deactivate();
+    }, [deviceId]);
+
+    // Toggle light manually
     const toggleLight = async () => {
         if (isLocked) return;
 
@@ -72,7 +101,7 @@ export default function CentralControl({ deviceId }) {
                     >
                         <img
                             src={"path/to/alarmIcon.png"}
-                            alt="Alarm"
+                            alt="Coffee"
                             className="h-10 w-10"
                         />
                     </button>

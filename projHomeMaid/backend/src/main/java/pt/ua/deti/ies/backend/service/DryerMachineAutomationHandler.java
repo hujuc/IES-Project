@@ -5,14 +5,19 @@ import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
 
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 
 @Component
 public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public DryerMachineAutomationHandler(DeviceRepository deviceRepository) {
+    public DryerMachineAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.deviceRepository = deviceRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -36,6 +41,14 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
             device.setTemperature(temperature);
             device.setMode(dryMode);
             deviceRepository.save(device);
+            try {
+                String deviceJson = new ObjectMapper().writeValueAsString(device);
+                System.out.println("Broadcasting update: " + deviceJson);
+                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
 
             System.out.println("Dryer Machine started with:");
             System.out.println("Temperature: " + temperature);
@@ -51,6 +64,14 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
             Thread.sleep(120000); // Simulate 2-minute drying cycle
             device.setState(false); // Set state to false after the cycle
             deviceRepository.save(device);
+            try {
+                String deviceJson = new ObjectMapper().writeValueAsString(device);
+                System.out.println("Broadcasting update: " + deviceJson);
+                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
 
             System.out.println("Dryer Machine cycle completed. Turned off.");
         } catch (InterruptedException e) {

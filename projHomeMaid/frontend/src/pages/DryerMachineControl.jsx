@@ -102,9 +102,9 @@ export default function DryerMachineControl() {
                     disabled={isDryerOn}
                     className="mt-2 block w-full border border-gray-300 rounded-lg p-2 text-gray-700 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
-                    <option value="Normal Dry">Normal Dry</option>
-                    <option value="Delicate Dry">Delicate Dry</option>
-                    <option value="Heavy Dry">Heavy Dry</option>
+                    <option value="Regular Dry">Regular Dry</option>
+                    <option value="Gentle Dry">Gentle Dry</option>
+                    <option value="Permanent Press">Permanent Press</option>
                 </select>
             </div>
 

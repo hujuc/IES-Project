@@ -38,7 +38,7 @@ export default function StateControl({ deviceId, toggleWasher, temperature, wash
         };
 
         fetchCurrentState();
-    }, [deviceId]);
+    }, [deviceId, toggleWasher, temperature, washMode]);
 
     // Simulate the washing cycle when the washer is turned on
     useEffect(() => {

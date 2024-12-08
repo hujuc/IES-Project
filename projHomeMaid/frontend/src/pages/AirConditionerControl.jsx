@@ -4,6 +4,8 @@ import EllipsisButton from "../components/AirConditionerPage/EllipsisButton.jsx"
 import TemperatureControl from "../components/AirConditionerPage/TemperatureControl.jsx";
 import AirFluxControl from "../components/AirConditionerPage/AirFluxControl.jsx";
 import AutomatizeAirConditioner from "../components/AirConditionerPage/AutomatizeAirCond.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function AirConditionerControl() {
     const [deviceData, setDeviceData] = useState(null);
@@ -29,21 +31,37 @@ export default function AirConditionerControl() {
 
         fetchDeviceData();
 
-        // Conectar ao WebSocket
-        const ws = new WebSocket("ws://localhost:8080/ws/devices");
+        // Conectar ao WebSocket com SockJS
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
 
-        ws.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                if (message.deviceId === deviceId) {
-                    setDeviceData((prev) => ({ ...prev, ...message })); // Atualiza os dados do dispositivo em tempo real
+        client.onConnect = () => {
+            console.log("Conectado ao WebSocket STOMP!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Mensagem recebida via WebSocket:", updatedData);
+
+                if (updatedData.deviceId === deviceId) {
+                    setDeviceData((prev) => ({ ...prev, ...updatedData }));
+                    console.log("Dados atualizados no frontend:", updatedData);
                 }
-            } catch (error) {
-                console.error("Error parsing WebSocket message:", error);
-            }
+            });
+
         };
 
-        return () => ws.close(); // Fechar a conexão ao desmontar o componente
+        client.onStompError = (frame) => {
+            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
+            console.error("Detalhes do erro:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
     }, [deviceId]);
 
     const toggleAirConditioner = async () => {

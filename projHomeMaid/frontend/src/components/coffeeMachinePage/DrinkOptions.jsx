@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Assuming you're using Axios for API calls
+import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function DrinkOptions({ deviceId }) {
     const [selectedOption, setSelectedOption] = useState("Espresso"); // Default option: Espresso
@@ -26,6 +28,38 @@ export default function DrinkOptions({ deviceId }) {
         if (deviceId) {
             fetchDrinkType();
         }
+    }, [deviceId]);
+
+    // WebSocket connection for real-time updates
+    useEffect(() => {
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000, // Retry connection every 5 seconds
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+
+            // Subscribe to updates for the specific device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId && updatedData.drinkType) {
+                    setSelectedOption(updatedData.drinkType);
+                    console.log("Drink type updated via WebSocket:", updatedData.drinkType);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Disconnect on component unmount
     }, [deviceId]);
 
     // Update the drinkType in the database

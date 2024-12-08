@@ -5,14 +5,18 @@ import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
 
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Component
 public class SpeakerAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public SpeakerAutomationHandler(DeviceRepository deviceRepository) {
+    public SpeakerAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.deviceRepository = deviceRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -35,6 +39,14 @@ public class SpeakerAutomationHandler implements DeviceAutomationHandler {
 
         // Salva as mudanças no repositório
         deviceRepository.save(device);
+        try {
+            String deviceJson = new ObjectMapper().writeValueAsString(device);
+            System.out.println("Broadcasting update: " + deviceJson);
+            simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("Speaker automation executed for device: " + device.getDeviceId());
     }
 }

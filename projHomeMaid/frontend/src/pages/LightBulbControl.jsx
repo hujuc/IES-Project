@@ -3,6 +3,8 @@ import GetBackButton from "../components/buttons/GetBackButton.jsx";
 import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import { FiZapOff, FiZap } from "react-icons/fi";
 import AutomatizeLight from "../components/LightBulbPage/AutomatizeLight.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 import outlineSunIcon from "../assets/outlineSun.png";
 import fullSunIcon from "../assets/fullSun.png";
@@ -32,7 +34,6 @@ export default function LightBulbControl() {
         { name: "Purple", value: "#800080" },
     ];
 
-
     // Buscar o estado inicial da lâmpada
     useEffect(() => {
         const fetchLightData = async () => {
@@ -51,6 +52,40 @@ export default function LightBulbControl() {
         };
 
         fetchLightData();
+
+        // Conectar ao WebSocket com SockJS
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000, // Reconecta automaticamente após 5 segundos em caso de falha
+            heartbeatIncoming: 4000, // Checa o servidor a cada 4 segundos
+            heartbeatOutgoing: 4000, // Informa o servidor que está vivo a cada 4 segundos
+        });
+
+        client.onConnect = () => {
+            console.log("Conectado ao WebSocket STOMP!");
+
+            // Subscribing to updates for the specific device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Mensagem recebida via WebSocket:", updatedData);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.state !== undefined) setIsLightOn(updatedData.state);
+                    if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
+                    if (updatedData.color !== undefined) setColor(updatedData.color);
+                    console.log("Dados atualizados no frontend:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
+            console.error("Detalhes do erro:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
     }, [deviceId]);
 
     // Alternar o estado da lâmpada
@@ -151,14 +186,12 @@ export default function LightBulbControl() {
                     onClick={toggleLight}
                     className="w-48 h-56 bg-white rounded-3xl flex items-center justify-center shadow-lg relative"
                 >
-                    {/* Fundo da lâmpada */}
                     <div
                         className={`absolute w-32 h-32 rounded-full border-4 ${
                             isLightOn ? `bg-yellow-500 opacity-${Math.floor(brightness / 10)}` : "bg-gray-300"
                         }`}
                         style={{backgroundColor: isLightOn ? color : "#ccc"}}
                     ></div>
-                    {/* Ícone da lâmpada */}
                     <div className="z-10">
                         {isLightOn ? (
                             <FiZap size={50} className="text-black"/>
@@ -167,7 +200,6 @@ export default function LightBulbControl() {
                         )}
                     </div>
                 </button>
-                {/* Seletor do estado */}
                 <div className="mt-4 flex items-center">
                     <span className="text-lg font-medium mr-3">Light</span>
                     <input
@@ -182,10 +214,7 @@ export default function LightBulbControl() {
             {/* Slider de brilho */}
             <div className={`mt-6 w-60 text-center ${isLightOn ? "" : "opacity-50 pointer-events-none"}`}>
                 <div className="flex justify-between items-center">
-                    {/* Ícone para brilho mínimo */}
                     <img src={outlineSunIcon} alt="Low Brightness" className="w-11 h-11"/>
-
-                    {/* Slider */}
                     <input
                         type="range"
                         min="10"
@@ -197,7 +226,6 @@ export default function LightBulbControl() {
                             background: `linear-gradient(to right, #FACC15 ${brightness}%, #e5e7eb ${brightness}%)`,
                         }}
                     />
-                    {/* Ícone para brilho máximo */}
                     <img src={fullSunIcon} alt="High Brightness" className="w-11 h-11"/>
                 </div>
                 <p className="text-white-500 mt-0">{brightness}%</p>
@@ -219,7 +247,6 @@ export default function LightBulbControl() {
                     ))}
                 </div>
             </div>
-
 
             {/* Automatização */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">

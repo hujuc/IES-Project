@@ -6,7 +6,7 @@ export default function AutomatizeDryer({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
     const [temperature, setTemperature] = useState(60); // Default temperature for dryer
-    const [dryMode, setDryMode] = useState("Normal Dry"); // Default dry mode
+    const [dryMode, setDryMode] = useState("Regular Dry"); // Default dry mode
 
     useEffect(() => {
         fetch(`${API_BASE_URL}`)
@@ -101,9 +101,9 @@ export default function AutomatizeDryer({ deviceId }) {
                             onChange={(e) => setDryMode(e.target.value)}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
-                            <option value="Normal Dry">Normal Dry</option>
-                            <option value="Delicate Dry">Delicate Dry</option>
-                            <option value="Heavy Dry">Heavy Dry</option>
+                            <option value="Regular Dry">Regular Dry</option>
+                            <option value="Gentle Dry">Gentle Dry</option>
+                            <option value="Permanent Press">Permanent Press</option>
                         </select>
                     </div>
                 </div>

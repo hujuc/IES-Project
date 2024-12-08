@@ -3,6 +3,8 @@ import GetBackButton from "../components/buttons/GetBackButton.jsx";
 import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import ClockCentralControl from "../components/clockPage/ClockCentralControl.jsx";
 import Automatize from "../components/clockPage/AutomatizeAlarmClock.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function ClockControl() {
     const url = window.location.href;
@@ -18,24 +20,55 @@ export default function ClockControl() {
     const [volume, setVolume] = useState(50); // Default volume
     const [error, setError] = useState(null);
 
-    // Fetch the initial alarm sound and volume from the API
+    // Fetch the initial clock data and setup WebSocket
     useEffect(() => {
         const fetchClockData = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
                 const data = await response.json();
 
-                setAlarmSound(data.alarmSound || "sound1"); // Default to "sound1" if no sound is set
-                setVolume(data.volume || 50); // Default to 50 if no volume is set
+                setAlarmSound(data.alarmSound || "sound1"); // Default to "sound1" if not set
+                setVolume(data.volume || 50); // Default to 50 if not set
             } catch (err) {
                 console.error("Error fetching clock data:", err);
                 setError("Failed to fetch the clock data.");
             }
         };
 
-        if (deviceId) {
-            fetchClockData();
-        }
+        fetchClockData();
+
+        // Setup WebSocket with SockJS
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000, // Retry connection every 5 seconds
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket STOMP!");
+
+            // Subscribe to updates for the specific device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Message received via WebSocket:", updatedData);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.alarmSound) setAlarmSound(updatedData.alarmSound);
+                    if (updatedData.volume) setVolume(updatedData.volume);
+                    console.log("Updated data in frontend:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Disconnect on component unmount
     }, [deviceId]);
 
     // Update the alarm sound in the database

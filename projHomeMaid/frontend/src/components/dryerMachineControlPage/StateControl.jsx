@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import washerOnIcon from "../../assets/washer_aut.png"; // Icon for washer on
-import washerOffIcon from "../../assets/washer_aut.png"; // Icon for washer off
+import dryerOnIcon from "../../assets/washer_aut.png"; // Icon for dryer on
+import dryerOffIcon from "../../assets/washer_aut.png"; // Icon for dryer off
 
 const API_BASE_URL = "http://localhost:8080/api/devices";
 
-export default function StateControl({ deviceId, toggleDryer, temperature, washMode }) {
-    const [isRunning, setIsRunning] = useState(false);  // To track if the washer is running
+export default function StateControl({ deviceId, toggleDryer, temperature, dryMode }) {
+    const [isRunning, setIsRunning] = useState(false); // To track if the dryer is running
     const [currentState, setCurrentState] = useState({
-        isWasherOn: false,
+        isDryerOn: false,
         temperature: 50.0,
-        washMode: "Permanent Press"
-    }); // To store the current state of the washer
+        dryMode: "Normal Dry",
+    }); // To store the current state of the dryer
     const [loading, setLoading] = useState(true); // Track loading state
 
     // Fetch the current state from the backend when the component is mounted
@@ -23,9 +23,9 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
                 if (response.ok) {
                     // Set the current state from backend data
                     setCurrentState({
-                        isWasherOn: data.state,
+                        isDryerOn: data.state,
                         temperature: data.temperature,
-                        washMode: data.mode,
+                        dryMode: data.mode,
                     });
                 } else {
                     console.error("Failed to fetch device state:", data);
@@ -38,21 +38,21 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
         };
 
         fetchCurrentState();
-    }, [deviceId]);
+    }, [deviceId, toggleDryer, temperature, dryMode]);
 
-    // Simulate the washing cycle when the washer is turned on
+    // Simulate the drying cycle when the dryer is turned on
     useEffect(() => {
-        if (!loading && currentState.isWasherOn && !isRunning) {
+        if (!loading && currentState.isDryerOn && !isRunning) {
             setIsRunning(true);
 
-            // Update the washer’s state to "on" in the backend
-            updateDeviceState(true, currentState.temperature, currentState.washMode);
+            // Update the dryer’s state to "on" in the backend
+            updateDeviceState(true, currentState.temperature, currentState.dryMode);
 
             // Simulate the cycle by using a timeout
             const timer = setTimeout(() => {
                 setIsRunning(false); // Set isRunning to false when cycle ends
 
-                // Update the washer’s state to "off" in the database
+                // Update the dryer’s state to "off" in the database
                 updateDeviceState(false, null, null);
 
                 toggleDryer(false); // Update the frontend state to match
@@ -60,14 +60,14 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
 
             return () => clearTimeout(timer); // Cleanup the timer when component unmounts
         }
-    }, [currentState.isWasherOn, loading, deviceId, toggleDryer, temperature, washMode]);
+    }, [currentState.isDryerOn, loading]);
 
-    // Update the device state in the backend (e.g., when the washer starts/stops)
+    // Update the device state in the backend (e.g., when the dryer starts/stops)
     const updateDeviceState = async (state, temp, mode) => {
         try {
             const payload = { state };
             if (temp !== null) payload.temperature = temp;
-            if (mode !== null) payload.washMode = mode;
+            if (mode !== null) payload.dryMode = mode;
 
             const response = await fetch(`${API_BASE_URL}/${deviceId}`, {
                 method: "PATCH",
@@ -95,7 +95,7 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
     return (
         <div className="flex flex-col items-center mt-6">
             <button
-                onClick={() => toggleDryer(!currentState.isWasherOn)}
+                onClick={() => toggleDryer(!currentState.isDryerOn)}
                 className={`w-48 h-56 bg-white rounded-3xl flex items-center justify-center shadow-lg relative ${
                     isRunning ? "opacity-50 pointer-events-none" : ""
                 }`}
@@ -103,27 +103,27 @@ export default function StateControl({ deviceId, toggleDryer, temperature, washM
             >
                 {/* Background */}
                 <div className="absolute w-32 h-32 rounded-full bg-gray-300"></div>
-                {/* Washer state icon */}
+                {/* Dryer state icon */}
                 <div className="z-10">
-                    {currentState.isWasherOn ? (
-                        <img src={washerOnIcon} alt="Washer On" className="w-20 h-20" />
+                    {currentState.isDryerOn ? (
+                        <img src={dryerOnIcon} alt="Dryer On" className="w-20 h-20" />
                     ) : (
-                        <img src={washerOffIcon} alt="Washer Off" className="w-20 h-20" />
+                        <img src={dryerOffIcon} alt="Dryer Off" className="w-20 h-20" />
                     )}
                 </div>
             </button>
 
-            {/* Washer Running Indicator */}
-            {isRunning && <p className="text-orange-500 font-semibold mt-2">Washer Running...</p>}
+            {/* Dryer Running Indicator */}
+            {isRunning && <p className="text-orange-500 font-semibold mt-2">Dryer Running...</p>}
 
             {/* State toggle */}
             <div className="mt-4 flex items-center">
-                <span className="text-lg font-medium mr-3">{currentState.isWasherOn ? "On" : "Off"}</span>
+                <span className="text-lg font-medium mr-3">{currentState.isDryerOn ? "On" : "Off"}</span>
                 <input
                     type="checkbox"
                     className="toggle bg-gray-300 checked:bg-orange-500"
-                    checked={currentState.isWasherOn}
-                    onChange={() => toggleDryer(!currentState.isWasherOn)}
+                    checked={currentState.isDryerOn}
+                    onChange={() => toggleDryer(!currentState.isDryerOn)}
                     disabled={isRunning} // Prevent toggling during the cycle
                 />
             </div>

@@ -84,8 +84,8 @@ export default function AutomatizeDryer({ deviceId }) {
                         <label className="text-gray-600 font-medium">Temperature</label>
                         <input
                             type="range"
-                            min="30"
-                            max="80"
+                            min="50"
+                            max="90"
                             step="1"
                             value={temperature}
                             onChange={(e) => setTemperature(parseFloat(e.target.value))}

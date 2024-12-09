@@ -1,30 +1,33 @@
-package pt.ua.deti.ies.homemaid.model;
+package pt.ua.deti.ies.backend.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "sensors")
 public class Sensor {
-    @Id
-    private String sensorId;
-    private String name;
-    private String type;  // Ex: "temperature", "humidity", etc.
-    private Double value; // Valor da leitura
-    private String unit;  // Ex: "°C", "%", "Pa", etc.
-    private String houseId; // ID da casa para onde o sensor pertence
 
-    // Construtores, getters e setters
-    public Sensor(String sensorId, String name, String type, Double value, String unit, String houseId) {
+    private String sensorId; // ID único do sensor
+    private String roomId;   // ID do quarto ao qual o sensor pertence
+    private String houseId;  // ID da casa à qual o sensor pertence
+    private String type;     // Tipo do sensor: "temperature", "humidity", etc.
+    private Double value;    // Valor lido pelo sensor
+    private String unit;     // Unidade da leitura: "°C", "%", etc.
+    private String name;     // Nome descritivo do sensor
+
+    // Construtores
+    public Sensor(String sensorId, String roomId, String houseId, String type, Double value, String unit, String name) {
         this.sensorId = sensorId;
-        this.name = name;
+        this.roomId = roomId;
+        this.houseId = houseId;
         this.type = type;
         this.value = value;
         this.unit = unit;
-        this.houseId = houseId;
+        this.name = name;
     }
 
     public Sensor() {}
 
+    // Getters e Setters
     public String getSensorId() {
         return sensorId;
     }
@@ -33,12 +36,20 @@ public class Sensor {
         this.sensorId = sensorId;
     }
 
-    public String getName() {
-        return name;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getHouseId() {
+        return houseId;
+    }
+
+    public void setHouseId(String houseId) {
+        this.houseId = houseId;
     }
 
     public String getType() {
@@ -65,23 +76,24 @@ public class Sensor {
         this.unit = unit;
     }
 
-    public String getHouseId() {
-        return houseId;
+    public String getName() {
+        return name;
     }
 
-    public void setHouseId(String houseId) {
-        this.houseId = houseId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Sensor{" +
                 "sensorId='" + sensorId + '\'' +
-                ", name='" + name + '\'' +
+                ", roomId='" + roomId + '\'' +
+                ", houseId='" + houseId + '\'' +
                 ", type='" + type + '\'' +
                 ", value=" + value +
                 ", unit='" + unit + '\'' +
-                ", houseId='" + houseId + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

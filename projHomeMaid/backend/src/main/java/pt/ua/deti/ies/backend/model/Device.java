@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.homemaid.model;
+package pt.ua.deti.ies.backend.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,24 +18,13 @@ public class Device {
     private String mode;
     private Boolean ringing;
     private String airFluxDirection;
-    private Integer airFluxRate;
-    private String alarmSong;
-    private String coffeeType;
-    private Float cycleTime;
-    private String dryingMode;
-    private String washingMode;
-    private Integer waterPercentage;
-    private Integer conditionerPercentage;
-    private Integer detergentPercentage;
-    private Integer shuttersPercentage;
-    private String airType;
+    private String airFluxRate;
+    private String drinkType;
+    private String alarmSound;
 
-    // Constructor with all parameters
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, Integer airFluxRate, String alarmSong, String coffeeType, Float cycleTime,
-                  String dryingMode, String washingMode, Integer waterPercentage, Integer conditionerPercentage,
-                  Integer detergentPercentage, Integer shuttersPercentage, String airType) {
+                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -49,22 +38,12 @@ public class Device {
         this.ringing = ringing;
         this.airFluxDirection = airFluxDirection;
         this.airFluxRate = airFluxRate;
-        this.alarmSong = alarmSong;
-        this.coffeeType = coffeeType;
-        this.cycleTime = cycleTime;
-        this.dryingMode = dryingMode;
-        this.washingMode = washingMode;
-        this.waterPercentage = waterPercentage;
-        this.conditionerPercentage = conditionerPercentage;
-        this.detergentPercentage = detergentPercentage;
-        this.shuttersPercentage = shuttersPercentage;
-        this.airType = airType;
+        this.drinkType = drinkType;
+        this.alarmSound = alarmSound;
     }
 
-    // Default constructor
     public Device() {}
 
-    // Getters and Setters
     public String getDeviceId() {
         return deviceId;
     }
@@ -161,96 +140,32 @@ public class Device {
         this.airFluxDirection = airFluxDirection;
     }
 
-    public Integer getAirFluxRate() {
+    public String getAirFluxRate() {
         return airFluxRate;
     }
 
-    public void setAirFluxRate(Integer airFluxRate) {
+    public void setAirFluxRate(String airFluxRate) {
         this.airFluxRate = airFluxRate;
     }
 
-    public String getAlarmSong() {
-        return alarmSong;
+    public String getDrinkType() {
+        return drinkType;
     }
 
-    public void setAlarmSong(String alarmSong) {
-        this.alarmSong = alarmSong;
+    public void setDrinkType(String drinkType) {
+        this.drinkType = drinkType;
     }
 
-    public String getCoffeeType() {
-        return coffeeType;
+    public String getAlarmSound() {
+        return alarmSound;
     }
 
-    public void setCoffeeType(String coffeeType) {
-        this.coffeeType = coffeeType;
+    public void setAlarmSound(String alarmSound) {
+        this.alarmSound = alarmSound;
     }
 
-    public Float getCycleTime() {
-        return cycleTime;
-    }
-
-    public void setCycleTime(Float cycleTime) {
-        this.cycleTime = cycleTime;
-    }
-
-    public String getDryingMode() {
-        return dryingMode;
-    }
-
-    public void setDryingMode(String dryingMode) {
-        this.dryingMode = dryingMode;
-    }
-
-    public String getWashingMode() {
-        return washingMode;
-    }
-
-    public void setWashingMode(String washingMode) {
-        this.washingMode = washingMode;
-    }
-
-    public Integer getWaterPercentage() {
-        return waterPercentage;
-    }
-
-    public void setWaterPercentage(Integer waterPercentage) {
-        this.waterPercentage = waterPercentage;
-    }
-
-    public Integer getConditionerPercentage() {
-        return conditionerPercentage;
-    }
-
-    public void setConditionerPercentage(Integer conditionerPercentage) {
-        this.conditionerPercentage = conditionerPercentage;
-    }
-
-    public Integer getDetergentPercentage() {
-        return detergentPercentage;
-    }
-
-    public void setDetergentPercentage(Integer detergentPercentage) {
-        this.detergentPercentage = detergentPercentage;
-    }
-
-    public Integer getShuttersPercentage() {
-        return shuttersPercentage;
-    }
-
-    public void setShuttersPercentage(Integer shuttersPercentage) {
-        this.shuttersPercentage = shuttersPercentage;
-    }
-
-    public String getAirType() {
-        return airType;
-    }
-
-    public void setAirType(String airType) {
-        this.airType = airType;
-    }
-
-    @Override
-    public String toString() {
+    @java.lang.Override
+    public java.lang.String toString() {
         return "Device{" +
                 "deviceId='" + deviceId + '\'' +
                 ", name='" + name + '\'' +
@@ -265,15 +180,8 @@ public class Device {
                 ", ringing=" + ringing +
                 ", airFluxDirection='" + airFluxDirection + '\'' +
                 ", airFluxRate=" + airFluxRate +
-                ", alarmSong='" + alarmSong + '\'' +
-                ", coffeeType='" + coffeeType + '\'' +
-                ", cycleTime=" + cycleTime +
-                ", dryingMode='" + dryingMode + '\'' +
-                ", washingMode='" + washingMode + '\'' +
-                ", waterPercentage=" + waterPercentage +
-                ", conditionerPercentage=" + conditionerPercentage +
-                ", detergentPercentage=" + detergentPercentage +
-                ", shuttersPercentage=" + shuttersPercentage +
+                ", drinkTYpe =" + drinkType +
+                ", alarmSound =" + alarmSound +
                 '}';
     }
 }

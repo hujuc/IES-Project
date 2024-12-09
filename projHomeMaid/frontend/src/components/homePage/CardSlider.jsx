@@ -33,8 +33,6 @@ function CardSlider() {
                     const houseCard = {
                         id: "house",
                         label: "Home",
-                        temperature: data.temperature,
-                        humidity: data.humidity,
                         image: HouseImage, // Usar imagem padrão para a casa
                         type: "House",
                         deviceObjects: data.devices, // Passar os dispositivos da casa
@@ -44,8 +42,6 @@ function CardSlider() {
                     const roomCards = data.rooms.map((room) => ({
                         id: room.roomId,
                         label: room.type,
-                        temperature: room.temperature,
-                        humidity: room.humidity,
                         image: getDefaultImage(room.type),
                         type: room.type,
                         deviceObjects: room.deviceObjects, // AQUI também usamos deviceObjects
@@ -126,10 +122,10 @@ function CardSlider() {
                 {/* Informações no canto superior esquerdo */}
                 <div className="absolute top-4 left-4 flex flex-col space-y-1">
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Temperature:</strong> {cards[currentIndex].temperature}°C
+                        <strong>Temperature:</strong> {22}°C
                     </div>
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Humidity:</strong> {cards[currentIndex].humidity}%
+                        <strong>Humidity:</strong> {22}%
                     </div>
                 </div>
 

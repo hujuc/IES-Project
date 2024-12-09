@@ -58,9 +58,7 @@ public class HouseController {
 
         return ResponseEntity.ok(new HouseDetailsResponse(
                 house.getHouseId(),
-                rooms,
-                house.getTemperature(),
-                house.getHumidity()
+                rooms
         ));
     }
 

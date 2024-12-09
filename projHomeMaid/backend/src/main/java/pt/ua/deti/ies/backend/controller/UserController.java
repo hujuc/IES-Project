@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
 import pt.ua.deti.ies.backend.model.User;
 import pt.ua.deti.ies.backend.service.UserService;
+import pt.ua.deti.ies.backend.model.House;
+import pt.ua.deti.ies.backend.service.HouseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,15 +28,20 @@ import java.util.*;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
+    private HouseService houseService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, HouseService houseService) {
         this.userService = userService;
+        this.houseService = houseService;
     }
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUpUser(@RequestBody User user) {
         try {
             userService.signUpUser(user);
+
+            House newHouse = houseService.createHouseWithRoomsAndDevices(user.getHouseId());
+
             return ResponseEntity.ok("User successfully registered.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

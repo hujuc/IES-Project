@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx"; // Importe o header
+import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/heatedFloorsControlPage/StateControl.jsx";
 import TemperatureControl from "../../components/automationsPages/heatedFloorsControlPage/TemperatureControl.jsx";
 import AutomatizeHeatedFloors from "../../components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx"; // Corrigido
+import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import TemperatureControl from "../../components/automationsPages/AirConditionerPage/TemperatureControl.jsx";
 import AirFluxControl from "../../components/automationsPages/AirConditionerPage/AirFluxControl.jsx";
 import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx";

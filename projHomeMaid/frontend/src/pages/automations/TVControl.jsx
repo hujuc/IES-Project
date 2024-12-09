@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx"; // Importe o header
+import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/TVControlPage/StateControl.jsx";
 import VolumeControl from "../../components/automationsPages/TVControlPage/VolumeControl.jsx";
 import BrightnessControl from "../../components/automationsPages/TVControlPage/BrightnessControl.jsx";

@@ -64,7 +64,6 @@ public class DeviceService {
                 .orElseThrow(() -> new RuntimeException("House not found"));
     }
 
-    // getAllDevices:
     public List<Device> getAllDevices() {
         return deviceRepository.findAll();
     }
@@ -86,9 +85,4 @@ public class DeviceService {
                 .toArray(String[]::new);
     }
 
-
-    // getAllDevices:
-    public List<Device> getAllDevices() {
-        return deviceRepository.findAll();
-    }
 }

@@ -1,52 +1,93 @@
 import React, { useState, useEffect } from "react";
-import GetBackButton from "../components/buttons/GetBackButton.jsx";
-import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
-import StateControl from "../components/ShutterControlPage/StateControl.jsx";
-import PercentageControl from "../components/ShutterControlPage/PercentageControl.jsx";
-import AutomatizeShutter from "../components/ShutterControlPage/AutomatizeShutter.jsx";
+import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
+import StateControl from "../../components/automationsPages/ShutterControlPage/StateControl.jsx";
+import PercentageControl from "../../components/automationsPages/ShutterControlPage/PercentageControl.jsx";
+import AutomatizeShutter from "../../components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function ShutterControl() {
+    const DEFAULT_OPEN_PERCENTAGE = 50;
     const [isShutterOpen, setIsShutterOpen] = useState(false);
-    const [openPercentage, setOpenPercentage] = useState(null);
+    const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
     const [error, setError] = useState(null);
 
     const url = window.location.href;
-    const deviceId = url.split("/").pop();
+    const urlParts = url.split("/");
+    const deviceId = urlParts[urlParts.length - 1];
 
-    const fetchShutterData = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
-            const data = await response.json();
+    // Fetch initial shutter data and set up WebSocket
+    useEffect(() => {
+        const fetchShutterData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const data = await response.json();
 
-            // Certifique-se de sincronizar os estados com o backend
-            if (data.state !== undefined) {
-                setIsShutterOpen(data.state);
+                setIsShutterOpen(data.state || false);
+                setOpenPercentage(
+                    data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE
+                );
+            } catch (err) {
+                console.error("Erro ao buscar o estado da persiana:", err);
+                setError("Falha ao buscar o estado da persiana.");
             }
+        };
 
-            if (data.openPercentage !== undefined) {
-                setOpenPercentage(data.openPercentage); // Atualize para o valor do backend
-            }
-        } catch (err) {
-            console.error("Erro ao buscar o estado da persiana:", err);
-            setError("Falha ao buscar o estado da persiana.");
-        }
-    };
+        fetchShutterData();
+
+        // Set up WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            reconnectDelay: 5000, // Retry connection every 5 seconds
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+        });
+
+        client.onConnect = () => {
+            console.log("Conectado ao WebSocket STOMP!");
+
+            // Subscribe to updates for the specific device
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Mensagem recebida via WebSocket:", updatedData);
+
+                if (updatedData.deviceId === deviceId) {
+                    if (updatedData.state !== undefined) setIsShutterOpen(updatedData.state);
+                    if (updatedData.openPercentage !== undefined)
+                        setOpenPercentage(updatedData.openPercentage);
+                    console.log("Dados atualizados no frontend:", updatedData);
+                }
+            });
+        };
+
+        client.onStompError = (frame) => {
+            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
+            console.error("Detalhes do erro:", frame.body);
+        };
+
+        client.activate();
+
+        return () => client.deactivate(); // Disconnect on component unmount
+    }, [deviceId]);
 
     useEffect(() => {
-        fetchShutterData();
-        const intervalId = setInterval(fetchShutterData, 5000);
-
-        return () => clearInterval(intervalId);
-    }, [deviceId]);
+        if (openPercentage === 0 && isShutterOpen) {
+            saveStateToDatabase(false, 0);
+            setIsShutterOpen(false);
+        }
+    }, [openPercentage, isShutterOpen]);
 
     const toggleShutter = async (state) => {
         try {
             const updatedState = state !== undefined ? state : !isShutterOpen;
 
-            const targetPercentage = updatedState ? 100 : 0;
-
-            setOpenPercentage(targetPercentage);
-            await saveStateToDatabase(updatedState, targetPercentage);
+            if (updatedState) {
+                setOpenPercentage(DEFAULT_OPEN_PERCENTAGE);
+                await saveStateToDatabase(updatedState, DEFAULT_OPEN_PERCENTAGE);
+            } else {
+                setOpenPercentage(0);
+                await saveStateToDatabase(updatedState, 0);
+            }
 
             setIsShutterOpen(updatedState);
         } catch (err) {
@@ -92,23 +133,25 @@ export default function ShutterControl() {
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            <div className="w-full flex justify-between px-6 py-4 items-center">
-                <div className="h-16 w-16">
-                    <GetBackButton />
-                </div>
-                <span className="text-3xl font-semibold">Shutter</span>
-                <div className="h-12 w-14">
-                    <EllipsisButton />
-                </div>
+            {/* Top Bar com o AutomationsHeader */}
+            <AutomationsHeader />
+
+            {/* Title Section */}
+            <div className="flex flex-col items-center justify-center mt-4">
+                <span className="text-2xl font-semibold">Shutter</span>
             </div>
 
+            {/* State Control */}
             <StateControl isShutterOpen={isShutterOpen} toggleShutter={toggleShutter} />
+
+            {/* Percentage Control */}
             <PercentageControl
                 isShutterOpen={isShutterOpen}
                 openPercentage={openPercentage}
                 updateOpenPercentage={updateOpenPercentage}
             />
 
+            {/* Automatization Section */}
             <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
                 <div
                     className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"

@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 import axios from "axios";
 
 // Importing images for devices
-import air_conditioner from "../../assets/air_conditioner.jpg";
-import coffe_machine from "../../assets/coffee_machine.jpg";
-import heated_floor from "../../assets/heated_floor.jpg";
-import lamp from "../../assets/lamp.jpg";
-import shutters from "../../assets/shutters.jpg";
-import speaker from "../../assets/speaker.png";
-import television from "../../assets/television.jpg";
-import washer from "../../assets/washer_and_dryer.jpg";
+import airConditioner from "../../assets/homePage/devicesImages/airConditioner.jpg";
+import coffeMachine from "../../assets/homePage/devicesImages/coffeeMachine.jpg";
+import heatedFloor from "../../assets/homePage/devicesImages/heatedFloor.jpg";
+import lamp from "../../assets/homePage/devicesImages/lamp.jpg";
+import shutters from "../../assets/homePage/devicesImages/shutter.jpg";
+import speaker from "../../assets/homePage/devicesImages/stereo.png";
+import television from "../../assets/homePage/devicesImages/television.jpg";
+import washer from "../../assets/homePage/devicesImages/washingMachine.jpg";
+import dryer from "../../assets/homePage/devicesImages/dryerMachine.jpg"
+import clock from "../../assets/homePage/devicesImages/clock.jpg"
 
 function RoomInfo({ room }) {
     const [deviceObjects, setDeviceObjects] = useState([]); // Initializing as an empty array
@@ -34,23 +36,27 @@ function RoomInfo({ room }) {
 
     // Function to get the corresponding image for a device type
     const getDeviceImage = (type) => {
-        switch (type?.toLowerCase()) {
-            case "air conditioner":
-                return air_conditioner;
-            case "coffee machine":
-                return coffe_machine;
-            case "heated floors":
-                return heated_floor;
+        switch (type) {
+            case "airConditioner":
+                return airConditioner;
+            case "coffeeMachine":
+                return coffeMachine;
+            case "heatedFloor":
+                return heatedFloor;
             case "lamp":
                 return lamp;
-            case "shutters":
+            case "shutter":
                 return shutters;
-            case "speakers":
+            case "stereo":
                 return speaker;
             case "television":
                 return television;
-            case "washer and dryer":
+            case "washingMachine":
                 return washer;
+            case "dryerMachine":
+                return dryer;
+            case "clock":
+                return clock;
             default:
                 return null;
         }
@@ -108,15 +114,15 @@ function RoomInfo({ room }) {
                         onClick={() => navigate(`/${device.type}/${device.deviceId}`)} // Navigate to the automations page
                     >
                         {/* Device Name */}
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                            {device.name || "Unnamed Device"}
-                        </h4>
+                        <div className="flex justify-center mb-2">
+                            <h4 className="text-lg font-semibold text-gray-800 text-center">{device.name || "Unnamed Device"}</h4>
+                        </div>
 
                         {/* Device Image */}
                         <img
                             src={getDeviceImage(device.type)}
                             alt={device.name || "Device"}
-                            className="w-28 h-28 object-cover rounded-full mb-4 border-2 border-gray-200"
+                            className="w-28 h-28 object-cover rounded-full mb-4 border-2 border-gray-200 mx-auto" // Ajustado para w-28 e h-28
                         />
 
                         {/* Toggle Switch */}

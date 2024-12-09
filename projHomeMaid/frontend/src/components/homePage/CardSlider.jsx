@@ -3,14 +3,14 @@ import { useParams } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
 
 // Imagens padrão para cada tipo de divisão
-import HouseImage from "../../assets/default_house.jpg";
-import BedroomImage from "../../assets/default_bedroom.jpg";
-import KitchenImage from "../../assets/default_kitchen.jpg";
-import LivingRoomImage from "../../assets/default_living_room.jpg";
-import HallImage from "../../assets/default_hall.jpg";
-import LaundryImage from "../../assets/default_laundry.jpg";
-import OfficeImage from "../../assets/default_office.jpg";
-import BathroomImage from "../../assets/default_bathroom.jpg";
+import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
+import BedroomImage from "../../assets/homePage/roomsImages/bedroom.jpg";
+import KitchenImage from "../../assets/homePage/roomsImages/kitchen.jpg";
+import LivingRoomImage from "../../assets/homePage/roomsImages/livingRoom.jpg";
+import HallImage from "../../assets/homePage/roomsImages/hall.jpg";
+import LaundryImage from "../../assets/homePage/roomsImages/laundry.jpg";
+import OfficeImage from "../../assets/homePage/roomsImages/office.jpg";
+import BathroomImage from "../../assets/homePage/roomsImages/bathroom.jpg";
 
 function CardSlider() {
     const { houseId } = useParams(); // Obter houseId do URL

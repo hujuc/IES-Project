@@ -128,6 +128,7 @@ public class HouseService {
                 devices.add(masterBedroomHeatedFloor);
 
                 Device masterBedroomTelevision = new Device("television_" + roomType + "_" + houseId, "television");
+                masterBedroomTelevision.setName("Master Bedroom Television");
                 masterBedroomTelevision.setState(false);
                 masterBedroomTelevision.setVolume(0);
                 masterBedroomTelevision.setBrightness(10);

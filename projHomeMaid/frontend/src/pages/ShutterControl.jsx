@@ -22,7 +22,7 @@ export default function ShutterControl() {
     useEffect(() => {
         const fetchShutterData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 setIsShutterOpen(data.state || false);
@@ -82,7 +82,7 @@ export default function ShutterControl() {
 
     const saveStateToDatabase = async (state, percentage) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

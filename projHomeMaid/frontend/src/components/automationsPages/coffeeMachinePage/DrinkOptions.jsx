@@ -16,7 +16,7 @@ export default function DrinkOptions({ deviceId }) {
     useEffect(() => {
         const fetchDrinkType = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await axios.get(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const { drinkType } = response.data; // Assuming the database has a 'drinkType' field
                 setSelectedOption(drinkType || "Espresso"); // Default to "Espresso" if null
             } catch (err) {
@@ -33,7 +33,7 @@ export default function DrinkOptions({ deviceId }) {
     // WebSocket connection for real-time updates
     useEffect(() => {
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000, // Retry connection every 5 seconds
             heartbeatIncoming: 4000, // Check server every 4 seconds
             heartbeatOutgoing: 4000, // Inform server every 4 seconds
@@ -65,7 +65,7 @@ export default function DrinkOptions({ deviceId }) {
     // Update the drinkType in the database
     const updateDrinkType = async (optionName) => {
         try {
-            await axios.patch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 drinkType: optionName,
             });
             console.log("Drink type updated successfully");

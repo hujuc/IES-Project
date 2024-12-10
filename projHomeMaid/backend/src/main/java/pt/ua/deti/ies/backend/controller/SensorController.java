@@ -9,16 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
 @RestController
 @RequestMapping("/api/sensors")
 public class SensorController {

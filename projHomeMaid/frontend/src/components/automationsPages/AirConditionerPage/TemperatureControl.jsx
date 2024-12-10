@@ -9,7 +9,7 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
     }, [initialTemperature]);
 
     const updateTemperature = (newTemperature) => {
-        fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+        fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

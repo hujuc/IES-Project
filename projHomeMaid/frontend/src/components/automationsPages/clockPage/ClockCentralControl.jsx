@@ -11,7 +11,7 @@ export default function ClockCentralControl({ deviceId }) {
     useEffect(() => {
         const fetchDeviceState = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 // Initialize `lightOn` with the ringing state from the backend
@@ -54,7 +54,7 @@ export default function ClockCentralControl({ deviceId }) {
     // Function to update the state in the backend
     const updateDeviceState = async (ringing) => {
         try {
-            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default function ClockCentralControl({ deviceId }) {
 
         // Connect to WebSocket
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
         });
 

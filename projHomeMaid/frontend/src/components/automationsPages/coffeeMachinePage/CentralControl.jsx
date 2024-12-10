@@ -12,7 +12,7 @@ export default function CentralControl({ deviceId }) {
     useEffect(() => {
         const fetchDevice = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
                 setDevice(data);
                 setLightOn(data.state || false);
@@ -29,7 +29,7 @@ export default function CentralControl({ deviceId }) {
     // Subscribe to WebSocket updates
     useEffect(() => {
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
@@ -59,7 +59,7 @@ export default function CentralControl({ deviceId }) {
 
         try {
             const updatedState = true;
-            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ state: updatedState }),
@@ -70,7 +70,7 @@ export default function CentralControl({ deviceId }) {
             // Reset after 30 seconds
             setTimeout(async () => {
                 try {
-                    await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+                    await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ state: false }),

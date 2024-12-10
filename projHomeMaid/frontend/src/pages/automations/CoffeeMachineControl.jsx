@@ -16,7 +16,7 @@ export default function CoffeeMachineControl() {
     useEffect(() => {
         const fetchDeviceData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
                 setDeviceData(data);
                 setLoading(false);
@@ -30,7 +30,7 @@ export default function CoffeeMachineControl() {
 
         // Conectar ao WebSocket com SockJS
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000, // Reconecta automaticamente após 5 segundos em caso de falha
             heartbeatIncoming: 4000, // Checa o servidor a cada 4 segundos
             heartbeatOutgoing: 4000, // Informa o servidor que está vivo a cada 4 segundos

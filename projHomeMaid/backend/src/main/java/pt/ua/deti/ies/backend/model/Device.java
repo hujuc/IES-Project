@@ -42,6 +42,11 @@ public class Device {
         this.alarmSound = alarmSound;
     }
 
+    public Device(String deviceId, String type) {
+        this.deviceId = deviceId;
+        this.type = type;
+    }
+
     public Device() {}
 
     public String getDeviceId() {

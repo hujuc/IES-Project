@@ -5,35 +5,38 @@ import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
 
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Component
 public class ShutterAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public ShutterAutomationHandler(DeviceRepository deviceRepository) {
+    public ShutterAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.deviceRepository = deviceRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
     public void executeAutomation(Device device, Map<String, Object> changes) {
-        if (changes.containsKey("openPercentage")) {
-            int openPercentage = (int) changes.get("openPercentage");
+        if (changes.containsKey("state")) {
+            boolean state = (boolean) changes.get("state");
+            int openPercentage = state ? (int) changes.getOrDefault("openPercentage", 100) : 0;
 
-            if (openPercentage == 0) {
-                device.setOpenPercentage(0);
-                device.setState(false); // Fecha a persiana
-                System.out.println("Shutter closed, state set to false.");
-            } else {
-                device.setOpenPercentage(openPercentage);
-                device.setState(true); // Abre a persiana
-                System.out.println("Shutter opened to " + openPercentage + "%, state set to true.");
-            }
+            device.setState(state);
+            device.setOpenPercentage(openPercentage);
 
+            System.out.println("Shutter state: " + state + ", Open Percentage: " + openPercentage);
             deviceRepository.save(device);
-            System.out.println("Shutter automation executed for device: " + device.getDeviceId());
-        } else {
-            System.out.println("No openPercentage provided in automation changes.");
+            try {
+                String deviceJson = new ObjectMapper().writeValueAsString(device);
+                System.out.println("Broadcasting update: " + deviceJson);
+                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

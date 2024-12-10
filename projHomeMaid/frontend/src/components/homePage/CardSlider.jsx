@@ -3,14 +3,15 @@ import { useParams } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
 
 // Imagens padrão para cada tipo de divisão
-import HouseImage from "../../assets/default_house.jpg";
-import BedroomImage from "../../assets/default_bedroom.jpg";
-import KitchenImage from "../../assets/default_kitchen.jpg";
-import LivingRoomImage from "../../assets/default_living_room.jpg";
-import HallImage from "../../assets/default_hall.jpg";
-import LaundryImage from "../../assets/default_laundry.jpg";
-import OfficeImage from "../../assets/default_office.jpg";
-import BathroomImage from "../../assets/default_bathroom.jpg";
+import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
+import BedroomImage from "../../assets/homePage/roomsImages/bedroom.jpg";
+import KitchenImage from "../../assets/homePage/roomsImages/kitchen.jpg";
+import LivingRoomImage from "../../assets/homePage/roomsImages/livingRoom.jpg";
+import HallImage from "../../assets/homePage/roomsImages/hall.jpg";
+import LaundryImage from "../../assets/homePage/roomsImages/laundry.jpg";
+import OfficeImage from "../../assets/homePage/roomsImages/office.jpg";
+import BathroomImage from "../../assets/homePage/roomsImages/bathroom.jpg";
+import GuestBedroomImage from "../../assets/homePage/roomsImages/guestBedroom.jpg";
 
 function CardSlider() {
     const { houseId } = useParams(); // Obter houseId do URL
@@ -18,41 +19,72 @@ function CardSlider() {
     const [currentIndex, setCurrentIndex] = useState(0); // Índice atual do slider
     const [loading, setLoading] = useState(true);
 
+    // Mapeamento de tipos de divisões para os nomes personalizados
+    const roomNames = {
+        "masterBedroom": "Master Bedroom",
+        "guestBedroom": "Guest Bedroom",
+        "kitchen": "Kitchen",
+        "livingRoom": "Living Room",
+        "hall": "Hall",
+        "laundry": "Laundry",
+        "office": "Office",
+        "bathroom": "Bathroom",
+        "house": "House", // Aqui também pode ser o nome da casa, por exemplo.
+    };
+
+    // Definir a ordem dos cards (com base no ID ou tipo)
+    const customOrder = [
+        "house",
+        "hall",
+        "livingRoom",
+        "kitchen",
+        "masterBedroom",
+        "guestBedroom",
+        "bathroom",
+        "office",
+        "laundry"
+    ];
+
     // UseEffect para buscar os dados da casa e quartos do backend
     useEffect(() => {
         const fetchHouseData = async () => {
             try {
-                // Requisição ao backend para obter os dados da casa
                 const response = await fetch(
                     `${import.meta.env.VITE_API_URL}/houses/${houseId}`
                 );
                 if (response.ok) {
                     const data = await response.json();
 
-                    // Formatar os dados para o slider
                     const houseCard = {
-                        id: "house",
-                        label: "Home",
-                        temperature: data.temperature,
-                        humidity: data.humidity,
-                        image: HouseImage, // Usar imagem padrão para a casa
+                        id: "house", // ID da casa
+                        label: roomNames["house"], // Usar o nome do mapeamento para a casa
+                        image: HouseImage,
                         type: "House",
-                        deviceObjects: data.devices, // Passar os dispositivos da casa
+                        deviceObjects: data.devices,
                     };
 
-                    // Adicionar os cards dos quartos
                     const roomCards = data.rooms.map((room) => ({
-                        id: room.roomId,
-                        label: room.type,
-                        temperature: room.temperature,
-                        humidity: room.humidity,
-                        image: getDefaultImage(room.type),
+                        id: room.type, // Certifique-se de que o `type` esteja no customOrder
+                        label: roomNames[room.type] || room.type, // Nome personalizado
+                        image: getDefaultImage(room.type), // Imagem da divisão
                         type: room.type,
-                        deviceObjects: room.deviceObjects, // AQUI também usamos deviceObjects
+                        deviceObjects: room.deviceObjects,
                     }));
 
-                    // Adicionar o card da casa e os quartos
-                    setCards([houseCard, ...roomCards]);
+                    // Ordenar os cards com base na ordem personalizada
+                    const orderedCards = [houseCard, ...roomCards].sort((a, b) => {
+                        const aIndex = customOrder.indexOf(a.id);
+                        const bIndex = customOrder.indexOf(b.id);
+
+                        // Se algum ID não for encontrado, movê-lo para o final
+                        if (aIndex === -1) return 1;
+                        if (bIndex === -1) return -1;
+
+                        // Comparar índices para garantir a ordem personalizada
+                        return aIndex - bIndex;
+                    });
+
+                    setCards(orderedCards);
                 } else {
                     console.error("Failed to fetch house data");
                 }
@@ -68,14 +100,16 @@ function CardSlider() {
 
     // Função para verificar e retornar a imagem padrão com base no tipo de divisão
     const getDefaultImage = (type) => {
-        const roomType = type.toLowerCase();
+        const roomType = type;
 
         switch (roomType) {
-            case "bedroom":
+            case "masterBedroom":
                 return BedroomImage;
+            case "guestBedroom":
+                return GuestBedroomImage;
             case "kitchen":
                 return KitchenImage;
-            case "living room":
+            case "livingRoom":
                 return LivingRoomImage;
             case "hall":
                 return HallImage;
@@ -122,58 +156,37 @@ function CardSlider() {
                     alt={cards[currentIndex].label}
                     className="w-full h-full object-cover rounded-lg p-2"
                 />
-
                 {/* Informações no canto superior esquerdo */}
                 <div className="absolute top-4 left-4 flex flex-col space-y-1">
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Temperature:</strong> {cards[currentIndex].temperature}°C
+                        <strong>Temperature:</strong> {22}°C
                     </div>
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Humidity:</strong> {cards[currentIndex].humidity}%
+                        <strong>Humidity:</strong> {22}%
                     </div>
                 </div>
-
                 {/* Título no centro inferior */}
                 <div className="absolute bottom-4 left-0 right-0 text-center">
                     <p className="text-xl font-semibold text-white bg-black bg-opacity-50 py-1 rounded-md">
-                        {cards[currentIndex].type}
+                        {cards[currentIndex].label} {/* Exibindo o nome personalizado */}
                     </p>
                 </div>
             </div>
 
             {/* Navigation Buttons */}
             <div className="flex space-x-4">
+                {/* Botão Prev */}
                 <button
                     onClick={handlePrev}
-                    style={{
-                        backgroundColor: "#d1d5db", // bg-gray-300
-                        color: "#374151", // text-gray-700
-                        padding: "0.5rem 1rem",
-                        borderRadius: "0.5rem",
-                        border: "none",
-                        outline: "none",
-                        boxShadow: "none",
-                        cursor: "pointer",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()} // Prevent active state on click
-                    onFocus={(e) => e.target.blur()} // Remove focus after click
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
                 >
                     Prev
                 </button>
+
+                {/* Botão Next */}
                 <button
                     onClick={handleNext}
-                    style={{
-                        backgroundColor: "#d1d5db", // bg-gray-300
-                        color: "#374151", // text-gray-700
-                        padding: "0.5rem 1rem",
-                        borderRadius: "0.5rem",
-                        border: "none",
-                        outline: "none",
-                        boxShadow: "none",
-                        cursor: "pointer",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()} // Prevent active state on click
-                    onFocus={(e) => e.target.blur()} // Remove focus after click
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
                 >
                     Next
                 </button>

@@ -8,6 +8,16 @@ import pt.ua.deti.ies.backend.service.*;
 import java.time.LocalTime;
 import java.util.List;
 
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.DELETE,
+                RequestMethod.POST,
+                RequestMethod.PATCH
+        })
 @RestController
 @RequestMapping("/api/automations")
 public class AutomationController {

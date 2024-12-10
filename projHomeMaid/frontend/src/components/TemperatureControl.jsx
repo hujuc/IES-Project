@@ -4,7 +4,7 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
     const [temperature, setTemperature] = useState(initialTemperature);
 
     const updateTemperature = (newTemperature) => {
-        fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+        fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

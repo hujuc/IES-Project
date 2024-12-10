@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE_URL = "http://localhost:8080/api/automations";
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function AutomatizeDryer({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);

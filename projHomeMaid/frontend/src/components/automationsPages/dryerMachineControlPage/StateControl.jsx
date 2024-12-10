@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import dryerOnIcon from "../../../assets/washer_aut.png"; // Icon for dryer on
 import dryerOffIcon from "../../../assets/washer_aut.png"; // Icon for dryer off
 
-const API_BASE_URL = "http://localhost:8080/api/devices";
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
 
 export default function StateControl({ deviceId, toggleDryer, temperature, dryMode }) {
     const [isRunning, setIsRunning] = useState(false); // To track if the dryer is running

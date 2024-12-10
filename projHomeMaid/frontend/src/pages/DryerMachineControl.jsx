@@ -5,7 +5,7 @@ import StateControl from "../components/dryerMachineControlPage/StateControl.jsx
 import TemperatureControl from "../components/dryerMachineControlPage/TemperatureControl.jsx";
 import AutomatizeDryer from "../components/dryerMachineControlPage/AutomatizeDryer.jsx";
 
-const API_BASE_URL = "http://localhost:8080/api/devices";
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function DryerMachineControl() {
     const [isDryerOn, setIsDryerOn] = useState(false);

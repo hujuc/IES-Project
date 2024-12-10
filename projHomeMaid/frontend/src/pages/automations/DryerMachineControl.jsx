@@ -21,7 +21,7 @@ export default function DryerMachineControl() {
     useEffect(() => {
         const fetchDeviceData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 setIsDryerOn(data.state || false);
@@ -39,7 +39,7 @@ export default function DryerMachineControl() {
 
         // WebSocket connection
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
@@ -112,7 +112,7 @@ export default function DryerMachineControl() {
         try {
             const payload = { state, temperature: temp, mode };
 
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

@@ -20,7 +20,7 @@ export default function ShutterControl() {
     useEffect(() => {
         const fetchShutterData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 setIsShutterOpen(data.state || false);
@@ -37,7 +37,7 @@ export default function ShutterControl() {
 
         // Set up WebSocket connection
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000, // Retry connection every 5 seconds
             heartbeatIncoming: 4000, // Check server every 4 seconds
             heartbeatOutgoing: 4000, // Inform server every 4 seconds
@@ -112,7 +112,7 @@ export default function ShutterControl() {
 
     const saveStateToDatabase = async (state, percentage) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

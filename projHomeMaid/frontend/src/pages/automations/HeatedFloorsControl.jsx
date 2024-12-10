@@ -16,7 +16,7 @@ export default function HeatedFloorsControl() {
 
     const fetchHeatedFloorsData = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
             const data = await response.json();
 
             if (data.state !== undefined) {
@@ -37,7 +37,7 @@ export default function HeatedFloorsControl() {
 
         // Setup WebSocket with SockJS
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000, // Retry connection every 5 seconds
             heartbeatIncoming: 4000, // Check server every 4 seconds
             heartbeatOutgoing: 4000, // Inform server every 4 seconds
@@ -98,7 +98,7 @@ export default function HeatedFloorsControl() {
 
     const saveStateToDatabase = async (state, temperature) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

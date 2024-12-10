@@ -9,7 +9,7 @@ export default function ClockCentralControl({ deviceId }) {
     useEffect(() => {
         const fetchDeviceState = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 // Initialize `lightOn` with the state from the backend
@@ -52,7 +52,7 @@ export default function ClockCentralControl({ deviceId }) {
     // Function to update the state in the backend
     const updateDeviceState = async (state) => {
         try {
-            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

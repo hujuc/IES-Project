@@ -2,6 +2,7 @@ package pt.ua.deti.ies.backend.service;
 
 import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
+import pt.ua.deti.ies.backend.model.House;
 import pt.ua.deti.ies.backend.repository.HouseRepository;
 import pt.ua.deti.ies.backend.repository.RoomRepository;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,14 @@ public class DeviceService {
                 .map(FeatureDescriptor::getName)
                 .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
                 .toArray(String[]::new);
+    }
+
+    public String getHouseIdByDeviceId(String deviceId) {
+        return houseRepository.findAll().stream()
+                .filter(house -> house.getDevices().contains(deviceId))
+                .map(House::getHouseId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("[ERROR] House associated with the device not found."));
     }
 
 }

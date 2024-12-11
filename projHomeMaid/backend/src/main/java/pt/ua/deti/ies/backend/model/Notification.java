@@ -3,52 +3,87 @@ package pt.ua.deti.ies.backend.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "notifications")
 public class Notification {
 
     @Id
-    private String notificationId;
-    private String userName;
-    private String notificationText;
-    private boolean isRead;
+    private String mongoId; // MongoDB unique ID
+    private String houseId; // Identificador da casa
+    private String text; // Texto da notificação
+    private LocalDateTime timestamp; // Data e hora da notificação
+    private boolean read; // Status de leitura
+    private String type; // Tipo da notificação
 
-    public Notification() {}
-
-    public Notification(String userName, String notificationText) {
-        this.userName = userName;
-        this.notificationText = notificationText;
-        this.isRead = false; // Define como não lida por padrão
+    public Notification() {
     }
 
-    public String getNotificationId() {
-        return notificationId;
+    public Notification(String houseId, String text, LocalDateTime timestamp, boolean read, String type) {
+        this.houseId = houseId;
+        this.text = text;
+        this.timestamp = timestamp;
+        this.read = read;
+        this.type = type;
     }
 
-    public void setNotificationId(String notificationId) {
-        this.notificationId = notificationId;
+    public String getMongoId() {
+        return mongoId;
     }
 
-    public String getUserName() {
-        return userName;
+    public void setMongoId(String mongoId) {
+        this.mongoId = mongoId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public String getHouseId() {
+        return houseId;
     }
 
-    public String getNotificationText() {
-        return notificationText;
+    public void setHouseId(String houseId) {
+        this.houseId = houseId;
     }
 
-    public void setNotificationText(String notificationText) {
-        this.notificationText = notificationText;
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public boolean isRead() {
-        return isRead;
+        return read;
     }
 
-    public void setRead(boolean isRead) {
-        this.isRead = isRead;
+    public void setRead(boolean read) {
+        this.read = read;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "mongoId='" + mongoId + '\'' +
+                ", houseId='" + houseId + '\'' +
+                ", text='" + text + '\'' +
+                ", timestamp=" + timestamp +
+                ", read=" + read +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

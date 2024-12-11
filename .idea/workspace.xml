@@ -5,56 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/CorsConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/AutomationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/AutomationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/SensorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/SensorController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/deployment/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/deployment/nginx.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/ShutterControlPage/AutomatizeShutter.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/ShutterControlPage/AutomatizeShutter.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/TemperatureControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/TemperatureControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AirFluxControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AirFluxControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/TemperatureControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/TemperatureControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/TVControlPage/AutomatizeTV.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/TVControlPage/AutomatizeTV.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/ClockCentralControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/ClockCentralControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/CentralControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/CentralControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/DrinkOptions.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/DrinkOptions.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/StateControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/StateControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/speakersControlPage/AutomatizeSpeaker.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/speakersControlPage/AutomatizeSpeaker.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/AutomatizeWasher.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/AutomatizeWasher.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/StateControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/StateControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/clockPage/AutomatizeAlarmClock.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/clockPage/AutomatizeAlarmClock.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/clockPage/ClockCentralControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/clockPage/ClockCentralControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/dryerMachineControlPage/AutomatizeDryer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/dryerMachineControlPage/AutomatizeDryer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/dryerMachineControlPage/StateControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/dryerMachineControlPage/StateControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/UserHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/UserHeader.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/DryerMachineControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/DryerMachineControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/ShutterControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/ShutterControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/AirConditionerControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/AirConditionerControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/ClockControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/ClockControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/CoffeeMachineControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/CoffeeMachineControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/DryerMachineControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/DryerMachineControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/HeatedFloorsControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/HeatedFloorsControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/LightBulbControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/LightBulbControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/ShutterControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/ShutterControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/SpeakerControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/SpeakerControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/TVControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/TVControl.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/WashingMachinaControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/WashingMachinaControl.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/RoomController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/NotificationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/CoffeeMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/CoffeeMachineAutomationHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DryerMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DryerMachineAutomationHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/HouseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/HouseService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/NotificationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/WashingMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/WashingMachineAutomationHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/thread/AutomationThreadManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/thread/AutomationThreadManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/NotificationDropdown.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/NotificationDropdown.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JSX File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -70,25 +47,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "dev",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/fullStack-automation-notifications-75&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.21565.193" />
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-IU-243.21565.193" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23726.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23726.103" />
       </set>
     </attachedChunks>
   </component>
@@ -103,6 +79,7 @@
       <workItem from="1730730776829" duration="50000" />
       <workItem from="1731772791962" duration="1640000" />
       <workItem from="1731968553203" duration="4455000" />
+      <workItem from="1733868868173" duration="4479000" />
     </task>
     <servers />
   </component>
@@ -111,16 +88,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="LAST_COMMIT_MESSAGE" value="" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/projHomeMaid/frontend/src/pages/Login.jsx</url>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

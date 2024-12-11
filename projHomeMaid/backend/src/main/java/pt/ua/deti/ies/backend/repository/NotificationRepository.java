@@ -6,5 +6,6 @@ import pt.ua.deti.ies.backend.model.Notification;
 import java.util.List;
 
 public interface NotificationRepository extends MongoRepository<Notification, String> {
-    List<Notification> findByUserName(String userName);
+    List<Notification> findByHouseId(String houseId);
+    List<Notification> findByHouseIdAndRead(String houseId, boolean read);
 }

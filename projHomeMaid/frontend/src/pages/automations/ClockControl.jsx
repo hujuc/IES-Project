@@ -23,7 +23,7 @@ export default function ClockControl() {
     useEffect(() => {
         const fetchClockData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
                 setAlarmSound(data.alarmSound || "sound1"); // Default to "sound1" if not set
@@ -38,7 +38,7 @@ export default function ClockControl() {
 
         // Setup WebSocket with SockJS
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8080/ws/devices"),
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000, // Retry connection every 5 seconds
             heartbeatIncoming: 4000, // Check server every 4 seconds
             heartbeatOutgoing: 4000, // Inform server every 4 seconds
@@ -73,7 +73,7 @@ export default function ClockControl() {
     // Update the alarm sound in the database
     const updateAlarmSound = async (sound) => {
         try {
-            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export default function ClockControl() {
     const updateVolume = async (newVolume) => {
         try {
             const roundedVolume = Math.round(newVolume / 10) * 10;
-            await fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

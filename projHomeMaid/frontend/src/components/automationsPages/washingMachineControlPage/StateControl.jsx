@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import washerOnIcon from "../../../assets/washer_aut.png"; // Icon for washer on
 import washerOffIcon from "../../../assets/washer_aut.png"; // Icon for washer off
 
-const API_BASE_URL = "http://localhost:8080/api/devices";
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
 
 export default function StateControl({ deviceId, toggleWasher, temperature, washMode }) {
     const [isRunning, setIsRunning] = useState(false);  // To track if the washer is running

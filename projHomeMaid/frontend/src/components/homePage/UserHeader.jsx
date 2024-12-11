@@ -12,7 +12,7 @@ function UserHeader() {
         // Fetch user data based on houseId
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/users/${houseId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/users/${houseId}`); // Fetch user data from the API
                 if (response.ok) {
                     const data = await response.json();
                     setUserData(data);

@@ -11,7 +11,7 @@ export default function AirFluxControl({ deviceId }) {
 
     useEffect(() => {
         // Fetch initial device data
-        fetch(`http://localhost:8080/api/devices/${deviceId}`)
+        fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`)
             .then((response) => response.json())
             .then((data) => {
                 setSelectedMode(data.mode || "Hot");
@@ -24,7 +24,7 @@ export default function AirFluxControl({ deviceId }) {
     }, [deviceId]);
 
     const updateAirFluxControl = (newState) => {
-        fetch(`http://localhost:8080/api/devices/${deviceId}`, {
+        fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

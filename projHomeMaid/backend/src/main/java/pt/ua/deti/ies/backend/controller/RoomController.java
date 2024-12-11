@@ -11,6 +11,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.DELETE,
+                RequestMethod.POST,
+                RequestMethod.PATCH
+        })
 @RestController
 @RequestMapping("/api/rooms")
 public class RoomController {

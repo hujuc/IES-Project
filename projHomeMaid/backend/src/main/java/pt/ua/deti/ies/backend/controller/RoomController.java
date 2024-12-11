@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/rooms")
 public class RoomController {

@@ -44,6 +44,13 @@ public class HouseService {
         return houseRepository.save(house);
     }
 
+    private String getHouseIdByDeviceId(String deviceId) {
+        return houseRepository.findAll().stream()
+                .filter(house -> house.getDevices().contains(deviceId))
+                .map(House::getHouseId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("[ERROR] Casa associada ao dispositivo não encontrada."));
+    }
 
     public House createHouseWithRoomsAndDevices(String houseId) {
         // Criar os tipos de room

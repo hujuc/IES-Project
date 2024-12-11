@@ -1,71 +1,110 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoMdNotifications } from "react-icons/io";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+
+// Importing the automation notification icon
+import automationNotificationIcon from "../../assets/homePage/notifications/automationNotificationIcon.png";
 
 function NotificationDropdown() {
+    const { houseId } = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("new");
     const [notifications, setNotifications] = useState({
-        new: [
-            {
-                id: 1,
-                message: "Lamp in Living Room was turned off after 3 hours, as you requested.",
-                time: "3h ago",
-            },
-            {
-                id: 2,
-                message: "Living room Air conditioner isn't functioning properly.",
-                time: "2h ago",
-            },
-            {
-                id: 3,
-                message: "The front door was left open for 10 minutes.",
-                time: "6h ago",
-            },
-        ],
+        new: [],
         read: [],
     });
 
     const dropdownRef = useRef(null);
 
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`
+                );
+                const allNotifications = response.data;
+
+                // Categorize notifications
+                const categorizedNotifications = {
+                    new: allNotifications.filter((n) => !n.read),
+                    read: allNotifications.filter((n) => n.read),
+                };
+
+                setNotifications(categorizedNotifications);
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        if (houseId) {
+            fetchNotifications();
+        }
+    }, [houseId]);
+
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
+    // Calculate the time elapsed
+    const getTimeElapsed = (timestamp) => {
+        const notificationTime = new Date(timestamp);
+        const now = new Date();
+        const diff = Math.abs(now - notificationTime);
+        const minutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
-    const markAsRead = (id) => {
-        setNotifications((prev) => {
-            const notificationToMark = prev.new.find((n) => n.id === id);
-            return {
-                new: prev.new.filter((n) => n.id !== id),
-                read: [notificationToMark, ...prev.read],
-            };
-        });
+        if (days > 0) return `${days}d ago`;
+        if (hours > 0) return `${hours}h ago`;
+        return `${minutes}m ago`;
     };
 
-    const deleteNotification = (id) => {
-        setNotifications((prev) => ({
-            ...prev,
-            read: prev.read.filter((n) => n.id !== id),
-        }));
+    const markAsRead = async (notification) => {
+        try {
+            await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/read`, {
+                mongoId: notification.mongoId,
+            });
+
+            setNotifications((prev) => {
+                const notificationToMark = prev.new.find((n) => n.mongoId === notification.mongoId);
+                if (notificationToMark) notificationToMark.read = true;
+
+                return {
+                    new: prev.new.filter((n) => n.mongoId !== notification.mongoId),
+                    read: [notificationToMark, ...prev.read],
+                };
+            });
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+        }
     };
 
-    const deleteAllRead = () => {
-        setNotifications((prev) => ({
-            ...prev,
-            read: [],
-        }));
+    const deleteNotification = async (notification) => {
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/notifications`, {
+                data: { mongoId: notification.mongoId },
+            });
+
+            setNotifications((prev) => ({
+                ...prev,
+                read: prev.read.filter((n) => n.mongoId !== notification.mongoId),
+            }));
+        } catch (error) {
+            console.error("Error deleting notification:", error);
+        }
+    };
+
+    const deleteAllRead = async () => {
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`);
+            setNotifications((prev) => ({
+                ...prev,
+                read: [],
+            }));
+        } catch (error) {
+            console.error("Error deleting all read notifications:", error);
+        }
     };
 
     return (
@@ -122,30 +161,37 @@ function NotificationDropdown() {
                         </button>
                     </div>
 
-                    {/* Content for the Active Tab */}
+                    {/* Notifications */}
                     <ul className="max-h-60 overflow-y-auto">
                         {activeTab === "new" && (
                             <>
                                 {notifications.new.length > 0 ? (
-                                    notifications.new.map((notification) => (
+                                    notifications.new.map((notification, index) => (
                                         <li
-                                            key={notification.id}
+                                            key={index}
                                             className="flex items-center p-4 mb-2 bg-[#D9D9D9] rounded-[25px]"
                                         >
+                                            <img
+                                                src={automationNotificationIcon}
+                                                alt="Automation Notification"
+                                                className="w-10 h-10 mr-4 rounded-full"
+                                            />
                                             <div className="flex-1">
-                                                <p className="text-sm text-gray-600">
-                                                    {notification.message}
+                                                <p className="text-sm text-gray-600 font-semibold mb-1">
+                                                    {notification.text}
                                                 </p>
-                                                <button
-                                                    onClick={() => markAsRead(notification.id)}
-                                                    className="text-orange-500 text-sm mt-2"
-                                                >
-                                                    Mark as Read
-                                                </button>
+                                                <div className="flex items-center justify-between">
+                                                    <button
+                                                        onClick={() => markAsRead(notification)}
+                                                        className="text-orange-500 text-sm"
+                                                    >
+                                                        Mark as Read
+                                                    </button>
+                                                    <p className="text-sm text-blue-600 font-bold">
+                                                        {getTimeElapsed(notification.timestamp)}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <span className="text-gray-400 text-xs">
-                                                {notification.time}
-                                            </span>
                                         </li>
                                     ))
                                 ) : (
@@ -159,28 +205,38 @@ function NotificationDropdown() {
                             <>
                                 {notifications.read.length > 0 ? (
                                     <>
-                                        {notifications.read.map((notification) => (
+                                        {notifications.read.map((notification, index) => (
                                             <li
-                                                key={notification.id}
+                                                key={index}
                                                 className="flex items-center p-4 mb-2 bg-[#D9D9D9] rounded-[25px]"
                                             >
+                                                <img
+                                                    src={automationNotificationIcon}
+                                                    alt="Automation Notification"
+                                                    className="w-10 h-10 mr-4 rounded-full"
+                                                />
                                                 <div className="flex-1">
-                                                    <p className="text-sm text-gray-600">
-                                                        {notification.message}
+                                                    <p className="text-sm text-gray-600 font-semibold mb-1">
+                                                        {notification.text}
                                                     </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <button
+                                                            onClick={() =>
+                                                                deleteNotification(notification)
+                                                            }
+                                                            className="text-red-500 text-sm"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                        <p className="text-sm text-blue-600 font-bold">
+                                                            {getTimeElapsed(
+                                                                notification.timestamp
+                                                            )}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <button
-                                                    onClick={() => deleteNotification(notification.id)}
-                                                    className="text-red-500 text-sm"
-                                                >
-                                                    Delete
-                                                </button>
-                                                <span className="text-gray-400 text-xs ml-2">
-                                                    {notification.time}
-                                                </span>
                                             </li>
                                         ))}
-                                        {/* Delete All Read Button */}
                                         <li className="p-4 text-center">
                                             <button
                                                 onClick={deleteAllRead}

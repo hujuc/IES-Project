@@ -91,10 +91,10 @@ public class AutomationThreadManager {
                 throw new RuntimeException("[ERROR] House associated with device not found.");
             }
 
+            sendAutomationNotification(device, houseId);
+
             DeviceAutomationHandler handler = automationHandlerFactory.getHandler(device.getType());
             handler.executeAutomation(device, automation.getChanges());
-
-            sendAutomationNotification(device, houseId);
 
             System.out.println("[INFO] Automation executed for device: " + device.getName());
         } catch (Exception e) {
@@ -104,11 +104,6 @@ public class AutomationThreadManager {
 
     private void sendAutomationNotification(Device device, String houseId) {
         try {
-            if (Boolean.FALSE.equals(device.getReceiveAutomationNotification())) {
-                System.out.println("[INFO] Device opted out of automation notifications: " + device.getName());
-                return;
-            }
-
             String notificationText = "The automation for " + device.getName() + " was activated.";
             Notification notification = new Notification(
                     houseId,
@@ -125,5 +120,4 @@ public class AutomationThreadManager {
             System.err.println("[ERROR] Error creating notification: " + e.getMessage());
         }
     }
-
 }

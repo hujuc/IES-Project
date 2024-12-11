@@ -1,9 +1,9 @@
-package pt.ua.deti.ies.homemaid.service;
+package pt.ua.deti.ies.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pt.ua.deti.ies.homemaid.model.Sensor;
-import pt.ua.deti.ies.homemaid.repository.SensorRepository;
+import pt.ua.deti.ies.backend.model.Sensor;
+import pt.ua.deti.ies.backend.repository.SensorRepository;
 
 import java.util.List;
 import java.util.Optional;

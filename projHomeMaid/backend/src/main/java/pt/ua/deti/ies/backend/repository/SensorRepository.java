@@ -1,6 +1,6 @@
-package pt.ua.deti.ies.homemaid.repository;
+package pt.ua.deti.ies.backend.repository;
 
-import pt.ua.deti.ies.homemaid.model.Sensor;
+import pt.ua.deti.ies.backend.model.Sensor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
-import pt.ua.deti.ies.homemaid.model.Sensor;
-import pt.ua.deti.ies.homemaid.service.SensorService;
+import pt.ua.deti.ies.backend.model.Sensor;
+import pt.ua.deti.ies.backend.service.SensorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

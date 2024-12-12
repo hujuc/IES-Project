@@ -8,15 +8,11 @@ public class HouseDetailsResponse {
 
     private String houseId;
     private List<Room> rooms;
-    private double temperature;
-    private double humidity;
 
     // Construtor
-    public HouseDetailsResponse(String houseId, List<Room> rooms, double temperature, double humidity) {
+    public HouseDetailsResponse(String houseId, List<Room> rooms) {
         this.houseId = houseId;
         this.rooms = rooms;
-        this.temperature = temperature;
-        this.humidity = humidity;
     }
 
     // Getters e Setters
@@ -34,21 +30,5 @@ public class HouseDetailsResponse {
 
     public void setRooms(List<Room> rooms) {
         this.rooms = rooms;
-    }
-
-    public double getTemperature() {
-        return temperature;
-    }
-
-    public void setTemperature(double temperature) {
-        this.temperature = temperature;
-    }
-
-    public double getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(double humidity) {
-        this.humidity = humidity;
     }
 }

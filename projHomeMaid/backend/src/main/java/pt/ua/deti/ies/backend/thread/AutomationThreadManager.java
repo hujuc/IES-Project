@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class AutomationThreadManager {
@@ -20,12 +22,15 @@ public class AutomationThreadManager {
     private final DeviceRepository deviceRepository;
     private final AutomationHandlerFactory automationHandlerFactory;
 
+    private final ExecutorService executorService;
+
     public AutomationThreadManager(AutomationRepository automationRepository,
                                    DeviceRepository deviceRepository,
                                    AutomationHandlerFactory automationHandlerFactory) {
         this.automationRepository = automationRepository;
         this.deviceRepository = deviceRepository;
         this.automationHandlerFactory = automationHandlerFactory;
+        this.executorService = Executors.newCachedThreadPool(); // Pool de threads dinâmico
     }
 
     @PostConstruct
@@ -33,10 +38,11 @@ public class AutomationThreadManager {
         Thread automationThread = new Thread(() -> {
             while (true) {
                 try {
+                    System.out.println("[DEBUG] Master thread: Verificando automatizações...");
                     processAutomations();
                     Thread.sleep(60000); // Aguarda 1 minuto antes de verificar novamente
                 } catch (InterruptedException e) {
-                    System.err.println("Automation thread interrupted: " + e.getMessage());
+                    System.err.println("[ERROR] Master thread interrompida: " + e.getMessage());
                     Thread.currentThread().interrupt();
                     break;
                 }
@@ -45,25 +51,45 @@ public class AutomationThreadManager {
 
         automationThread.setDaemon(true); // Termina automaticamente com a aplicação
         automationThread.start();
+        System.out.println("[DEBUG] Master thread iniciada.");
     }
 
     private void processAutomations() {
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        System.out.println("Thread running at: " + now);
+        System.out.println("[DEBUG] Master thread: Checando automatizações para " + now);
 
         List<Automation> automations = automationRepository.findAllByExecutionTime(now);
 
+        System.out.println("[DEBUG] Master thread: Encontradas " + automations.size() + " automatizações.");
         for (Automation automation : automations) {
-            System.out.println("Executing automation: " + automation);
-            executeAutomation(automation);
+            System.out.println("[DEBUG] Delegando execução para automatização(ões)");
+
+            executorService.submit(() -> {
+                try {
+                    executeAutomation(automation);
+                } catch (Exception e) {
+                    System.err.println("[ERROR]: " + e.getMessage());
+                }
+            });
         }
     }
 
     private void executeAutomation(Automation automation) {
-        Device device = deviceRepository.findById(automation.getDeviceId())
-                .orElseThrow(() -> new RuntimeException("Device not found"));
+        try {
+            System.out.println("[DEBUG] Executando automação para dispositivo: " + automation.getDeviceId());
+            Device device = deviceRepository.findById(automation.getDeviceId())
+                    .orElseThrow(() -> new RuntimeException("[ERROR] Dispositivo não encontrado: " + automation.getDeviceId()));
 
-        DeviceAutomationHandler handler = automationHandlerFactory.getHandler(device.getType());
-        handler.executeAutomation(device, automation.getChanges());
+            System.out.println("[DEBUG] Encontrado dispositivo: " + device.getName() + " do tipo " + device.getType());
+            DeviceAutomationHandler handler = automationHandlerFactory.getHandler(device.getType());
+            handler.executeAutomation(device, automation.getChanges());
+        } catch (Exception e) {
+            System.err.println("[ERROR] Erro ao executar automação: " + e.getMessage());
+        }
+    }
+
+    public void shutdown() {
+        System.out.println("[DEBUG] Finalizando executor de threads.");
+        executorService.shutdown();
     }
 }

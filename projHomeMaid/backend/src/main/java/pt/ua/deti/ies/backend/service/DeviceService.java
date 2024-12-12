@@ -87,8 +87,5 @@ public class DeviceService {
     }
 
 
-    // getAllDevices:
-    public List<Device> getAllDevices() {
-        return deviceRepository.findAll();
-    }
+
 }

@@ -3,6 +3,7 @@ import requests
 import random
 import time
 import json
+from datetime import datetime, timedelta
 
 # Configuração do Kafka
 KAFKA_BROKER = "kafka:9092"
@@ -16,6 +17,9 @@ BACKEND_DEVICES_URL = "http://backend:8080/api/devices"
 # Criar o Kafka producer
 producer = KafkaProducer(bootstrap_servers=[KAFKA_BROKER],
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+
+# Dispositivos que não podem ser desligados
+CANNOT_BE_TURNED_OFF = ["clock", "dryerMachine", "washingMachine", "coffeeMachine"]
 
 # Função para buscar sensores existentes
 def fetch_existing_sensors():
@@ -48,27 +52,59 @@ def generate_sensor_data(sensor):
         "houseId": sensor["houseId"]
     }
 
+# Função para gerar um timestamp aleatório no futuro
+def generate_future_timestamp():
+    now = datetime.now()
+    future_time = now + timedelta(seconds=random.randint(60, 3600))  # Entre 1 minuto e 1 hora no futuro
+    return future_time.isoformat()
+
 # Função para gerar automatizações para dispositivos
 def generate_device_automation(device):
-    automation = {"deviceId": device["deviceId"], "name": device["name"], "type": device["type"]}
+    # Inicializa a automatização com o ID do dispositivo, nome, tipo, e adiciona um timestamp
+    automation = {
+        "deviceId": device["deviceId"],
+        "name": device["name"],
+        "type": device["type"],
+        "executionTime": generate_future_timestamp(),
+    }
 
-    if device["type"] == "coffee machine":
-        automation["action"] = "brew coffee"
-        automation["drinkType"] = random.choice(["espresso", "latte", "americano"])
-    elif device["type"] == "air conditioner":
-        automation["action"] = "adjust temperature"
-        automation["temperature"] = random.uniform(18, 30)
-        automation["mode"] = random.choice(["cool", "heat", "fan"])
-    elif device["type"] == "clock alarm":
-        automation["action"] = "set alarm"
-        automation["time"] = f"{random.randint(6, 23)}:{random.randint(0, 59):02d}"
-        automation["volume"] = random.randint(1, 10)
-    elif device["type"] == "light bulb":
-        automation["action"] = "adjust lighting"
-        automation["brightness"] = random.randint(0, 100)
-        automation["color"] = random.choice(["red", "blue", "green", "white", "yellow"])
+    # Verifica se o dispositivo pode ser desligado
+    if device["type"] in CANNOT_BE_TURNED_OFF:
+        automation["state"] = True  # Sempre ligado para esses tipos
     else:
-        automation["action"] = "unknown action"
+        automation["state"] = random.choice([True, False])  # Estado aleatório (ligado/desligado)
+
+    # Adiciona valores adicionais apenas se o estado for "ligado"
+    if automation["state"]:
+        if device["type"] == "coffeeMachine":
+            automation["drinkType"] = random.choice(["espresso", "tea", "latte"])
+        elif device["type"] == "airConditioner":
+            automation["temperature"] = random.randint(12, 32)
+            automation["mode"] = random.choice(["hot", "cold", "air", "humid"])
+            automation["airFluxDirection"] = random.choice(["up", "down"])
+            automation["airFluxRate"] = random.choice(["low", "medium", "high"])
+        elif device["type"] == "clock":
+            automation["ringing"] = True
+            automation["alarmSound"] = random.choice(["alarm1", "alarm2", "alarm3"])
+            automation["volume"] = random.randint(0, 100)
+        elif device["type"] == "dryerMachine":
+            automation["temperature"] = random.randint(50, 90)
+            automation["mode"] = random.choice(["Regular Dry", "Gentle Dry", "Permanent Press"])
+        elif device["type"] == "washingMachine":
+            automation["temperature"] = random.randint(20, 90)
+            automation["mode"] = random.choice(["Regular Wash", "Delicate Wash", "Deep Clean"])
+        elif device["type"] == "heatedFloor":
+            automation["temperature"] = random.randint(0, 20)
+        elif device["type"] == "lamp":
+            automation["color"] = random.choice(["#ffffff", "#ff0000", "#ffc0cb", "#ffa500", "#ffd700", "#ffff00", "#00ff00", "#008080", "#add8e6", "#0000ff", "#800080"])
+            automation["brightness"] = random.randint(1, 100)
+        elif device["type"] == "shutter":
+            automation["openPercentage"] = random.randint(0, 100)
+        elif device["type"] == "stereo":
+            automation["volume"] = random.randint(0, 100)
+        elif device["type"] == "television":
+            automation["volume"] = random.randint(0, 100)
+            automation["brightness"] = random.randint(10, 100)
 
     return automation
 
@@ -79,6 +115,9 @@ def send_data_to_kafka(topic, data):
 
 # Loop principal
 if __name__ == "__main__":
+    last_automation_time = 0  # Timestamp do último envio de automatizações
+    automation_interval = 60  # Intervalo em segundos
+
     while True:
         # Buscar sensores e dispositivos
         sensors = fetch_existing_sensors()
@@ -94,17 +133,20 @@ if __name__ == "__main__":
             time.sleep(10)
             continue
 
-        # Gerar e enviar dados de sensores
+        # Gerar e enviar dados de sensores (a cada 20 segundos)
         for sensor in sensors:
             sensor_data = generate_sensor_data(sensor)
             send_data_to_kafka(TOPIC_SENSOR_DATA, sensor_data)
             print(f"Dado do sensor enviado: {sensor_data}")
 
-        # Gerar e enviar automatizações para dispositivos
-        for device in devices:
-            device_automation = generate_device_automation(device)
-            send_data_to_kafka(TOPIC_DEVICE_AUTOMATIONS, device_automation)
-            print(f"Automatização do dispositivo enviada: {device_automation}")
+        # Verificar se já passou o intervalo para gerar automatizações
+        current_time = time.time()
+        if current_time - last_automation_time >= automation_interval:
+            for device in devices:
+                device_automation = generate_device_automation(device)
+                send_data_to_kafka(TOPIC_DEVICE_AUTOMATIONS, device_automation)
+                print(f"Automatização do dispositivo enviada: {device_automation}")
+            last_automation_time = current_time  # Atualizar o timestamp do último envio
 
-        # Intervalo entre gerações
-        time.sleep(10)
+        # Esperar 20 segundos antes de gerar os próximos dados de sensores
+        time.sleep(20)

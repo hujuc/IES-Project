@@ -11,18 +11,14 @@ public class Room {
     @Id
     private String roomId;
     private List<String> devices;
-    private List<Device> deviceObjects; // Lista dos dispositivos completos
-    private Double temperature;
-    private Double humidity;
+    private List<Device> deviceObjects;
     private String type;
 
     public Room() {}
 
-    public Room(String roomId, List<String> devices, Double temperature, Double humidity, String type) {
+    public Room(String roomId, List<String> devices, String type) {
         this.roomId = roomId;
         this.devices = devices;
-        this.temperature = temperature;
-        this.humidity = humidity;
         this.type = type;
     }
 
@@ -57,22 +53,6 @@ public class Room {
         return deviceObjects;
     }
 
-    public Double getTemperature() {
-        return temperature;
-    }
-
-    public void setTemperature(Double temperature) {
-        this.temperature = temperature;
-    }
-
-    public Double getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(Double humidity) {
-        this.humidity = humidity;
-    }
-
     public String getType() {
         return type;
     }
@@ -86,8 +66,7 @@ public class Room {
         return "Room{" +
                 "roomId='" + roomId + '\'' +
                 ", devices=" + devices +
-                ", temperature=" + temperature +
-                ", humidity=" + humidity +
+                ", deviceObjects=" + deviceObjects +
                 ", type='" + type + '\'' +
                 '}';
     }

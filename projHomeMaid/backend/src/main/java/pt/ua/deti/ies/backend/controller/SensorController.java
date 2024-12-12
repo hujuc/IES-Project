@@ -1,13 +1,10 @@
-package pt.ua.deti.ies.homemaid.controller;
+package pt.ua.deti.ies.backend.controller;
 
-import pt.ua.deti.ies.homemaid.model.Sensor;
-import pt.ua.deti.ies.homemaid.service.SensorService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
+import pt.ua.deti.ies.backend.service.SensorService;
+import pt.ua.deti.ies.backend.model.Sensor;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/sensors")
@@ -19,44 +16,73 @@ public class SensorController {
         this.sensorService = sensorService;
     }
 
-    // Criar Sensor
     @PostMapping
-    public ResponseEntity<Sensor> createSensor(@RequestBody Sensor sensor) {
-        Sensor createdSensor = sensorService.createSensor(sensor);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdSensor);
+    public ResponseEntity<String> createSensor(@RequestBody Sensor sensor) {
+        try {
+            sensorService.saveSensor(sensor);
+            return ResponseEntity.ok("Dados do sensor enviados para o InfluxDB!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao salvar dados: " + e.getMessage());
+        }
     }
 
-    // Listar todos os Sensores
-    @GetMapping
-    public ResponseEntity<List<Sensor>> getAllSensors() {
-        return ResponseEntity.ok(sensorService.getAllSensors());
+
+    // Temperatura média por divisão
+    @GetMapping("/rooms/{roomId}/average-temperature")
+    public ResponseEntity<String> getAverageTemperatureByRoom(
+            @PathVariable String roomId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageTemperature(roomId, "room", timeframe);
+        return ResponseEntity.ok(result);
     }
 
-    // Listar Sensores por ID da Casa
-    @GetMapping("/houses/{houseId}/sensors")
-    public ResponseEntity<List<Sensor>> getSensorsByHouseId(@PathVariable String houseId) {
-        List<Sensor> sensors = sensorService.getSensorsByHouseId(houseId);
-        return ResponseEntity.ok(sensors);
+    // Temperatura média por casa
+    @GetMapping("/houses/{houseId}/average-temperature")
+    public ResponseEntity<String> getAverageTemperatureByHouse(
+            @PathVariable String houseId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageTemperature(houseId, "house", timeframe);
+        return ResponseEntity.ok(result);
     }
 
-    // Buscar Sensor por ID
-    @GetMapping("/{sensorId}")
-    public ResponseEntity<Sensor> getSensorById(@PathVariable String sensorId) {
-        Optional<Sensor> sensor = sensorService.getSensorById(sensorId);
-        return sensor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    // Humidade média por divisão
+    @GetMapping("/rooms/{roomId}/average-humidity")
+    public ResponseEntity<String> getAverageHumidityByRoom(
+            @PathVariable String roomId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageHumidity(roomId, "room", timeframe);
+        return ResponseEntity.ok(result);
     }
 
-    // Atualizar Sensor
-    @PutMapping("/{sensorId}")
-    public ResponseEntity<Sensor> updateSensor(@PathVariable String sensorId, @RequestBody Sensor updatedSensor) {
-        Sensor sensor = sensorService.updateSensor(sensorId, updatedSensor);
-        return ResponseEntity.ok(sensor);
+    // Humidade média por casa
+    @GetMapping("/houses/{houseId}/average-humidity")
+    public ResponseEntity<String> getAverageHumidityByHouse(
+            @PathVariable String houseId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageHumidity(houseId, "house", timeframe);
+        return ResponseEntity.ok(result);
     }
 
-    // Deletar Sensor
-    @DeleteMapping("/{sensorId}")
-    public ResponseEntity<Void> deleteSensor(@PathVariable String sensorId) {
-        sensorService.deleteSensor(sensorId);
-        return ResponseEntity.noContent().build();
+
+
+    @GetMapping("/{sensorId}/data")
+    public ResponseEntity<String> getSensor(@PathVariable String sensorId) {
+        if (sensorId == null || sensorId.isEmpty()) {
+            return ResponseEntity.badRequest().body("O ID do sensor é obrigatório.");
+        }
+
+        try {
+            String result = sensorService.getSensor(sensorId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao buscar dados do sensor: " + e.getMessage());
+        }
     }
+
+
 }

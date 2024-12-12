@@ -261,6 +261,7 @@ public class HouseService {
                 devices.add(livingRoomStereo);
 
                 Device livingroomTelevision = new Device("television_" + roomType + "_" + houseId, "television");
+                livingroomTelevision.setName("Living Room Television");
                 livingroomTelevision.setState(false);
                 livingroomTelevision.setVolume(0);
                 livingroomTelevision.setBrightness(10);

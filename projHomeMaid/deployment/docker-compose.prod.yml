@@ -35,6 +35,8 @@ services:
       "logging.level.org.springframework":"INFO",
       "spring.main.web-application-type":"servlet"
       }'
+      SPRING_PROFILES_ACTIVE: prod
+
 
   frontend:
     build:

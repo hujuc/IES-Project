@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -10,22 +12,52 @@ export default function AutomatizeLight({ deviceId }) {
     const [action, setAction] = useState("Turn On");
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}`)
-            .then((res) => res.json())
-            .then((data) => {
+        // Fetch existing automatizations
+        const fetchAutomatizations = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}`);
+                const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-            })
-            .catch((err) => console.error("Error fetching automatizations:", err));
+            } catch (err) {
+                console.error("Error fetching automatizations:", err);
+            }
+        };
+
+        fetchAutomatizations();
+
+        // WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for Lights Automatizations!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId) {
+                    setAutomatizations((prev) => [...prev, updatedData]);
+                    console.log("Updated automatization received via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.activate();
+
+        return () => client.deactivate();
     }, [deviceId]);
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
     };
 
-    const addAutomatization = () => {
+    const addAutomatization = async () => {
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
@@ -33,37 +65,49 @@ export default function AutomatizeLight({ deviceId }) {
                 action === "Turn On"
                     ? {
                         state: true,
-                        brightness: parseInt(brightness),
+                        brightness: parseInt(brightness, 10),
                         color,
                     }
                     : { state: false },
         };
 
-        fetch(API_BASE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newAutomatization),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setAutomatizations([...automatizations, data]);
-            })
-            .catch((err) => console.error("Error adding automatization:", err));
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newAutomatization),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setAutomatizations([...automatizations, data]);
+            console.log("Automatization added successfully.");
+        } catch (err) {
+            console.error("Error adding automatization:", err);
+        }
     };
 
-    const deleteAutomatization = (index) => {
+    const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
-        fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
-            method: "DELETE",
-        })
-            .then(() => {
-                setAutomatizations(
-                    automatizations.filter((_, i) => i !== index)
-                );
-            })
-            .catch((err) => console.error("Error deleting automatization:", err));
+        try {
+            const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }
+
+            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            console.log("Automatization deleted successfully.");
+        } catch (err) {
+            console.error("Error deleting automatization:", err);
+        }
     };
 
     return (
@@ -74,7 +118,6 @@ export default function AutomatizeLight({ deviceId }) {
                 </div>
 
                 <div className="space-y-4">
-                    {/* Set Time */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Time</label>
                         <input
@@ -85,7 +128,6 @@ export default function AutomatizeLight({ deviceId }) {
                         />
                     </div>
 
-                    {/* Set Action */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Action</label>
                         <select
@@ -98,7 +140,6 @@ export default function AutomatizeLight({ deviceId }) {
                         </select>
                     </div>
 
-                    {/* Brightness Control */}
                     {action === "Turn On" && (
                         <>
                             <div className="flex items-center justify-between">
@@ -115,7 +156,6 @@ export default function AutomatizeLight({ deviceId }) {
                                 <span className="text-gray-700 font-medium">{brightness}</span>
                             </div>
 
-                            {/* Color Control */}
                             <div className="flex items-center justify-between">
                                 <label className="text-gray-600 font-medium">Color</label>
                                 <input

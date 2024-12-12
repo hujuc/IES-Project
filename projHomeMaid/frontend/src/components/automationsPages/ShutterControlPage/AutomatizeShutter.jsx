@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -8,24 +10,53 @@ export default function AutomatizeShutter({ deviceId }) {
     const [openPercentage, setOpenPercentage] = useState(50); // Percentagem de abertura
     const [action, setAction] = useState("Turn On"); // Ação (Turn On / Turn Off)
 
-    // Fetch automatizations from backend
     useEffect(() => {
-        fetch(`${API_BASE_URL}`)
-            .then((res) => res.json())
-            .then((data) => {
+        // Fetch automatizations from backend
+        const fetchAutomatizations = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}`);
+                const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-            })
-            .catch((err) => console.error("Error fetching automatizations:", err));
+            } catch (err) {
+                console.error("Error fetching automatizations:", err);
+            }
+        };
+
+        fetchAutomatizations();
+
+        // WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for Shutter Automatizations!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId) {
+                    setAutomatizations((prev) => [...prev, updatedData]);
+                    console.log("Updated automatization received via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.activate();
+
+        return () => client.deactivate();
     }, [deviceId]);
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
     };
 
-    const addAutomatization = () => {
+    const addAutomatization = async () => {
         const newAutomatization = {
             deviceId: deviceId,
             executionTime: onTime,
@@ -35,32 +66,44 @@ export default function AutomatizeShutter({ deviceId }) {
                     : { state: false, openPercentage: 0 },
         };
 
-        fetch(API_BASE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newAutomatization),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setAutomatizations([...automatizations, data]);
-            })
-            .catch((err) => console.error("Error adding automatization:", err));
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newAutomatization),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setAutomatizations([...automatizations, data]);
+            console.log("Automatization added successfully.");
+        } catch (err) {
+            console.error("Error adding automatization:", err);
+        }
     };
 
-    const deleteAutomatization = (index) => {
+    const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
-        fetch(
-            `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-            { method: "DELETE" }
-        )
-            .then(() => {
-                setAutomatizations(
-                    automatizations.filter((_, i) => i !== index)
-                );
-            })
-            .catch((err) => console.error("Error deleting automatization:", err));
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
+                { method: "DELETE" }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }
+
+            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            console.log("Automatization deleted successfully.");
+        } catch (err) {
+            console.error("Error deleting automatization:", err);
+        }
     };
 
     return (
@@ -68,7 +111,7 @@ export default function AutomatizeShutter({ deviceId }) {
             {/* Automatize Container */}
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Shutter</h2>
                 </div>
 
                 <div className="space-y-4">

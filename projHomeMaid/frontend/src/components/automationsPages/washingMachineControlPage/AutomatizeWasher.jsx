@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -9,22 +11,52 @@ export default function AutomatizeWasher({ deviceId }) {
     const [washMode, setWashMode] = useState("Regular Wash");
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}`)
-            .then((res) => res.json())
-            .then((data) => {
+        // Fetch automatizations from backend
+        const fetchAutomatizations = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}`);
+                const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-            })
-            .catch((err) => console.error("Error fetching automatizations:", err));
+            } catch (err) {
+                console.error("Error fetching automatizations:", err);
+            }
+        };
+
+        fetchAutomatizations();
+
+        // WebSocket connection for real-time updates
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for Washer Automatizations!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId) {
+                    setAutomatizations((prev) => [...prev, updatedData]);
+                    console.log("Updated automatization received via WebSocket:", updatedData);
+                }
+            });
+        };
+
+        client.activate();
+
+        return () => client.deactivate();
     }, [deviceId]);
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
     };
 
-    const addAutomatization = () => {
+    const addAutomatization = async () => {
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
@@ -35,38 +67,51 @@ export default function AutomatizeWasher({ deviceId }) {
             },
         };
 
-        fetch(API_BASE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newAutomatization),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setAutomatizations([...automatizations, data]);
-            })
-            .catch((err) => console.error("Error adding automatization:", err));
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newAutomatization),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setAutomatizations([...automatizations, data]);
+            console.log("Automatization added successfully.");
+        } catch (err) {
+            console.error("Error adding automatization:", err);
+        }
     };
 
-    const deleteAutomatization = (index) => {
+    const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
-        fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
-            method: "DELETE",
-        })
-            .then(() => {
-                setAutomatizations(
-                    automatizations.filter((_, i) => i !== index)
-                );
-            })
-            .catch((err) => console.error("Error deleting automatization:", err));
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
+                { method: "DELETE" }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }
+
+            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            console.log("Automatization deleted successfully.");
+        } catch (err) {
+            console.error("Error deleting automatization:", err);
+        }
     };
 
     return (
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Washer</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -99,7 +144,7 @@ export default function AutomatizeWasher({ deviceId }) {
                         <select
                             value={washMode}
                             onChange={(e) => setWashMode(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none" // Increased width (w-48) and padding (p-2)
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
                             <option value="Regular Wash">Regular Wash</option>
                             <option value="Gentle Wash">Gentle Wash</option>

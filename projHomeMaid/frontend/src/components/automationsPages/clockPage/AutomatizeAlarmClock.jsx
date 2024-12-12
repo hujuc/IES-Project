@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -27,6 +29,25 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
 
         if (deviceId) {
             fetchAutomatizations();
+            const client = new Client({
+                webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
+            });
+
+            client.onConnect = () => {
+                client.subscribe(`/topic/device-updates`, (message) => {
+                    const updatedData = JSON.parse(message.body);
+                    if (updatedData.deviceId === deviceId) {
+                        setAutomatizations((prev) => [...prev, updatedData]);
+                    }
+                });
+            };
+
+            client.activate();
+
+            return () => client.deactivate();
         }
     }, [deviceId]);
 

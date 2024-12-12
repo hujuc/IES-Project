@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import GetBackButton from "../components/buttons/GetBackButton.jsx";
-import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import ClockCentralControl from "../components/ClockCentralControl.jsx";
 import Automatize from "../components/AutomatizeAlarmClock.jsx";
+import AutomationsHeader from "../components/automationsPages/AutomationsHeader.jsx";
 
 export default function ClockControl() {
     const deviceId = "clock-001";
@@ -61,15 +60,7 @@ export default function ClockControl() {
             className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white"
         >
             {/* Top Bar */}
-            <div className="w-full flex justify-between px-6 py-4 items-center">
-                <div className="h-16 w-16">
-                    <GetBackButton />
-                </div>
-                <span className="text-3xl font-semibold">Clock</span>
-                <div className="h-12 w-14">
-                    <EllipsisButton />
-                </div>
-            </div>
+            <AutomationsHeader/>
 
             {/* Alarm Sound Selector */}
             <div className="flex flex-col items-center justify-center mt-6 space-y-4 w-full px-4">

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import GetBackButton from "../components/buttons/GetBackButton.jsx";
-import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import StateControl from "../components/ShutterControlPage/StateControl.jsx";
 import PercentageControl from "../components/ShutterControlPage/PercentageControl.jsx";
 import AutomatizeShutter from "../components/ShutterControlPage/AutomatizeShutter.jsx";
+import AutomationsHeader from "../components/automationsPages/AutomationsHeader.jsx";
 
 export default function ShutterControl() {
     const DEFAULT_OPEN_PERCENTAGE = 50;
@@ -103,15 +102,8 @@ export default function ShutterControl() {
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            <div className="w-full flex justify-between px-6 py-4 items-center">
-                <div className="h-16 w-16">
-                    <GetBackButton />
-                </div>
-                <span className="text-3xl font-semibold">Shutter</span>
-                <div className="h-12 w-14">
-                    <EllipsisButton />
-                </div>
-            </div>
+
+            <AutomationsHeader/>
 
             {/* State Control */}
             <StateControl isShutterOpen={isShutterOpen} toggleShutter={toggleShutter} />

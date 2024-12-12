@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import GetBackButton from "../components/buttons/GetBackButton.jsx";
-import EllipsisButton from "../components/buttons/EllipsisButton.jsx";
 import StateControl from "../components/dryerMachineControlPage/StateControl.jsx";
 import TemperatureControl from "../components/dryerMachineControlPage/TemperatureControl.jsx";
 import AutomatizeDryer from "../components/dryerMachineControlPage/AutomatizeDryer.jsx";
+import AutomationsHeader from "../components/automationsPages/AutomationsHeader.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -65,15 +64,8 @@ export default function DryerMachineControl() {
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            <div className="w-full flex justify-between px-6 py-4 items-center">
-                <div className="h-16 w-16">
-                    <GetBackButton />
-                </div>
-                <span className="text-3xl font-semibold">Dryer Machine</span>
-                <div className="h-12 w-14">
-                    <EllipsisButton />
-                </div>
-            </div>
+
+            <AutomationsHeader/>
 
             <div className="mt-8">
                 <StateControl

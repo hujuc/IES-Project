@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.influxdb.query.FluxTable;
 import pt.ua.deti.ies.backend.model.Sensor;
 import com.influxdb.client.domain.WritePrecision;
+import com.influxdb.query.FluxRecord;
+
 
 import java.util.List;
 
@@ -26,115 +28,149 @@ public class SensorService {
         }
 
         try (WriteApi writeApi = influxDBClient.getWriteApi()) {
-            // String de dados sem o timestamp
             String data = String.format(
-                    "%s,sensor_id=%s,room_id=%s,house_id=%s,name=\"%s\",unit=\"%s\" value=%f",
+                    "%s,sensor_id=%s,room_id=%s,house_id=%s,unit=%s value=%f",
                     sensorData.getType(),
                     sensorData.getSensorId(),
                     sensorData.getRoomId(),
                     sensorData.getHouseId(),
-                    sensorData.getName(),
                     sensorData.getUnit(),
                     sensorData.getValue()
             );
 
-            String bucket = "sensor_data"; // Bucket configurado no InfluxDB
-            String org = "HomeMaidOrg";   // Organização configurada no InfluxDB
+            String bucket = "sensor_data";
+            String org = "HomeMaidOrg";
 
-            // O InfluxDB irá gerar o timestamp automaticamente
             writeApi.writeRecord(bucket, org, WritePrecision.NS, data);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao salvar dados no InfluxDB: " + e.getMessage(), e);
         }
     }
 
-
-
-
-    public String getAverageTemperature(String roomId) {
-        if (roomId == null) {
-            throw new IllegalArgumentException("O ID do quarto é obrigatório.");
+    public String getAverageTemperature(String id, String idType, String timeframe) {
+        if (id == null || idType == null) {
+            throw new IllegalArgumentException("O ID e o tipo de ID são obrigatórios.");
         }
+
+        String range;
+        switch (timeframe.toLowerCase()) {
+            case "daily":
+                range = "-1d";
+                break;
+            case "weekly":
+                range = "-7d";
+                break;
+            case "monthly":
+                range = "-30d";
+                break;
+            default:
+                throw new IllegalArgumentException("Timeframe inválido. Use 'daily', 'weekly' ou 'monthly'.");
+        }
+
+        String filter = idType.equalsIgnoreCase("house")
+                ? String.format("r[\"house_id\"] == \"%s\"", id)
+                : String.format("r[\"room_id\"] == \"%s\"", id);
 
         String fluxQuery = String.format(
                 "from(bucket: \"sensor_data\") " +
-                        "|> range(start: -1d) " +
-                        "|> filter(fn: (r) => r[\"room_id\"] == \"%s\" and r[\"_measurement\"] == \"temperature\") " +
-                        "|> mean()", roomId
+                        "|> range(start: %s) " +
+                        "|> filter(fn: (r) => %s and r[\"_measurement\"] == \"temperature\") " +
+                        "|> keep(columns: [\"_value\"]) " +
+                        "|> mean()",
+                range, filter
         );
 
         QueryApi queryApi = influxDBClient.getQueryApi();
         try {
             List<FluxTable> tables = queryApi.query(fluxQuery);
-
             if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
-                return "Nenhum dado encontrado para o quarto: " + roomId;
+                return "Média de temperatura: Nenhum dado encontrado.";
             }
-
-            // Extrair o valor médio da tabela
             Object meanValue = tables.get(0).getRecords().get(0).getValue();
-            return String.format("A temperatura média do quarto '%s' é: %s", roomId, meanValue);
-
+            return String.format("Média de temperatura: %.2f", Double.parseDouble(meanValue.toString()));
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao consultar a temperatura média: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao consultar a média de temperatura: " + e.getMessage(), e);
         }
     }
+
+
+    public String getAverageHumidity(String id, String idType, String timeframe) {
+        if (id == null || idType == null) {
+            throw new IllegalArgumentException("O ID e o tipo de ID são obrigatórios.");
+        }
+
+        String range;
+        switch (timeframe.toLowerCase()) {
+            case "daily":
+                range = "-1d";
+                break;
+            case "weekly":
+                range = "-7d";
+                break;
+            case "monthly":
+                range = "-30d";
+                break;
+            default:
+                throw new IllegalArgumentException("Timeframe inválido. Use 'daily', 'weekly' ou 'monthly'.");
+        }
+
+        // Define o filtro com base no idType
+        String filter = idType.equalsIgnoreCase("house")
+                ? String.format("r[\"house_id\"] == \"%s\"", id)
+                : String.format("r[\"room_id\"] == \"%s\"", id);
+
+        // Monta a query Flux para calcular a humidade média
+        String fluxQuery = String.format(
+                "from(bucket: \"sensor_data\") " +
+                        "|> range(start: %s) " +
+                        "|> filter(fn: (r) => %s and r[\"_measurement\"] == \"humidity\") " +
+                        "|> keep(columns: [\"_value\"]) " + // Mantenha apenas a coluna _value
+                        "|> mean()",
+                range, filter
+        );
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        try {
+            // Executa a query
+            List<FluxTable> tables = queryApi.query(fluxQuery);
+            if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
+                return "Média de humidade: Nenhum dado encontrado.";
+            }
+            // Extrai o valor da média
+            Object meanValue = tables.get(0).getRecords().get(0).getValue();
+            return String.format("Média de humidade: %.2f", Double.parseDouble(meanValue.toString()));
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao consultar a média de humidade: " + e.getMessage(), e);
+        }
+    }
+
+
 
     public String getSensor(String sensorId) {
         String fluxQuery = String.format(
                 "from(bucket: \"sensor_data\") " +
-                        "|> range(start: -1d) " +
-                        "|> filter(fn: (r) => r[\"sensor_id\"] == \"%s\")", sensorId
+                        "|> range(start: -30d) " +
+                        "|> filter(fn: (r) => r[\"sensor_id\"] == \"%s\")",
+                sensorId
         );
 
         QueryApi queryApi = influxDBClient.getQueryApi();
         try {
             List<FluxTable> tables = queryApi.query(fluxQuery);
-
             if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
                 return "Nenhum dado encontrado para o sensor: " + sensorId;
             }
 
             StringBuilder result = new StringBuilder();
             for (FluxTable table : tables) {
-                table.getRecords().forEach(record -> result.append(record.getValue()).append("\n"));
+                table.getRecords().forEach(record ->
+                        result.append("Time: ").append(record.getTime()).append(", ")
+                                .append("Value: ").append(record.getValue()).append("\n")
+                );
             }
             return result.toString();
-
         } catch (Exception e) {
             throw new RuntimeException("Erro ao buscar dados do sensor: " + e.getMessage(), e);
-        }
-    }
-
-    public String getTemperatureRange(String roomId) {
-        if (roomId == null) {
-            throw new IllegalArgumentException("O ID do quarto é obrigatório.");
-        }
-
-        String fluxQuery = String.format(
-                "from(bucket: \"sensor_data\") " +
-                        "|> range(start: -1d) " +
-                        "|> filter(fn: (r) => r[\"room_id\"] == \"%s\" and r[\"_measurement\"] == \"temperature\") " +
-                        "|> reduce(identity: {min: inf, max: -inf}, fn: (r, accumulator) => " +
-                        "{min: if r._value < accumulator.min then r._value else accumulator.min, " +
-                        "max: if r._value > accumulator.max then r._value else accumulator.max})", roomId
-        );
-
-        QueryApi queryApi = influxDBClient.getQueryApi();
-        try {
-            List<FluxTable> tables = queryApi.query(fluxQuery);
-
-            if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
-                return "Nenhum dado encontrado para o quarto: " + roomId;
-            }
-
-            Object minValue = tables.get(0).getRecords().get(0).getValueByKey("min");
-            Object maxValue = tables.get(0).getRecords().get(0).getValueByKey("max");
-
-            return String.format("A temperatura mínima no quarto '%s' é: %s, e a máxima é: %s", roomId, minValue, maxValue);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao consultar a faixa de temperatura: " + e.getMessage(), e);
         }
     }
 }

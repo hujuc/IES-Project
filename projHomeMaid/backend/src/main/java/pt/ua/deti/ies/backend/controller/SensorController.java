@@ -28,11 +28,47 @@ public class SensorController {
     }
 
 
+    // Temperatura média por divisão
     @GetMapping("/rooms/{roomId}/average-temperature")
-    public ResponseEntity<String> getAverageTemperature(@PathVariable String roomId) {
-        String result = sensorService.getAverageTemperature(roomId);
+    public ResponseEntity<String> getAverageTemperatureByRoom(
+            @PathVariable String roomId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageTemperature(roomId, "room", timeframe);
         return ResponseEntity.ok(result);
     }
+
+    // Temperatura média por casa
+    @GetMapping("/houses/{houseId}/average-temperature")
+    public ResponseEntity<String> getAverageTemperatureByHouse(
+            @PathVariable String houseId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageTemperature(houseId, "house", timeframe);
+        return ResponseEntity.ok(result);
+    }
+
+    // Humidade média por divisão
+    @GetMapping("/rooms/{roomId}/average-humidity")
+    public ResponseEntity<String> getAverageHumidityByRoom(
+            @PathVariable String roomId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageHumidity(roomId, "room", timeframe);
+        return ResponseEntity.ok(result);
+    }
+
+    // Humidade média por casa
+    @GetMapping("/houses/{houseId}/average-humidity")
+    public ResponseEntity<String> getAverageHumidityByHouse(
+            @PathVariable String houseId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        String result = sensorService.getAverageHumidity(houseId, "house", timeframe);
+        return ResponseEntity.ok(result);
+    }
+
+
 
     @GetMapping("/{sensorId}/data")
     public ResponseEntity<String> getSensor(@PathVariable String sensorId) {
@@ -48,9 +84,5 @@ public class SensorController {
         }
     }
 
-    @GetMapping("/rooms/{roomId}/temperature-range")
-    public ResponseEntity<String> getTemperatureRange(@PathVariable String roomId) {
-        String result = sensorService.getTemperatureRange(roomId);
-        return ResponseEntity.ok(result);
-    }
+
 }

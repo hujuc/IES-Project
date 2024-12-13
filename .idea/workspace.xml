@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/StateControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/StateControl.jsx" afterDir="false" />
-    </list>
+    <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,7 +29,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "disable.download.node.interpreter.editor.notification": "true",
-    "git-widget-placeholder": "bug-fixes",
+    "git-widget-placeholder": "feature/fullStack-automation-notifications-75",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/ugo/Desktop/UA/3ano/1semestre/IES/projeto/ies-24-25-group-project-304/projHomeMaid/backend/src/main/resources",
     "node.js.detected.package.eslint": "true",
@@ -75,7 +69,6 @@
       <workItem from="1731772791962" duration="1640000" />
       <workItem from="1731968553203" duration="4455000" />
       <workItem from="1734053309298" duration="2620000" />
-      <workItem from="1734190968035" duration="7712000" />
     </task>
     <servers />
   </component>

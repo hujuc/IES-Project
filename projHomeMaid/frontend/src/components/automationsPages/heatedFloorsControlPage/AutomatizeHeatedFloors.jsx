@@ -163,13 +163,13 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.state ? (
+                            {item.changes && item.changes.state !== undefined ? (
                                 <span className="block font-medium">
                                     Temperature:{" "}
-                                    <span className="font-semibold">{item.changes.temperature}°C</span>
+                                    <span className="font-semibold">{item.changes.temperature || 0}°C</span>
                                 </span>
                             ) : (
-                                <span className="block font-medium">Action: Turn Off</span>
+                                <span className="block font-medium">Invalid Data</span>
                             )}
                         </div>
                         <button

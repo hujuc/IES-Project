@@ -1,0 +1,17 @@
+[33mcommit de72ec42d37e2b9d5655bcbb9e60fe7aece9dc9d[m[33m ([m[1;36mHEAD -> [m[1;32mbug-fixes[m[33m, [m[1;31morigin/feature/fullStack-add-remove-devices-75[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/bug-fixes[m[33m)[m
+Author: Rita-Silva04 <aritafs@ua.pt>
+Date:   Fri Dec 13 01:21:26 2024 +0000
+
+    adding and removing devices by user doneeeee - just missing web socket configuration
+
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/AutomationController.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/SensorController.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Room.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java
+projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/RoomService.java
+projHomeMaid/frontend/package-lock.json
+projHomeMaid/frontend/package.json
+projHomeMaid/frontend/src/components/automationsPages/AutomationsHeader.jsx
+projHomeMaid/frontend/src/components/homePage/CardSlider.jsx

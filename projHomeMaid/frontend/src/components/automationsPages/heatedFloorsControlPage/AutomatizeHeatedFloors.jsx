@@ -40,7 +40,12 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
 
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
+                if (
+                    updatedData.deviceId === deviceId &&
+                    updatedData.executionTime &&
+                    updatedData.changes &&
+                    (updatedData.changes.state === true || updatedData.changes.state === false)
+                ) {
                     setAutomatizations((prev) => [...prev, updatedData]);
                     console.log("Updated automatization received via WebSocket:", updatedData);
                 }

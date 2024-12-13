@@ -3,6 +3,7 @@ import AutomationsHeader from "../../components/automationsPages/AutomationsHead
 import StateControl from "../../components/automationsPages/heatedFloorsControlPage/StateControl.jsx";
 import TemperatureControl from "../../components/automationsPages/heatedFloorsControlPage/TemperatureControl.jsx";
 import AutomatizeHeatedFloors from "../../components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; // Import the new component
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
@@ -134,14 +135,10 @@ export default function HeatedFloorsControl() {
                 updateTemperature={updateTemperature}
             />
 
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeHeatedFloors deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Use AutomationBox */}
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeHeatedFloors deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

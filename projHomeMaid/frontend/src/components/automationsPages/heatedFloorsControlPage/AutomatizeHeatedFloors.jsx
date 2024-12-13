@@ -158,6 +158,13 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
                 </div>
             </div>
 
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
+
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -200,13 +207,6 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

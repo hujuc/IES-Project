@@ -6,16 +6,7 @@ import pt.ua.deti.ies.backend.service.SensorService;
 import pt.ua.deti.ies.backend.model.Sensor;
 import org.springframework.http.HttpStatus;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
+
 @RestController
 @RequestMapping("/api/sensors")
 public class SensorController {

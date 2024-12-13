@@ -14,6 +14,17 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.*;
 
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.PUT,
+                RequestMethod.DELETE,
+                RequestMethod.POST
+        })
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

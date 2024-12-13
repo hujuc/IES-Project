@@ -5,7 +5,20 @@ import org.springframework.web.bind.annotation.*;
 import pt.ua.deti.ies.backend.service.SensorService;
 import pt.ua.deti.ies.backend.model.Sensor;
 import org.springframework.http.HttpStatus;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.PUT,
+                RequestMethod.DELETE,
+                RequestMethod.POST
+        })
 @RestController
 @RequestMapping("/api/sensors")
 public class SensorController {
@@ -83,6 +96,26 @@ public class SensorController {
             return ResponseEntity.status(500).body("Erro ao buscar dados do sensor: " + e.getMessage());
         }
     }
+
+    @GetMapping("/rooms/{roomId}/latest")
+    public ResponseEntity<Map<String, Double>> getLatestMeasurementsByRoom(@PathVariable String roomId) {
+        try {
+            double temperature = sensorService.getLatestMeasurementAsDouble(roomId, "room", "temperature");
+            double humidity = sensorService.getLatestMeasurementAsDouble(roomId, "room", "humidity");
+            Map<String, Double> result = new HashMap<>();
+            result.put("temperature", temperature);
+            result.put("humidity", humidity);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", Double.NaN)); // Caso ocorra erro
+        }
+    }
+
+
+
+
+
 
 
 }

@@ -8,6 +8,8 @@ import com.influxdb.query.FluxTable;
 import pt.ua.deti.ies.backend.model.Sensor;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.query.FluxRecord;
+import java.util.Map;
+import java.util.HashMap;
 
 
 import java.util.List;
@@ -173,4 +175,36 @@ public class SensorService {
             throw new RuntimeException("Erro ao buscar dados do sensor: " + e.getMessage(), e);
         }
     }
+
+    public double getLatestMeasurementAsDouble(String id, String idType, String measurementType) {
+        String filter = idType.equalsIgnoreCase("house")
+                ? String.format("r[\"house_id\"] == \"%s\"", id)
+                : String.format("r[\"room_id\"] == \"%s\"", id);
+
+        String fluxQuery = String.format(
+                "from(bucket: \"sensor_data\") " +
+                        "|> range(start: -30d) " +
+                        "|> filter(fn: (r) => %s and r[\"_measurement\"] == \"%s\") " +
+                        "|> sort(columns: [\"_time\"], desc: true) " +
+                        "|> limit(n: 1)",
+                filter, measurementType
+        );
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        try {
+            List<FluxTable> tables = queryApi.query(fluxQuery);
+            if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
+                throw new RuntimeException("No data found for measurement: " + measurementType);
+            }
+
+            FluxRecord record = tables.get(0).getRecords().get(0);
+            return Double.parseDouble(record.getValue().toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching latest measurement as double: " + e.getMessage(), e);
+        }
+    }
+
+
+
+
 }

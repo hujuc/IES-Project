@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
+import Statistics from "./Statistics";
 
 // Imagens padrão para cada tipo de divisão
 import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
@@ -29,10 +30,10 @@ function CardSlider() {
         "laundry": "Laundry",
         "office": "Office",
         "bathroom": "Bathroom",
-        "house": "House", // Aqui também pode ser o nome da casa, por exemplo.
+        "house": "House", // Nome da casa
     };
 
-    // Definir a ordem dos cards (com base no ID ou tipo)
+    // Ordem personalizada dos cards
     const customOrder = [
         "house",
         "hall",
@@ -42,67 +43,12 @@ function CardSlider() {
         "guestBedroom",
         "bathroom",
         "office",
-        "laundry"
+        "laundry",
     ];
-
-    // UseEffect para buscar os dados da casa e quartos do backend
-    useEffect(() => {
-        const fetchHouseData = async () => {
-            try {
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/houses/${houseId}`
-                );
-                if (response.ok) {
-                    const data = await response.json();
-
-                    const houseCard = {
-                        id: "house", // ID da casa
-                        label: roomNames["house"], // Usar o nome do mapeamento para a casa
-                        image: HouseImage,
-                        type: "House",
-                        deviceObjects: data.devices,
-                    };
-
-                    const roomCards = data.rooms.map((room) => ({
-                        id: room.type, // Certifique-se de que o `type` esteja no customOrder
-                        label: roomNames[room.type] || room.type, // Nome personalizado
-                        image: getDefaultImage(room.type), // Imagem da divisão
-                        type: room.type,
-                        deviceObjects: room.deviceObjects,
-                    }));
-
-                    // Ordenar os cards com base na ordem personalizada
-                    const orderedCards = [houseCard, ...roomCards].sort((a, b) => {
-                        const aIndex = customOrder.indexOf(a.id);
-                        const bIndex = customOrder.indexOf(b.id);
-
-                        // Se algum ID não for encontrado, movê-lo para o final
-                        if (aIndex === -1) return 1;
-                        if (bIndex === -1) return -1;
-
-                        // Comparar índices para garantir a ordem personalizada
-                        return aIndex - bIndex;
-                    });
-
-                    setCards(orderedCards);
-                } else {
-                    console.error("Failed to fetch house data");
-                }
-            } catch (error) {
-                console.error("Error fetching house data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchHouseData();
-    }, [houseId]);
 
     // Função para verificar e retornar a imagem padrão com base no tipo de divisão
     const getDefaultImage = (type) => {
-        const roomType = type;
-
-        switch (roomType) {
+        switch (type) {
             case "masterBedroom":
                 return BedroomImage;
             case "guestBedroom":
@@ -120,11 +66,89 @@ function CardSlider() {
             case "bathroom":
                 return BathroomImage;
             default:
-                return HouseImage; // Imagem padrão para a casa
+                return HouseImage;
         }
     };
 
-    // Funções de navegação do slider
+    // Função para buscar os valores mais recentes de temperatura e humidade
+    const fetchLatestValues = async (roomId) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/sensors/rooms/${roomId}/latest`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Latest values for room:", roomId, data); // Verifique os valores aqui
+                return {
+                    temperature: data.temperature || NaN,
+                    humidity: data.humidity || NaN,
+                };
+            } else {
+                console.error("Failed to fetch latest values for room:", roomId);
+                return { temperature: NaN, humidity: NaN };
+            }
+        } catch (error) {
+            console.error("Error fetching latest values:", error);
+            return { temperature: NaN, humidity: NaN };
+        }
+    };
+
+    useEffect(() => {
+        const fetchHouseData = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/houses/${houseId}`
+                );
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Criar card da casa
+                    const houseCard = {
+                        id: "house",
+                        label: roomNames["house"],
+                        image: HouseImage,
+                        type: "House",
+                        deviceObjects: data.devices,
+                        temperature: NaN,
+                        humidity: NaN,
+                    };
+
+                    // Criar cards dos quartos
+                    const roomCards = await Promise.all(
+                        data.rooms.map(async (room) => {
+                            const latestValues = await fetchLatestValues(room.roomId);
+                            return {
+                                id: room.roomId,
+                                label: roomNames[room.type] || room.type,
+                                image: getDefaultImage(room.type),
+                                type: room.type,
+                                deviceObjects: room.deviceObjects,
+                                temperature: latestValues.temperature,
+                                humidity: latestValues.humidity,
+                            };
+                        })
+                    );
+
+                    // Ordenar cards com base na ordem personalizada
+                    const orderedCards = [houseCard, ...roomCards].sort((a, b) => {
+                        const aIndex = customOrder.indexOf(a.type);
+                        const bIndex = customOrder.indexOf(b.type);
+                        return aIndex - bIndex;
+                    });
+
+                    setCards(orderedCards);
+                } else {
+                    console.error("Failed to fetch house data");
+                }
+            } catch (error) {
+                console.error("Error fetching house data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHouseData();
+    }, [houseId]);
+
     const handlePrev = () => {
         setCurrentIndex((prevIndex) =>
             prevIndex === 0 ? cards.length - 1 : prevIndex - 1
@@ -137,7 +161,6 @@ function CardSlider() {
         );
     };
 
-    // Exibir mensagem de carregamento ou de dados não disponíveis
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -148,42 +171,37 @@ function CardSlider() {
 
     return (
         <div className="relative flex flex-col items-center space-y-4">
-            {/* Card Display */}
             <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-64">
-                {/* Imagem */}
                 <img
                     src={cards[currentIndex].image}
                     alt={cards[currentIndex].label}
                     className="w-full h-full object-cover rounded-lg p-2"
                 />
-                {/* Informações no canto superior esquerdo */}
                 <div className="absolute top-4 left-4 flex flex-col space-y-1">
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Temperature:</strong> {22}°C
+                        <strong>Temperature:</strong> {!isNaN(cards[currentIndex].temperature)
+                        ? `${cards[currentIndex].temperature}°C`
+                        : "N/A"}
                     </div>
                     <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Humidity:</strong> {22}%
+                        <strong>Humidity:</strong> {!isNaN(cards[currentIndex].humidity)
+                        ? `${cards[currentIndex].humidity}%`
+                        : "N/A"}
                     </div>
                 </div>
-                {/* Título no centro inferior */}
                 <div className="absolute bottom-4 left-0 right-0 text-center">
                     <p className="text-xl font-semibold text-white bg-black bg-opacity-50 py-1 rounded-md">
-                        {cards[currentIndex].label} {/* Exibindo o nome personalizado */}
+                        {cards[currentIndex].label}
                     </p>
                 </div>
             </div>
-
-            {/* Navigation Buttons */}
             <div className="flex space-x-4">
-                {/* Botão Prev */}
                 <button
                     onClick={handlePrev}
                     className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
                 >
                     Prev
                 </button>
-
-                {/* Botão Next */}
                 <button
                     onClick={handleNext}
                     className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
@@ -191,9 +209,9 @@ function CardSlider() {
                     Next
                 </button>
             </div>
-
-            {/* Room Info */}
             <RoomInfo room={cards[currentIndex]} />
+            <Statistics houseId={houseId} rooms={cards.filter((card) => card.id !== "house")} />
+
         </div>
     );
 }

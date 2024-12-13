@@ -1,6 +1,6 @@
 import React from "react";
-import heatedOnIcon from "../../../assets/shutter_open.png"; // Ícone para aquecimento ligado
-import heatedOffIcon from "../../../assets/shutter_closed.png"; // Ícone para aquecimento desligado
+import heatedOnIcon from "../../../assets/heatedFloorsOn.png"; // Ícone para aquecimento ligado
+import heatedOffIcon from "../../../assets/heatedFloorsOff.png"; // Ícone para aquecimento desligado
 
 export default function StateControl({ isHeatedOn, toggleHeatedFloors }) {
     return (

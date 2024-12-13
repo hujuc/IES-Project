@@ -21,10 +21,11 @@ public class Device {
     private String airFluxRate;
     private String drinkType;
     private String alarmSound;
+    private boolean receiveAutomationNotification = true;
 
     public Device(String deviceId, String name, String type, Boolean state, Integer brightness, String color,
                   Integer openPercentage, Integer volume, Double temperature, String mode, Boolean ringing,
-                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound) {
+                  String airFluxDirection, String airFluxRate, String drinkType, String alarmSound, boolean receiveAutomationNotification) {
         this.deviceId = deviceId;
         this.name = name;
         this.type = type;
@@ -40,6 +41,7 @@ public class Device {
         this.airFluxRate = airFluxRate;
         this.drinkType = drinkType;
         this.alarmSound = alarmSound;
+        this.receiveAutomationNotification = receiveAutomationNotification;
     }
 
     public Device(String deviceId, String type) {
@@ -167,6 +169,14 @@ public class Device {
 
     public void setAlarmSound(String alarmSound) {
         this.alarmSound = alarmSound;
+    }
+
+    public Boolean getReceiveAutomationNotification() {
+        return receiveAutomationNotification;
+    }
+
+    public void setReceiveAutomationNotification(Boolean receiveAutomationNotification) {
+        this.receiveAutomationNotification = receiveAutomationNotification;
     }
 
     @java.lang.Override

@@ -4,22 +4,25 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSound }) {
+export default function AutomatizeAlarmClock({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [alarmSound, setAlarmSound] = useState(selectedSound || "sound1");
+    const [alarmSound, setAlarmSound] = useState("sound1"); // Default sound
     const [volume, setVolume] = useState(50); // Default volume
     const [error, setError] = useState(null);
 
+    const alarmSoundOptions = [
+        { label: "Sound 1", value: "sound1" },
+        { label: "Sound 2", value: "sound2" },
+        { label: "Sound 3", value: "sound3" },
+    ];
+
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
                 const data = await response.json();
-                const deviceAutomatizations = data.filter(
-                    (item) => item.deviceId === deviceId
-                );
+                const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
@@ -30,7 +33,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
         if (deviceId) {
             fetchAutomatizations();
 
-            // WebSocket connection
             const client = new Client({
                 webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
                 reconnectDelay: 5000,
@@ -47,10 +49,7 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                         if (
                             updatedData.deviceId === deviceId &&
                             updatedData.executionTime &&
-                            updatedData.changes &&
-                            updatedData.changes.ringing !== undefined &&
-                            updatedData.changes.alarmSound &&
-                            typeof updatedData.changes.volume === "number"
+                            updatedData.changes
                         ) {
                             setAutomatizations((prev) => [...prev, updatedData]);
                             console.log("Updated automatization received via WebSocket:", updatedData);
@@ -71,13 +70,13 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
         setOnTime(e.target.value);
     };
 
-    const handleAlarmSoundChange = (e) => {
-        setAlarmSound(e.target.value);
+    const handleVolumeChange = (e) => {
+        const newValue = parseInt(e.target.value, 10);
+        setVolume(newValue);
     };
 
-    const handleVolumeChange = (e) => {
-        const newValue = Math.round(e.target.value / 10) * 10; // Ensure multiple of 10
-        setVolume(newValue);
+    const handleAlarmSoundChange = (e) => {
+        setAlarmSound(e.target.value);
     };
 
     const addAutomatization = async () => {
@@ -160,29 +159,38 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                             onChange={handleAlarmSoundChange}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
-                            {alarmSounds.map((sound) => (
-                                <option key={sound.value} value={sound.value}>
-                                    {sound.label}
+                            {alarmSoundOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
                                 </option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="flex flex-col items-center justify-between">
-                        <label className="text-gray-600 font-medium mb-2">Volume</label>
-                        <input
-                            type="range"
-                            min="10"
-                            max="100"
-                            step="10"
-                            value={volume}
-                            onChange={handleVolumeChange}
-                            className="w-full bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
-                        />
-                        <p className="text-gray-700 font-medium mt-2">{volume}</p>
+                    <div className="flex items-center justify-between">
+                        <label className="text-gray-600 font-medium">Volume</label>
+                        <div className="flex items-center w-2/3">
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="1"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                className="w-full bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-700 font-medium ml-4">{volume}</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
 
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
@@ -194,7 +202,7 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.ringing && (
+                            {item.changes && (
                                 <>
                                     <span className="block font-medium">
                                         Alarm Sound: <span className="font-semibold">{item.changes.alarmSound}</span>
@@ -228,13 +236,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

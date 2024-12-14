@@ -3,12 +3,14 @@ import AutomationsHeader from "../../components/automationsPages/AutomationsHead
 import StateControl from "../../components/automationsPages/heatedFloorsControlPage/StateControl.jsx";
 import TemperatureControl from "../../components/automationsPages/heatedFloorsControlPage/TemperatureControl.jsx";
 import AutomatizeHeatedFloors from "../../components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; // Import the new component
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 export default function HeatedFloorsControl() {
     const [isHeatedOn, setIsHeatedOn] = useState(false);
     const [temperature, setTemperature] = useState(20.0);
+    const [name, setName] = useState(""); // State to store device name
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -26,9 +28,13 @@ export default function HeatedFloorsControl() {
             if (data.temperature !== undefined) {
                 setTemperature(data.temperature);
             }
+
+            if (data.name !== undefined) {
+                setName(data.name); // Set the device name
+            }
         } catch (err) {
-            console.error("Error fetching heated floors state:", err);
-            setError("Failed to fetch heated floors state.");
+            console.error("Error fetching heated floors data:", err);
+            setError("Failed to fetch heated floors data.");
         }
     };
 
@@ -54,6 +60,7 @@ export default function HeatedFloorsControl() {
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsHeatedOn(updatedData.state);
                     if (updatedData.temperature !== undefined) setTemperature(updatedData.temperature);
+                    if (updatedData.name !== undefined) setName(updatedData.name); // Update name if available
                     console.log("Updated data in frontend:", updatedData);
                 }
             });
@@ -110,7 +117,6 @@ export default function HeatedFloorsControl() {
                 throw new Error(`API response error: ${response.status}`);
             }
 
-            console.log("State and temperature saved successfully:", { state, temperature });
         } catch (err) {
             console.error("Error saving state and temperature to database:", err);
             setError("Failed to save state and temperature to database.");
@@ -124,7 +130,7 @@ export default function HeatedFloorsControl() {
 
             {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Heated Floors</span>
+                <span className="text-2xl font-semibold">{name || "Loading..."}</span>
             </div>
 
             <StateControl isHeatedOn={isHeatedOn} toggleHeatedFloors={toggleHeatedFloors} />
@@ -134,14 +140,10 @@ export default function HeatedFloorsControl() {
                 updateTemperature={updateTemperature}
             />
 
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeHeatedFloors deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Use AutomationBox */}
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeHeatedFloors deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

@@ -52,7 +52,7 @@ public class HouseService {
                 .orElseThrow(() -> new RuntimeException("[ERROR] Casa associada ao dispositivo não encontrada."));
     }
 
-    public House createHouseWithRoomsAndDevices(String houseId) {
+    public House    createHouseWithRoomsAndDevices(String houseId) {
         // Criar os tipos de room
         List<String> roomTypes = List.of(
                 "hall", "masterBedroom", "guestBedroom", "kitchen",
@@ -103,7 +103,7 @@ public class HouseService {
                 hallClock.setName("Hall Clock");
                 hallClock.setState(false);
                 hallClock.setRinging(false);
-                hallClock.setAlarmSound("sound 1");
+                hallClock.setAlarmSound("sound1");
                 devices.add(hallClock);
 
                 Device hallLamp = new Device("lamp_" + roomType + "_" + houseId, "lamp");
@@ -159,7 +159,7 @@ public class HouseService {
                 masterBedroomClock.setName("Master Bedroom Clock");
                 masterBedroomClock.setState(false);
                 masterBedroomClock.setRinging(false);
-                masterBedroomClock.setAlarmSound("sound 1");
+                masterBedroomClock.setAlarmSound("sound1");
                 devices.add(masterBedroomClock);
 
                 Device masterBedroomAirConditioner = new Device("airConditioner_" + roomType + "_" + houseId, "airConditioner");
@@ -204,7 +204,7 @@ public class HouseService {
                 guestBedroomClock.setName("Guest Bedroom Clock");
                 guestBedroomClock.setState(false);
                 guestBedroomClock.setRinging(false);
-                guestBedroomClock.setAlarmSound("sound 1");
+                guestBedroomClock.setAlarmSound("sound1");
                 devices.add(guestBedroomClock);
 
                 Device guestBedroomAirConditioner = new Device("airConditioner_" + roomType + "_" + houseId, "airConditioner");
@@ -242,7 +242,7 @@ public class HouseService {
                 kitchenClock.setName("Kitchen Clock");
                 kitchenClock.setState(false);
                 kitchenClock.setRinging(false);
-                kitchenClock.setAlarmSound("sound 1");
+                kitchenClock.setAlarmSound("sound1");
                 devices.add(kitchenClock);
 
                 break;
@@ -277,7 +277,7 @@ public class HouseService {
                 livingRoomClock.setName("Living Room Clock");
                 livingRoomClock.setState(false);
                 livingRoomClock.setRinging(false);
-                livingRoomClock.setAlarmSound("sound 1");
+                livingRoomClock.setAlarmSound("sound1");
                 devices.add(livingRoomClock);
 
                 Device livingRoomAirConditioner = new Device("airConditioner_" + roomType + "_" + houseId, "airConditioner");

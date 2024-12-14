@@ -18,7 +18,6 @@ export default function TemperatureControl({ deviceId, initialTemperature }) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("Updated temperature:", data);
                 setTemperature(data.temperature);
             })
             .catch((error) =>

@@ -1,32 +1,34 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import washerOnIcon from "../../../assets/washer_aut.png"; // Icon for washer on
 import washerOffIcon from "../../../assets/washer_aut.png"; // Icon for washer off
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
 
-export default function StateControl({ deviceId, toggleWasher, temperature, washMode }) {
-    const [isRunning, setIsRunning] = useState(false);  // To track if the washer is running
+export default function StateControl({ deviceId }) {
+    const [isRunning, setIsRunning] = useState(false); // To track if the washer is running
     const [currentState, setCurrentState] = useState({
         isWasherOn: false,
         temperature: 40.0,
-        washMode: "regular wash"
+        washMode: "Regular Wash",
     }); // To store the current state of the washer
     const [loading, setLoading] = useState(true); // Track loading state
 
-    // Fetch the current state from the backend when the component is mounted
     useEffect(() => {
+        // Fetch the current state from the backend when the component is mounted
         const fetchCurrentState = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/${deviceId}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Set the current state from backend data
                     setCurrentState({
                         isWasherOn: data.state,
-                        temperature: data.temperature,
-                        washMode: data.mode,
+                        temperature: data.temperature || 40,
+                        washMode: data.mode || "Regular Wash",
                     });
+                    setIsRunning(data.state); // Sync "isRunning" with the current state
                 } else {
                     console.error("Failed to fetch device state:", data);
                 }
@@ -38,32 +40,39 @@ export default function StateControl({ deviceId, toggleWasher, temperature, wash
         };
 
         fetchCurrentState();
-    }, [deviceId, toggleWasher, temperature, washMode]);
 
-    // Simulate the washing cycle when the washer is turned on
-    useEffect(() => {
-        if (!loading && currentState.isWasherOn && !isRunning) {
-            setIsRunning(true);
+        // Set up WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
 
-            // Update the washer’s state to "on" in the backend
-            updateDeviceState(true, currentState.temperature, currentState.washMode);
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for Washer updates!");
 
-            // Simulate the cycle by using a timeout
-            const timer = setTimeout(() => {
-                setIsRunning(false); // Set isRunning to false when cycle ends
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId) {
+                    setCurrentState((prevState) => ({
+                        ...prevState,
+                        isWasherOn: updatedData.state ?? prevState.isWasherOn,
+                        temperature: updatedData.temperature ?? prevState.temperature,
+                        washMode: updatedData.mode ?? prevState.washMode,
+                    }));
+                    setIsRunning(updatedData.state ?? false); // Sync "isRunning" with backend state
+                    console.log("Updated washer state received via WebSocket:", updatedData);
+                }
+            });
+        };
 
-                // Update the washer’s state to "off" in the database
-                updateDeviceState(false, null, null);
+        client.activate();
 
-                toggleWasher(false); // Update the frontend state to match
-            }, 120000); // 2-minute cycle simulation
+        return () => client.deactivate();
+    }, [deviceId]);
 
-            return () => clearTimeout(timer); // Cleanup the timer when component unmounts
-        }
-    }, [currentState.isWasherOn, loading]);
-
-    // Update the device state in the backend (e.g., when the washer starts/stops)
-    const updateDeviceState = async (state, temp, mode) => {
+    const updateDeviceState = async (state, temp = null, mode = null) => {
         try {
             const payload = { state };
             if (temp !== null) payload.temperature = temp;
@@ -81,13 +90,60 @@ export default function StateControl({ deviceId, toggleWasher, temperature, wash
                 throw new Error(`Failed to update device state: ${response.statusText}`);
             }
 
-            console.log("Device state updated successfully:", payload);
+            const updatedState = await response.json();
+            setCurrentState({
+                isWasherOn: updatedState.state,
+                temperature: updatedState.temperature,
+                washMode: updatedState.mode,
+            });
+
+            setIsRunning(updatedState.state); // Ensure "isRunning" syncs with the backend state
+            console.log("Device state updated successfully:", updatedState);
         } catch (error) {
             console.error("Error updating device state:", error);
         }
     };
 
-    // Show loading state while fetching data
+    const handleToggleWasher = async () => {
+        const newState = !currentState.isWasherOn;
+
+        setCurrentState((prevState) => ({
+            ...prevState,
+            isWasherOn: newState,
+        }));
+
+        setIsRunning(newState); // Immediately update "isRunning"
+
+        // Update the washer’s state in the backend
+        await updateDeviceState(newState, newState ? currentState.temperature : null, newState ? currentState.washMode : null);
+
+        if (newState) {
+            // Simulate the cycle with a timeout
+            setTimeout(async () => {
+                setIsRunning(false);
+
+                // Automatically turn off the washer in the backend after the cycle
+                await updateDeviceState(false, null, null);
+
+                // Fetch the latest state to ensure synchronization
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${deviceId}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        setCurrentState({
+                            isWasherOn: data.state,
+                            temperature: data.temperature || 40,
+                            washMode: data.mode || "Regular Wash",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching updated state:", error);
+                }
+            }, 120000); // Simulate a 2-minute cycle
+        }
+    };
+
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -95,7 +151,7 @@ export default function StateControl({ deviceId, toggleWasher, temperature, wash
     return (
         <div className="flex flex-col items-center mt-6">
             <button
-                onClick={() => toggleWasher(!currentState.isWasherOn)}
+                onClick={handleToggleWasher}
                 className={`w-48 h-56 bg-white rounded-3xl flex items-center justify-center shadow-lg relative ${
                     isRunning ? "opacity-50 pointer-events-none" : ""
                 }`}
@@ -123,7 +179,7 @@ export default function StateControl({ deviceId, toggleWasher, temperature, wash
                     type="checkbox"
                     className="toggle bg-gray-300 checked:bg-orange-500"
                     checked={currentState.isWasherOn}
-                    onChange={() => toggleWasher(!currentState.isWasherOn)}
+                    onChange={handleToggleWasher}
                     disabled={isRunning} // Prevent toggling during the cycle
                 />
             </div>

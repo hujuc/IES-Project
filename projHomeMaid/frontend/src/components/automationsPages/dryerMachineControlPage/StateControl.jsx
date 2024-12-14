@@ -124,7 +124,7 @@ export default function StateControl({ deviceId }) {
 
                 // Automatically turn off the dryer in the backend after the cycle
                 updateDeviceState(false, null, null);
-            }, 3000); // 1-minute cycle simulation
+            }, 120000); // 1-minute cycle simulation
         }
     };
 

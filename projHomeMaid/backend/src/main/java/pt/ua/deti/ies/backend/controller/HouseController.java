@@ -15,16 +15,7 @@ import jakarta.validation.Valid;
 
 import java.util.*;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
+
 @RestController
 @RequestMapping("/api/houses")
 public class HouseController {

@@ -6,12 +6,16 @@ const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function AutomatizeWasher({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
+    const [currentState, setCurrentState] = useState({
+        isWasherOn: false,
+        temperature: 40,
+        washMode: "Regular Wash",
+    });
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(40); // Default temperature
+    const [temperature, setTemperature] = useState(40);
     const [washMode, setWashMode] = useState("Regular Wash");
 
     useEffect(() => {
-        // Fetch automatizations from backend
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -25,9 +29,27 @@ export default function AutomatizeWasher({ deviceId }) {
             }
         };
 
-        fetchAutomatizations();
+        const fetchDeviceState = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setCurrentState({
+                        isWasherOn: data.state,
+                        temperature: data.temperature || 40,
+                        washMode: data.mode || "Regular Wash",
+                    });
+                } else {
+                    console.error("Failed to fetch device state:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching device state:", err);
+            }
+        };
 
-        // WebSocket connection for real-time updates
+        fetchAutomatizations();
+        fetchDeviceState();
+
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -39,10 +61,40 @@ export default function AutomatizeWasher({ deviceId }) {
             console.log("Connected to WebSocket for Washer Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
-                    setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
+                try {
+                    const updatedData = JSON.parse(message.body);
+
+                    if (updatedData.deviceId === deviceId) {
+                        if (updatedData.executionTime) {
+                            setAutomatizations((prev) => {
+                                const exists = prev.some(
+                                    (item) =>
+                                        item.executionTime === updatedData.executionTime &&
+                                        item.deviceId === updatedData.deviceId
+                                );
+                                if (exists) {
+                                    return prev.map((item) =>
+                                        item.executionTime === updatedData.executionTime
+                                            ? updatedData
+                                            : item
+                                    );
+                                } else {
+                                    return [...prev, updatedData];
+                                }
+                            });
+                        }
+
+                        if (updatedData.changes) {
+                            setCurrentState((prevState) => ({
+                                ...prevState,
+                                isWasherOn: updatedData.changes.state ?? prevState.isWasherOn,
+                                temperature: updatedData.changes.temperature ?? prevState.temperature,
+                                washMode: updatedData.changes.washMode ?? prevState.washMode,
+                            }));
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
                 }
             });
         };
@@ -81,7 +133,7 @@ export default function AutomatizeWasher({ deviceId }) {
             }
 
             const data = await response.json();
-            setAutomatizations([...automatizations, data]);
+            setAutomatizations((prev) => [...prev, data]);
             console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
@@ -90,6 +142,7 @@ export default function AutomatizeWasher({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
@@ -100,7 +153,7 @@ export default function AutomatizeWasher({ deviceId }) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }
 
-            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            setAutomatizations((prev) => prev.filter((_, i) => i !== index));
             console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);

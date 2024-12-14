@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Importa useParams do React Router
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import ClockCentralControl from "../../components/automationsPages/clockPage/ClockCentralControl.jsx";
 import AutomatizeAlarmClock from "../../components/automationsPages/clockPage/AutomatizeAlarmClock.jsx";
@@ -8,25 +7,21 @@ import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function ClockControl() {
-    const { deviceId } = useParams(); // Captura o deviceId da URL
-    const [deviceName, setDeviceName] = useState("Clock"); // Nome padrão
+    const url = window.location.href;
+    const urlParts = url.split("/");
+    const deviceId = urlParts[urlParts.length - 1];
+
+    const [deviceName, setDeviceName] = useState("Clock"); // Default name
     const [error, setError] = useState(null);
 
+    // Fetch the initial clock data and setup WebSocket
     useEffect(() => {
-        if (!deviceId) {
-            console.error("Device ID is missing");
-            setError("Device ID is missing");
-            return;
-        }
-
         const fetchClockData = async () => {
             try {
                 const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch device: ${response.statusText}`);
-                }
                 const data = await response.json();
-                setDeviceName(data.name || "Clock"); // Define o nome do dispositivo
+
+                setDeviceName(data.name || "Clock"); // Use the device name from API
             } catch (err) {
                 console.error("Error fetching clock data:", err);
                 setError("Failed to fetch the clock data.");
@@ -35,17 +30,18 @@ export default function ClockControl() {
 
         fetchClockData();
 
-        // Configuração do WebSocket
+        // Setup WebSocket with SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
+            reconnectDelay: 5000, // Retry connection every 5 seconds
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Inform server every 4 seconds
         });
 
         client.onConnect = () => {
             console.log("Connected to WebSocket STOMP!");
 
+            // Subscribe to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 console.log("Message received via WebSocket:", updatedData);
@@ -64,20 +60,20 @@ export default function ClockControl() {
 
         client.activate();
 
-        return () => client.deactivate(); // Desconecta no unmount
+        return () => client.deactivate(); // Disconnect on component unmount
     }, [deviceId]);
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Título */}
+            {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
                 <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* Controle Central do Relógio */}
+            {/* Central Clock Control */}
             <div className="mt-6">
                 <ClockCentralControl deviceId={deviceId} />
             </div>

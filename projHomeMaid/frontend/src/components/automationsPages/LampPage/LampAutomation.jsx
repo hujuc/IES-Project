@@ -4,7 +4,7 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeLight({ deviceId }) {
+export default function LampAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
     const [brightness, setBrightness] = useState(50); // Default brightness

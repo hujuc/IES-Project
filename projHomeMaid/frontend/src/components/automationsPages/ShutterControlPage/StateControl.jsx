@@ -1,6 +1,6 @@
 import React from "react";
-import shutteropen from "../../../assets/shutter_open.png"; // Ícone para persiana aberta
-import shutterclosed from "../../../assets/shutter_closed.png"; // Ícone para persiana fechada
+import shutteropen from "../../../assets/automationsPages/devices/shutter/shutter_open.png"; // Ícone para persiana aberta
+import shutterclosed from "../../../assets/automationsPages/devices/shutter/shutter_closed.png"; // Ícone para persiana fechada
 
 export default function StateControl({ isShutterOpen, toggleShutter }) {
     return (

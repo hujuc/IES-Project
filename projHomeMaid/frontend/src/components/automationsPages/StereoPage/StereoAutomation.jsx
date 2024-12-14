@@ -4,7 +4,7 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeSpeaker({ deviceId }) {
+export default function StereoAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]); // Lista de automatizações
     const [onTime, setOnTime] = useState("08:00"); // Hora de ativação
     const [volume, setVolume] = useState(50); // Volume do speaker
@@ -95,7 +95,6 @@ export default function AutomatizeSpeaker({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -114,7 +113,6 @@ export default function AutomatizeSpeaker({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
@@ -165,11 +163,19 @@ export default function AutomatizeSpeaker({ deviceId }) {
                                 onChange={(e) => setVolume(e.target.value)}
                                 className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
                             />
-                            <span className="text-gray-700 font-medium">{volume}%</span>
+                            <span className="text-gray-700 font-medium">{volume}</span>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Botão de Adicionar Automatização */}
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
 
             {/* Lista de Automatizações */}
             <div className="w-full space-y-3">
@@ -185,7 +191,7 @@ export default function AutomatizeSpeaker({ deviceId }) {
                             {item.changes.state && item.changes.volume !== undefined && (
                                 <span className="block font-medium">
                                     Volume:{" "}
-                                    <span className="font-semibold">{item.changes.volume}%</span>
+                                    <span className="font-semibold">{item.changes.volume}</span>
                                 </span>
                             )}
                             <span className="block font-medium">
@@ -197,7 +203,7 @@ export default function AutomatizeSpeaker({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -218,14 +224,6 @@ export default function AutomatizeSpeaker({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            {/* Botão de Adicionar Automatização */}
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

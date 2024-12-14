@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/speakersControlPage/StateControl.jsx";
-import VolumeControl from "../../components/automationsPages/speakersControlPage/VolumeControl.jsx";
-import AutomatizeSpeaker from "../../components/automationsPages/speakersControlPage/AutomatizeSpeaker.jsx";
+import StateControl from "../../components/automationsPages/StereoPage/StateControl.jsx"; // Novo StateControl combinado
+import StereoAutomation from "../../components/automationsPages/StereoPage/StereoAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
-export default function SpeakerControl() {
+export default function StereoControl() {
     const DEFAULT_VOLUME = 50;
     const [isSpeakerOn, setIsSpeakerOn] = useState(false);
     const [volume, setVolume] = useState(DEFAULT_VOLUME);
+    const [deviceName, setDeviceName] = useState("Speaker"); // Nome padrão
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -24,6 +25,7 @@ export default function SpeakerControl() {
 
                 setIsSpeakerOn(data.state || false);
                 setVolume(data.volume != null ? Number(data.volume) : DEFAULT_VOLUME);
+                setDeviceName(data.name || "Speaker"); // Define o nome do dispositivo
             } catch (err) {
                 console.error("Error fetching speaker data:", err);
                 setError("Failed to fetch speaker data.");
@@ -50,6 +52,7 @@ export default function SpeakerControl() {
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsSpeakerOn(updatedData.state);
                     if (updatedData.volume !== undefined) setVolume(Number(updatedData.volume));
+                    if (updatedData.name !== undefined) setDeviceName(updatedData.name);
                     console.log("Speaker updated via WebSocket:", updatedData);
                 }
             });
@@ -104,8 +107,6 @@ export default function SpeakerControl() {
             if (!response.ok) {
                 throw new Error(`API response error: ${response.status}`);
             }
-
-            console.log("State and volume saved successfully:", { state, volume });
         } catch (err) {
             console.error("Error saving state and volume to database:", err);
             setError("Failed to save state and volume to database.");
@@ -113,25 +114,26 @@ export default function SpeakerControl() {
     };
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* State Control */}
-            <StateControl isSpeakerOn={isSpeakerOn} toggleSpeaker={toggleSpeaker} />
-
-            {/* Volume Control */}
-            <VolumeControl isSpeakerOn={isSpeakerOn} volume={volume} updateVolume={updateVolume} />
-
-            {/* Automatization Section */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeSpeaker deviceId={deviceId} />
-                </div>
+            {/* Título do Dispositivo */}
+            <div className="flex flex-col items-center justify-center mt-4">
+                <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
+
+            {/* State Control */}
+            <StateControl
+                isSpeakerOn={isSpeakerOn}
+                toggleSpeaker={toggleSpeaker}
+                volume={volume}
+                updateVolume={updateVolume}
+            />
+
+            <AutomationBox deviceId={deviceId}>
+                <StereoAutomation deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

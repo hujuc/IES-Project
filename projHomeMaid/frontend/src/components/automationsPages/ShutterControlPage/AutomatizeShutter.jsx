@@ -5,13 +5,12 @@ import SockJS from "sockjs-client";
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function AutomatizeShutter({ deviceId }) {
-    const [automatizations, setAutomatizations] = useState([]); // Lista de automatizações
-    const [onTime, setOnTime] = useState("08:00"); // Hora de ativação
-    const [openPercentage, setOpenPercentage] = useState(50); // Percentagem de abertura
-    const [action, setAction] = useState("Turn On"); // Ação (Turn On / Turn Off)
+    const [automatizations, setAutomatizations] = useState([]);
+    const [onTime, setOnTime] = useState("08:00");
+    const [openPercentage, setOpenPercentage] = useState(50);
+    const [action, setAction] = useState("Turn On");
 
     useEffect(() => {
-        // Fetch automatizations from backend
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -27,7 +26,6 @@ export default function AutomatizeShutter({ deviceId }) {
 
         fetchAutomatizations();
 
-        // WebSocket connection
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -42,7 +40,6 @@ export default function AutomatizeShutter({ deviceId }) {
                 try {
                     const updatedData = JSON.parse(message.body);
 
-                    // Validate incoming data
                     if (
                         updatedData.deviceId === deviceId &&
                         updatedData.executionTime &&
@@ -93,7 +90,6 @@ export default function AutomatizeShutter({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -112,7 +108,6 @@ export default function AutomatizeShutter({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
@@ -191,7 +186,7 @@ export default function AutomatizeShutter({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg

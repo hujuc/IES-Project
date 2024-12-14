@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import CentralControl from "../../components/automationsPages/coffeeMachinePage/CentralControl.jsx";
 import DrinkOptions from "../../components/automationsPages/coffeeMachinePage/DrinkOptions.jsx";
-import Automatize from "../../components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx";
+import AutomatizeCoffee from "../../components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx";
 import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function CoffeeMachineControl() {
     const { deviceId } = useParams(); // Extract deviceId from the URL
@@ -28,37 +29,37 @@ export default function CoffeeMachineControl() {
 
         fetchDeviceData();
 
-        // Conectar ao WebSocket com SockJS
+        // Connect to WebSocket with SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Reconecta automaticamente após 5 segundos em caso de falha
-            heartbeatIncoming: 4000, // Checa o servidor a cada 4 segundos
-            heartbeatOutgoing: 4000, // Informa o servidor que está vivo a cada 4 segundos
+            reconnectDelay: 5000, // Automatically reconnect after 5 seconds if disconnected
+            heartbeatIncoming: 4000, // Check server every 4 seconds
+            heartbeatOutgoing: 4000, // Notify server every 4 seconds that client is alive
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
+            console.log("Connected to WebSocket STOMP!");
 
             // Subscribing to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Mensagem recebida via WebSocket:", updatedData);
+                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                    console.log("Dados atualizados no frontend:", updatedData);
+                    console.log("Data updated in frontend:", updatedData);
                 }
             });
         };
 
         client.onStompError = (frame) => {
-            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
-            console.error("Detalhes do erro:", frame.body);
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
         };
 
         client.activate();
 
-        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
+        return () => client.deactivate(); // Close connection when the component unmounts
     }, [deviceId]);
 
     if (loading) {
@@ -78,13 +79,13 @@ export default function CoffeeMachineControl() {
     }
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            {/* Top Bar com o AutomationsHeader */}
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
+            {/* Top Bar with AutomationsHeader */}
             <AutomationsHeader />
 
             {/* Coffee Machine Title */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Coffee Machine</span>
+                <span className="text-2xl font-semibold">{deviceData.name || "Coffee Machine"}</span>
             </div>
 
             {/* Central Control */}
@@ -97,15 +98,9 @@ export default function CoffeeMachineControl() {
                 <DrinkOptions deviceId={deviceId} deviceData={deviceData} />
             </div>
 
-            {/* Automatize */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <Automatize deviceId={deviceId} />
-                </div>
-            </div>
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeCoffee deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

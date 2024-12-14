@@ -4,7 +4,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 export default function DrinkOptions({ deviceId }) {
-    const [selectedOption, setSelectedOption] = useState("Espresso"); // Default option: Espresso
+    const [selectedOption, setSelectedOption] = useState("Espresso");
     const options = [
         { name: "Espresso", icon: "☕" },
         { name: "Tea", icon: "🍵" },
@@ -12,41 +12,36 @@ export default function DrinkOptions({ deviceId }) {
     ];
     const [error, setError] = useState(null);
 
-    // Fetch the initial drinkType from the database
     useEffect(() => {
         const fetchDrinkType = async () => {
             try {
                 const response = await axios.get(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
-                const { drinkType } = response.data; // Assuming the database has a 'drinkType' field
-                setSelectedOption(drinkType || "Espresso"); // Default to "Espresso" if null
+                const { drinkType } = response.data;
+                setSelectedOption(capitalize(drinkType) || "Espresso");
             } catch (err) {
                 console.error("Error fetching drink type:", err);
                 setError("Failed to fetch the current drink type.");
             }
         };
 
-        if (deviceId) {
-            fetchDrinkType();
-        }
+        if (deviceId) fetchDrinkType();
     }, [deviceId]);
 
-    // WebSocket connection for real-time updates
     useEffect(() => {
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Retry connection every 5 seconds
-            heartbeatIncoming: 4000, // Check server every 4 seconds
-            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
         });
 
         client.onConnect = () => {
             console.log("Connected to WebSocket STOMP!");
 
-            // Subscribe to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 if (updatedData.deviceId === deviceId && updatedData.drinkType) {
-                    setSelectedOption(updatedData.drinkType);
+                    setSelectedOption(capitalize(updatedData.drinkType));
                     console.log("Drink type updated via WebSocket:", updatedData.drinkType);
                 }
             });
@@ -59,14 +54,13 @@ export default function DrinkOptions({ deviceId }) {
 
         client.activate();
 
-        return () => client.deactivate(); // Disconnect on component unmount
+        return () => client.deactivate();
     }, [deviceId]);
 
-    // Update the drinkType in the database
     const updateDrinkType = async (optionName) => {
         try {
             await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                drinkType: optionName,
+                drinkType: optionName.toLowerCase(),
             });
             console.log("Drink type updated successfully");
         } catch (err) {
@@ -75,15 +69,16 @@ export default function DrinkOptions({ deviceId }) {
         }
     };
 
-    // Handle user selection
     const handleSelection = (optionName) => {
-        setSelectedOption(optionName); // Update the local state
-        updateDrinkType(optionName); // Update the database
+        setSelectedOption(optionName);
+        updateDrinkType(optionName);
     };
+
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
     return (
         <div className="flex flex-col items-center">
-            {error && <p className="text-red-500">{error}</p>} {/* Display error if any */}
+            {error && <p className="text-red-500">{error}</p>}
             <div className="flex space-x-4">
                 {options.map((option, index) => (
                     <button

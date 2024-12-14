@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
+import coffeeMachineOn from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOn.png"; // Imagem para estado ligado
+import coffeeMachineOff from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOff.png"; // Imagem para estado desligado
+
 export default function CentralControl({ deviceId }) {
     const [device, setDevice] = useState(null);
     const [error, setError] = useState(null);
@@ -100,9 +103,9 @@ export default function CentralControl({ deviceId }) {
                         disabled={isLocked}
                     >
                         <img
-                            src={"path/to/alarmIcon.png"}
-                            alt="Coffee"
-                            className="h-10 w-10"
+                            src={lightOn ? coffeeMachineOn : coffeeMachineOff} // Condição para alternar a imagem
+                            alt={lightOn ? "Coffee Machine On" : "Coffee Machine Off"} // Texto alternativo
+                            className="h-14 w-14"
                         />
                     </button>
                 </div>

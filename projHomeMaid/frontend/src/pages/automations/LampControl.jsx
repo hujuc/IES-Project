@@ -3,10 +3,10 @@ import AutomationsHeader from "../../components/automationsPages/AutomationsHead
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import AutomatizeLight from "../../components/automationsPages/LightBulbPage/AutomatizeLight.jsx";
-import StateControl from "../../components/automationsPages/LightBulbPage/StateControl.jsx";
+import LampAutomation from "../../components/automationsPages/LampPage/LampAutomation.jsx";
+import StateControl from "../../components/automationsPages/LampPage/StateControl.jsx";
 
-export default function LightBulbControl() {
+export default function LampControl() {
     const [isLightOn, setIsLightOn] = useState(false);
     const [brightness, setBrightness] = useState(50); // Brilho padrão
     const [color, setColor] = useState("#ffffff"); // Cor padrão (branca)
@@ -97,7 +97,7 @@ export default function LightBulbControl() {
 
             {/* Automatização */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeLight deviceId={deviceId} />
+                <LampAutomation deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

@@ -1,6 +1,6 @@
 import React from "react";
-import lowVolumeIcon from "../../../assets/volume_min.jpg"; // Ícone para volume baixo
-import highVolumeIcon from "../../../assets/volume_max.jpg"; // Ícone para volume alto
+import lowVolumeIcon from "../../../assets/volume_min.png"; // Ícone para volume baixo
+import highVolumeIcon from "../../../assets/volume_max.png"; // Ícone para volume alto
 
 export default function VolumeControl({ isSpeakerOn, volume, updateVolume }) {
     return (

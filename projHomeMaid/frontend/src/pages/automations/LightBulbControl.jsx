@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import { FiZapOff, FiZap } from "react-icons/fi";
-import AutomatizeLight from "../../components/automationsPages/LightBulbPage/AutomatizeLight.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-
-import outlineSunIcon from "../../assets/outlineSun.png";
-import fullSunIcon from "../../assets/fullSun.png";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import AutomatizeLight from "../../components/automationsPages/LightBulbPage/AutomatizeLight.jsx";
+import StateControl from "../../components/automationsPages/LightBulbPage/StateControl.jsx";
 
 export default function LightBulbControl() {
     const [isLightOn, setIsLightOn] = useState(false);
     const [brightness, setBrightness] = useState(50); // Brilho padrão
     const [color, setColor] = useState("#ffffff"); // Cor padrão (branca)
+    const [deviceName, setDeviceName] = useState("Light Bulb"); // Nome padrão
     const [error, setError] = useState(null);
 
     // Obter ID do dispositivo da URL
@@ -19,21 +18,6 @@ export default function LightBulbControl() {
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
 
-    const predefinedColors = [
-        { name: "White", value: "#ffffff" },
-        { name: "Red", value: "#ff0000" },
-        { name: "Pink", value: "#ffc0cb" },
-        { name: "Orange", value: "#ffa500" },
-        { name: "Warm White", value: "#ffd700" },
-        { name: "Yellow", value: "#ffff00" },
-        { name: "Green", value: "#00ff00" },
-        { name: "Teal", value: "#008080" },
-        { name: "Light Blue", value: "#add8e6" },
-        { name: "Blue", value: "#0000ff" },
-        { name: "Purple", value: "#800080" },
-    ];
-
-    // Buscar o estado inicial da lâmpada
     useEffect(() => {
         const fetchLightData = async () => {
             try {
@@ -44,6 +28,7 @@ export default function LightBulbControl() {
                 setIsLightOn(data.state || false); // Estado inicial
                 setBrightness(data.brightness || 50); // Brilho inicial
                 setColor(data.color || "#ffffff"); // Cor inicial
+                setDeviceName(data.name || "Light Bulb"); // Nome do dispositivo
             } catch (err) {
                 console.error("Erro ao buscar o estado da lâmpada:", err);
                 setError("Falha ao buscar o estado da lâmpada.");
@@ -55,9 +40,9 @@ export default function LightBulbControl() {
         // Conectar ao WebSocket com SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Reconecta automaticamente após 5 segundos em caso de falha
-            heartbeatIncoming: 4000, // Checa o servidor a cada 4 segundos
-            heartbeatOutgoing: 4000, // Informa o servidor que está vivo a cada 4 segundos
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
         });
 
         client.onConnect = () => {
@@ -72,6 +57,7 @@ export default function LightBulbControl() {
                     if (updatedData.state !== undefined) setIsLightOn(updatedData.state);
                     if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
                     if (updatedData.color !== undefined) setColor(updatedData.color);
+                    if (updatedData.name !== undefined) setDeviceName(updatedData.name);
                     console.log("Dados atualizados no frontend:", updatedData);
                 }
             });
@@ -87,164 +73,32 @@ export default function LightBulbControl() {
         return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
     }, [deviceId]);
 
-    // Alternar o estado da lâmpada
-    const toggleLight = async () => {
-        try {
-            const updatedState = !isLightOn;
-            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ state: updatedState }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro na resposta da API: ${response.status}`);
-            }
-
-            console.log(`Estado da lâmpada atualizado na API para: ${updatedState}`);
-            setIsLightOn(updatedState);
-        } catch (err) {
-            console.error("Erro ao alternar a luz:", err);
-            setError("Falha ao alternar a luz.");
-        }
-    };
-
-    // Atualizar o brilho
-    const updateBrightness = async (newBrightness) => {
-        try {
-            setBrightness(newBrightness);
-
-            if (isLightOn) {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ brightness: newBrightness }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erro na resposta da API: ${response.status}`);
-                }
-
-                console.log(`Brilho atualizado na API para: ${newBrightness}`);
-            }
-        } catch (err) {
-            console.error("Erro ao atualizar o brilho:", err);
-            setError("Falha ao atualizar o brilho.");
-        }
-    };
-
-    // Atualizar a cor
-    const updateColor = async (newColor) => {
-        try {
-            setColor(newColor);
-
-            if (isLightOn) {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ color: newColor }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erro na resposta da API: ${response.status}`);
-                }
-
-                console.log(`Cor atualizada na API para: ${newColor}`);
-            }
-        } catch (err) {
-            console.error("Erro ao atualizar a cor:", err);
-            setError("Falha ao atualizar a cor.");
-        }
-    };
-
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Seletor do estado da lâmpada */}
-            <div className="flex flex-col items-center mt-6">
-                <button
-                    onClick={toggleLight}
-                    className="w-48 h-56 bg-white rounded-3xl flex items-center justify-center shadow-lg relative"
-                >
-                    <div
-                        className={`absolute w-32 h-32 rounded-full border-4 ${
-                            isLightOn ? `bg-yellow-500 opacity-${Math.floor(brightness / 10)}` : "bg-gray-300"
-                        }`}
-                        style={{backgroundColor: isLightOn ? color : "#ccc"}}
-                    ></div>
-                    <div className="z-10">
-                        {isLightOn ? (
-                            <FiZap size={50} className="text-black"/>
-                        ) : (
-                            <FiZapOff size={50} className="text-gray-400"/>
-                        )}
-                    </div>
-                </button>
-                <div className="mt-4 flex items-center">
-                    <span className="text-lg font-medium mr-3">Light</span>
-                    <input
-                        type="checkbox"
-                        className="toggle bg-gray-300 checked:bg-yellow-500"
-                        checked={isLightOn}
-                        onChange={toggleLight}
-                    />
-                </div>
+            {/* Título do dispositivo */}
+            <div className="flex flex-col items-center justify-center mt-4">
+                <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* Slider de brilho */}
-            <div className={`mt-6 w-60 text-center ${isLightOn ? "" : "opacity-50 pointer-events-none"}`}>
-                <div className="flex justify-between items-center">
-                    <img src={outlineSunIcon} alt="Low Brightness" className="w-11 h-11"/>
-                    <input
-                        type="range"
-                        min="10"
-                        max="100"
-                        value={brightness}
-                        onChange={(e) => updateBrightness(e.target.value)}
-                        className="w-full mx-4 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                            background: `linear-gradient(to right, #FACC15 ${brightness}%, #e5e7eb ${brightness}%)`,
-                        }}
-                    />
-                    <img src={fullSunIcon} alt="High Brightness" className="w-11 h-11"/>
-                </div>
-                <p className="text-white-500 mt-0">{brightness}%</p>
-            </div>
-
-            {/* Controle de cor */}
-            <div className={`mt-6 w-60 text-center ${isLightOn ? "" : "opacity-50 pointer-events-none"}`}>
-                <label className="text-lg font-medium mb-2 block">Color</label>
-                <div className="flex justify-center flex-wrap gap-2">
-                    {predefinedColors.map((colorOption) => (
-                        <button
-                            key={colorOption.value}
-                            style={{backgroundColor: colorOption.value}}
-                            className={`w-6 h-6 rounded-full border-2 ${
-                                color === colorOption.value ? "border-white" : "border-transparent"
-                            }`}
-                            onClick={() => updateColor(colorOption.value)}
-                        />
-                    ))}
-                </div>
-            </div>
+            {/* Controle de Estado */}
+            <StateControl
+                isLightOn={isLightOn}
+                setIsLightOn={setIsLightOn}
+                brightness={brightness}
+                setBrightness={setBrightness}
+                color={color}
+                setColor={setColor}
+                deviceId={deviceId}
+                error={error}
+            />
 
             {/* Automatização */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)"}}
-                >
-                    <AutomatizeLight deviceId={deviceId}/>
-                </div>
-            </div>
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeLight deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

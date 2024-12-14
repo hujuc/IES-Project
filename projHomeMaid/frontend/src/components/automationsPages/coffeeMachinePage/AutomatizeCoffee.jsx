@@ -9,7 +9,6 @@ export default function AutomatizeCoffee({ deviceId }) {
     const [onTime, setOnTime] = useState("10:00");
     const [selectedType, setSelectedType] = useState("Espresso");
 
-    // Fetch automatizations from backend and subscribe to WebSocket updates
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
@@ -18,7 +17,14 @@ export default function AutomatizeCoffee({ deviceId }) {
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
-                setAutomatizations(deviceAutomatizations);
+                const normalizedAutomatizations = deviceAutomatizations.map((item) => ({
+                    ...item,
+                    changes: {
+                        ...item.changes,
+                        drinkType: capitalize(item.changes.drinkType),
+                    },
+                }));
+                setAutomatizations(normalizedAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -45,6 +51,7 @@ export default function AutomatizeCoffee({ deviceId }) {
                         updatedData.changes &&
                         updatedData.changes.drinkType
                     ) {
+                        updatedData.changes.drinkType = capitalize(updatedData.changes.drinkType);
                         setAutomatizations((prev) => [...prev, updatedData]);
                         console.log("Updated automatization received via WebSocket:", updatedData);
                     }
@@ -67,7 +74,7 @@ export default function AutomatizeCoffee({ deviceId }) {
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
-            changes: { drinkType: selectedType },
+            changes: { drinkType: selectedType.toLowerCase() },
         };
 
         try {
@@ -84,8 +91,8 @@ export default function AutomatizeCoffee({ deviceId }) {
             }
 
             const data = await response.json();
+            data.changes.drinkType = capitalize(data.changes.drinkType);
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -105,11 +112,12 @@ export default function AutomatizeCoffee({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
     };
+
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
     return (
         <div className="flex flex-col items-center w-full">
@@ -144,6 +152,13 @@ export default function AutomatizeCoffee({ deviceId }) {
                 </div>
             </div>
 
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
+
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -160,7 +175,7 @@ export default function AutomatizeCoffee({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -181,13 +196,6 @@ export default function AutomatizeCoffee({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

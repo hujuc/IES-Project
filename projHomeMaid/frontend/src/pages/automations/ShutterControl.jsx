@@ -5,11 +5,15 @@ import PercentageControl from "../../components/automationsPages/ShutterControlP
 import AutomatizeShutter from "../../components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import AutomatizeHeatedFloors
+    from "../../components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";
 
 export default function ShutterControl() {
-    const DEFAULT_OPEN_PERCENTAGE = 50;
+    const DEFAULT_OPEN_PERCENTAGE = 100; // Valor padrão ao abrir a persiana
     const [isShutterOpen, setIsShutterOpen] = useState(false);
     const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
+    const [deviceName, setDeviceName] = useState("Shutter");
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -23,6 +27,7 @@ export default function ShutterControl() {
                 const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
+                setDeviceName(data.name || "Shutter"); // Define o nome do dispositivo como título
                 setIsShutterOpen(data.state || false);
                 setOpenPercentage(
                     data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE
@@ -55,6 +60,7 @@ export default function ShutterControl() {
                     if (updatedData.state !== undefined) setIsShutterOpen(updatedData.state);
                     if (updatedData.openPercentage !== undefined)
                         setOpenPercentage(updatedData.openPercentage);
+                    if (updatedData.name) setDeviceName(updatedData.name);
                     console.log("Dados atualizados no frontend:", updatedData);
                 }
             });
@@ -82,10 +88,10 @@ export default function ShutterControl() {
             const updatedState = state !== undefined ? state : !isShutterOpen;
 
             if (updatedState) {
-                setOpenPercentage(DEFAULT_OPEN_PERCENTAGE);
+                setOpenPercentage(DEFAULT_OPEN_PERCENTAGE); // Atualiza para 100% ao abrir
                 await saveStateToDatabase(updatedState, DEFAULT_OPEN_PERCENTAGE);
             } else {
-                setOpenPercentage(0);
+                setOpenPercentage(0); // Atualiza para 0% ao fechar
                 await saveStateToDatabase(updatedState, 0);
             }
 
@@ -124,7 +130,6 @@ export default function ShutterControl() {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }
 
-            console.log("State and percentage saved successfully:", { state, percentage });
         } catch (err) {
             console.error("Erro ao salvar estado e percentagem na base de dados:", err);
             setError("Falha ao salvar estado e percentagem na base de dados.");
@@ -132,13 +137,13 @@ export default function ShutterControl() {
     };
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
             {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Shutter</span>
+                <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
             {/* State Control */}
@@ -151,15 +156,9 @@ export default function ShutterControl() {
                 updateOpenPercentage={updateOpenPercentage}
             />
 
-            {/* Automatization Section */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeShutter deviceId={deviceId} />
-                </div>
-            </div>
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeShutter deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

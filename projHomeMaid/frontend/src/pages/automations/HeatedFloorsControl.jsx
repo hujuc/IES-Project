@@ -10,6 +10,7 @@ import SockJS from "sockjs-client";
 export default function HeatedFloorsControl() {
     const [isHeatedOn, setIsHeatedOn] = useState(false);
     const [temperature, setTemperature] = useState(20.0);
+    const [name, setName] = useState(""); // State to store device name
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -27,9 +28,13 @@ export default function HeatedFloorsControl() {
             if (data.temperature !== undefined) {
                 setTemperature(data.temperature);
             }
+
+            if (data.name !== undefined) {
+                setName(data.name); // Set the device name
+            }
         } catch (err) {
-            console.error("Error fetching heated floors state:", err);
-            setError("Failed to fetch heated floors state.");
+            console.error("Error fetching heated floors data:", err);
+            setError("Failed to fetch heated floors data.");
         }
     };
 
@@ -55,6 +60,7 @@ export default function HeatedFloorsControl() {
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsHeatedOn(updatedData.state);
                     if (updatedData.temperature !== undefined) setTemperature(updatedData.temperature);
+                    if (updatedData.name !== undefined) setName(updatedData.name); // Update name if available
                     console.log("Updated data in frontend:", updatedData);
                 }
             });
@@ -111,7 +117,6 @@ export default function HeatedFloorsControl() {
                 throw new Error(`API response error: ${response.status}`);
             }
 
-            console.log("State and temperature saved successfully:", { state, temperature });
         } catch (err) {
             console.error("Error saving state and temperature to database:", err);
             setError("Failed to save state and temperature to database.");
@@ -125,7 +130,7 @@ export default function HeatedFloorsControl() {
 
             {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Heated Floors</span>
+                <span className="text-2xl font-semibold">{name || "Loading..."}</span>
             </div>
 
             <StateControl isHeatedOn={isHeatedOn} toggleHeatedFloors={toggleHeatedFloors} />

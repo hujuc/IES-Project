@@ -4,23 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/HouseController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/RoomController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Notification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/NotificationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/CoffeeMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/CoffeeMachineAutomationHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DeviceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DryerMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/DryerMachineAutomationHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/HouseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/HouseService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/WashingMachineAutomationHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/WashingMachineAutomationHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/thread/AutomationThreadManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/thread/AutomationThreadManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/NotificationDropdown.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/NotificationDropdown.jsx" afterDir="false" />
-    </list>
+    <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

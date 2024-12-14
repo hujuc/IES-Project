@@ -31,7 +31,7 @@ export default function ClockCentralControl({ deviceId }) {
             setTimerActive(false); // Deactivate the timer if turned off manually
 
             // Update the backend state
-            updateDeviceState(false);
+            updateDeviceState(false, false); // Set both `ringing` and `state` to false
         }
     };
 
@@ -44,7 +44,7 @@ export default function ClockCentralControl({ deviceId }) {
                 setTimerActive(false); // Deactivate the timer
 
                 // Update the backend state
-                updateDeviceState(false);
+                updateDeviceState(false, false); // Set both `ringing` and `state` to false
             }, 30000);
         }
 
@@ -52,16 +52,15 @@ export default function ClockCentralControl({ deviceId }) {
     }, [lightOn, timerActive]);
 
     // Function to update the state in the backend
-    const updateDeviceState = async (ringing) => {
+    const updateDeviceState = async (ringing, state) => {
         try {
             await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ringing }),
+                body: JSON.stringify({ ringing, state }),
             });
-            console.log("Device ringing state updated successfully.");
         } catch (error) {
             console.error("Error updating device state:", error);
         }

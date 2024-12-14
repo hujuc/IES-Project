@@ -11,8 +11,26 @@ export default function AutomatizeLight({ deviceId }) {
     const [color, setColor] = useState("#ffffff"); // Default color
     const [action, setAction] = useState("Turn On");
 
+    const predefinedColors = [
+        { name: "White", value: "#ffffff" },
+        { name: "Red", value: "#ff0000" },
+        { name: "Pink", value: "#ffc0cb" },
+        { name: "Orange", value: "#ffa500" },
+        { name: "Warm Yellow", value: "#ffd700" },
+        { name: "Yellow", value: "#ffff00" },
+        { name: "Green", value: "#00ff00" },
+        { name: "Teal", value: "#008080" },
+        { name: "Light Blue", value: "#add8e6" },
+        { name: "Blue", value: "#0000ff" },
+        { name: "Purple", value: "#800080" },
+    ];
+
+    const getColorName = (value) => {
+        const colorObj = predefinedColors.find((color) => color.value === value);
+        return colorObj ? colorObj.name : value;
+    };
+
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -20,7 +38,16 @@ export default function AutomatizeLight({ deviceId }) {
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
-                setAutomatizations(deviceAutomatizations);
+
+                const updatedAutomatizations = deviceAutomatizations.map((item) => ({
+                    ...item,
+                    changes: {
+                        ...item.changes,
+                        colorName: getColorName(item.changes.color),
+                    },
+                }));
+
+                setAutomatizations(updatedAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -28,7 +55,6 @@ export default function AutomatizeLight({ deviceId }) {
 
         fetchAutomatizations();
 
-        // WebSocket connection
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -50,6 +76,7 @@ export default function AutomatizeLight({ deviceId }) {
                         updatedData.changes.state !== undefined &&
                         (updatedData.changes.brightness !== undefined || updatedData.changes.color)
                     ) {
+                        updatedData.changes.colorName = getColorName(updatedData.changes.color);
                         setAutomatizations((prev) => [...prev, updatedData]);
                         console.log("Updated automatization received via WebSocket:", updatedData);
                     }
@@ -96,6 +123,7 @@ export default function AutomatizeLight({ deviceId }) {
             }
 
             const data = await response.json();
+            data.changes.colorName = getColorName(data.changes.color);
             setAutomatizations([...automatizations, data]);
             console.log("Automatization added successfully.");
         } catch (err) {
@@ -167,19 +195,32 @@ export default function AutomatizeLight({ deviceId }) {
                                 <span className="text-gray-700 font-medium">{brightness}</span>
                             </div>
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
                                 <label className="text-gray-600 font-medium">Color</label>
-                                <input
-                                    type="color"
-                                    value={color}
-                                    onChange={(e) => setColor(e.target.value)}
-                                    className="w-12 h-12 p-1 border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-orange-500"
-                                />
+                                <div className="flex justify-center flex-wrap gap-2 mt-2">
+                                    {predefinedColors.map((colorOption) => (
+                                        <button
+                                            key={colorOption.value}
+                                            style={{ backgroundColor: colorOption.value }}
+                                            className={`w-6 h-6 rounded-full border-2 ${
+                                                color === colorOption.value ? "border-black" : "border-transparent"
+                                            }`}
+                                            onClick={() => setColor(colorOption.value)}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </>
                     )}
                 </div>
             </div>
+
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
 
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
@@ -199,7 +240,7 @@ export default function AutomatizeLight({ deviceId }) {
                                     </span>
                                     <span className="block font-medium">
                                         Color:{" "}
-                                        <span className="font-semibold">{item.changes.color}</span>
+                                        <span className="font-semibold">{item.changes.colorName}</span>
                                     </span>
                                 </>
                             ) : (
@@ -208,7 +249,7 @@ export default function AutomatizeLight({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -229,13 +270,6 @@ export default function AutomatizeLight({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

@@ -105,7 +105,6 @@ export default function AutomatizeAlarmClock({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
             setError("Failed to add automatization.");
@@ -125,7 +124,6 @@ export default function AutomatizeAlarmClock({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
             setError("Failed to delete automatization.");
@@ -215,7 +213,7 @@ export default function AutomatizeAlarmClock({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg

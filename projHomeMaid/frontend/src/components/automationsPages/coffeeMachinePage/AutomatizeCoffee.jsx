@@ -11,7 +11,6 @@ export default function AutomatizeCoffee({ deviceId }) {
 
     // Fetch automatizations from backend and subscribe to WebSocket updates
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -27,7 +26,6 @@ export default function AutomatizeCoffee({ deviceId }) {
 
         fetchAutomatizations();
 
-        // Set up WebSocket client
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -39,10 +37,19 @@ export default function AutomatizeCoffee({ deviceId }) {
             console.log("Connected to WebSocket for Coffee Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
-                    setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
+                try {
+                    const updatedData = JSON.parse(message.body);
+                    if (
+                        updatedData.deviceId === deviceId &&
+                        updatedData.executionTime &&
+                        updatedData.changes &&
+                        updatedData.changes.drinkType
+                    ) {
+                        setAutomatizations((prev) => [...prev, updatedData]);
+                        console.log("Updated automatization received via WebSocket:", updatedData);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
                 }
             });
         };
@@ -106,14 +113,12 @@ export default function AutomatizeCoffee({ deviceId }) {
 
     return (
         <div className="flex flex-col items-center w-full">
-            {/* Automatize Container */}
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-gray-700">Automatize Coffee Machine</h2>
                 </div>
 
                 <div className="space-y-4">
-                    {/* On Time Input */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">On</label>
                         <input
@@ -124,7 +129,6 @@ export default function AutomatizeCoffee({ deviceId }) {
                         />
                     </div>
 
-                    {/* Type Dropdown */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Type</label>
                         <select
@@ -140,7 +144,6 @@ export default function AutomatizeCoffee({ deviceId }) {
                 </div>
             </div>
 
-            {/* List of Automatizations */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -149,12 +152,10 @@ export default function AutomatizeCoffee({ deviceId }) {
                     >
                         <div className="text-sm">
                             <span className="block font-medium">
-                                Time:{" "}
-                                <span className="font-semibold">{item.executionTime}</span>
+                                Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
                             <span className="block font-medium">
-                                Type:{" "}
-                                <span className="font-semibold">{item.changes.drinkType}</span>
+                                Type: <span className="font-semibold">{item.changes.drinkType}</span>
                             </span>
                         </div>
                         <button
@@ -181,7 +182,6 @@ export default function AutomatizeCoffee({ deviceId }) {
                 ))}
             </div>
 
-            {/* Add Automatization Button */}
             <button
                 onClick={addAutomatization}
                 className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"

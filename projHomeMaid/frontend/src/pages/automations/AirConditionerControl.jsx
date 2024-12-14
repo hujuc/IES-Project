@@ -5,6 +5,7 @@ import AirFluxControl from "../../components/automationsPages/AirConditionerPage
 import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function AirConditionerControl() {
     const [deviceData, setDeviceData] = useState(null);
@@ -30,7 +31,7 @@ export default function AirConditionerControl() {
 
         fetchDeviceData();
 
-        // Conectar ao WebSocket com SockJS
+        // Connect to WebSocket with SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -39,27 +40,27 @@ export default function AirConditionerControl() {
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
+            console.log("Connected to WebSocket STOMP!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Mensagem recebida via WebSocket:", updatedData);
+                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                    console.log("Dados atualizados no frontend:", updatedData);
+                    console.log("Updated data in frontend:", updatedData);
                 }
             });
         };
 
         client.onStompError = (frame) => {
-            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
-            console.error("Detalhes do erro:", frame.body);
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
         };
 
         client.activate();
 
-        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
+        return () => client.deactivate(); // Disconnect when component unmounts
     }, [deviceId]);
 
     const toggleAirConditioner = async () => {
@@ -101,7 +102,7 @@ export default function AirConditionerControl() {
         );
     }
 
-    const isDisabled = !deviceData.state; // Desativa controles se o estado estiver desligado
+    const isDisabled = !deviceData.state; // Disable controls if the device is off
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
@@ -110,16 +111,24 @@ export default function AirConditionerControl() {
 
             {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Air Conditioner</span>
+                <span className="text-2xl font-semibold">{deviceData.name || "Air Conditioner"}</span>
+            </div>
+
+            {/* Toggle Switch Section */}
+            <div className="flex items-center justify-center mt-6 gap-2">
+                {/* Display "On" or "Off" text dynamically */}
+                <span className="text-lg font-semibold">
+                    {deviceData.state ? "On" : "Off"}
+                </span>
                 <input
                     type="checkbox"
-                    className="toggle bg-gray-300 checked:bg-orange-500 mt-2"
+                    className="toggle bg-gray-300 checked:bg-orange-500"
                     checked={deviceData.state || false}
-                    onChange={toggleAirConditioner} // Permite alternar o estado
+                    onChange={toggleAirConditioner} // Toggle state
                 />
             </div>
 
-            {/* Conteúdo bloqueável */}
+            {/* Blockable Content */}
             <div
                 className={`mt-6 w-full px-6 flex flex-col gap-6 ${
                     isDisabled ? "opacity-50 pointer-events-none" : ""
@@ -139,15 +148,10 @@ export default function AirConditionerControl() {
                 </div>
             </div>
 
-            {/* Automatize */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeAirConditioner deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Automation Box */}
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeAirConditioner deviceId={deviceId}/>
+            </AutomationBox>
         </div>
     );
 }

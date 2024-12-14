@@ -9,14 +9,23 @@ export default function AirFluxControl({ deviceId }) {
     const [airFluxDirection, setAirFluxDirection] = useState(null);
     const [airFluxRate, setAirFluxRate] = useState(null);
 
+    const directions = ["up", "down"];
+    const rates = ["low", "medium", "high"];
+    const modes = [
+        { name: "hot", icon: hotIcon },
+        { name: "cold", icon: coldIcon },
+        { name: "air", icon: airIcon },
+        { name: "humid", icon: humidIcon },
+    ];
+
     useEffect(() => {
         // Fetch initial device data
         fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`)
             .then((response) => response.json())
             .then((data) => {
-                setSelectedMode(data.mode || "Hot");
-                setAirFluxDirection(data.airFluxDirection || "Low");
-                setAirFluxRate(data.airFluxRate || "High");
+                setSelectedMode(data.mode || "hot");
+                setAirFluxDirection(data.airFluxDirection || "up");
+                setAirFluxRate(data.airFluxRate || "medium");
             })
             .catch((error) =>
                 console.error("Error fetching AirFluxControl data:", error)
@@ -33,7 +42,6 @@ export default function AirFluxControl({ deviceId }) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("AirFluxControl updated:", data);
             })
             .catch((error) =>
                 console.error("Error updating AirFluxControl:", error)
@@ -46,21 +54,20 @@ export default function AirFluxControl({ deviceId }) {
     };
 
     const handleDirectionChange = (direction) => {
-        setAirFluxDirection(direction);
-        updateAirFluxControl({ airFluxDirection: direction });
+        const currentIndex = directions.indexOf(airFluxDirection);
+        const newIndex = direction === "prev" ? (currentIndex - 1 + directions.length) % directions.length : (currentIndex + 1) % directions.length;
+        const newDirection = directions[newIndex];
+        setAirFluxDirection(newDirection);
+        updateAirFluxControl({ airFluxDirection: newDirection });
     };
 
-    const handleRateChange = (rate) => {
-        setAirFluxRate(rate);
-        updateAirFluxControl({ airFluxRate: rate });
+    const handleRateChange = (direction) => {
+        const currentIndex = rates.indexOf(airFluxRate);
+        const newIndex = direction === "prev" ? (currentIndex - 1 + rates.length) % rates.length : (currentIndex + 1) % rates.length;
+        const newRate = rates[newIndex];
+        setAirFluxRate(newRate);
+        updateAirFluxControl({ airFluxRate: newRate });
     };
-
-    const modes = [
-        { name: "Hot", icon: hotIcon },
-        { name: "Cold", icon: coldIcon },
-        { name: "Air", icon: airIcon },
-        { name: "Humid", icon: humidIcon },
-    ];
 
     if (
         selectedMode === null ||
@@ -89,7 +96,7 @@ export default function AirFluxControl({ deviceId }) {
                         }`}
                     >
                         <img src={mode.icon} alt={mode.name} className="w-6 h-6 mb-1" />
-                        <span className="text-sm">{mode.name}</span>
+                        <span className="text-sm">{mode.name.charAt(0).toUpperCase() + mode.name.slice(1)}</span>
                     </button>
                 ))}
             </div>
@@ -102,16 +109,16 @@ export default function AirFluxControl({ deviceId }) {
                 <div className="flex items-center">
                     <button
                         className="w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center hover:bg-orange-200"
-                        onClick={() => handleDirectionChange("Low")}
-                        disabled={airFluxDirection === "Low"} // Disable button if already Low
+                        onClick={() => handleDirectionChange("prev")}
                     >
                         &lt;
                     </button>
-                    <span className="mx-4 text-gray-700">{airFluxDirection}</span>
+                    <span className="mx-4 text-gray-700">
+                        {airFluxDirection.charAt(0).toUpperCase() + airFluxDirection.slice(1)}
+                    </span>
                     <button
                         className="w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center hover:bg-orange-200"
-                        onClick={() => handleDirectionChange("High")}
-                        disabled={airFluxDirection === "High"} // Disable button if already High
+                        onClick={() => handleDirectionChange("next")}
                     >
                         &gt;
                     </button>
@@ -124,16 +131,16 @@ export default function AirFluxControl({ deviceId }) {
                 <div className="flex items-center">
                     <button
                         className="w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center hover:bg-orange-200"
-                        onClick={() => handleRateChange("Low")}
-                        disabled={airFluxRate === "Low"} // Disable button if already Low
+                        onClick={() => handleRateChange("prev")}
                     >
                         &lt;
                     </button>
-                    <span className="mx-4 text-gray-700">{airFluxRate}</span>
+                    <span className="mx-4 text-gray-700">
+                        {airFluxRate.charAt(0).toUpperCase() + airFluxRate.slice(1)}
+                    </span>
                     <button
                         className="w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center hover:bg-orange-200"
-                        onClick={() => handleRateChange("High")}
-                        disabled={airFluxRate === "High"} // Disable button if already High
+                        onClick={() => handleRateChange("next")}
                     >
                         &gt;
                     </button>

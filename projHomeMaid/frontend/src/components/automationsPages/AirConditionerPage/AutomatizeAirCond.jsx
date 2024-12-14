@@ -8,7 +8,7 @@ export default function AutomatizeAirCond({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
     const [temperature, setTemperature] = useState(22.0); // Default temperature
-    const [mode, setMode] = useState("cooling"); // Default mode
+    const [mode, setMode] = useState("hot"); // Default mode
     const [airFluxDirection, setAirFluxDirection] = useState("up"); // Default air flux direction
     const [airFluxRate, setAirFluxRate] = useState("medium"); // Default air flux rate
     const [action, setAction] = useState("Turn On");
@@ -120,6 +120,9 @@ export default function AutomatizeAirCond({ deviceId }) {
         }
     };
 
+    const formatOption = (value) =>
+        value.charAt(0).toUpperCase() + value.slice(1); // Capitalize first letter
+
     return (
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
@@ -172,9 +175,10 @@ export default function AutomatizeAirCond({ deviceId }) {
                                     onChange={(e) => setMode(e.target.value)}
                                     className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                 >
-                                    <option value="cooling">Cooling</option>
-                                    <option value="heating">Heating</option>
-                                    <option value="fan">Fan</option>
+                                    <option value="hot">{formatOption("hot")}</option>
+                                    <option value="cold">{formatOption("cold")}</option>
+                                    <option value="air">{formatOption("air")}</option>
+                                    <option value="humid">{formatOption("humid")}</option>
                                 </select>
                             </div>
 
@@ -185,8 +189,8 @@ export default function AutomatizeAirCond({ deviceId }) {
                                     onChange={(e) => setAirFluxDirection(e.target.value)}
                                     className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                 >
-                                    <option value="up">Up</option>
-                                    <option value="down">Down</option>
+                                    <option value="up">{formatOption("up")}</option>
+                                    <option value="down">{formatOption("down")}</option>
                                 </select>
                             </div>
 
@@ -197,9 +201,9 @@ export default function AutomatizeAirCond({ deviceId }) {
                                     onChange={(e) => setAirFluxRate(e.target.value)}
                                     className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                 >
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
+                                    <option value="low">{formatOption("low")}</option>
+                                    <option value="medium">{formatOption("medium")}</option>
+                                    <option value="high">{formatOption("high")}</option>
                                 </select>
                             </div>
                         </>
@@ -207,6 +211,15 @@ export default function AutomatizeAirCond({ deviceId }) {
                 </div>
             </div>
 
+            {/* Add Button */}
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
+            >
+                +
+            </button>
+
+            {/* Automatizations List */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -224,15 +237,22 @@ export default function AutomatizeAirCond({ deviceId }) {
                                         <span className="font-semibold">{item.changes.temperature}°C</span>
                                     </span>
                                     <span className="block font-medium">
-                                        Mode: <span className="font-semibold">{item.changes.mode}</span>
+                                        Mode:{" "}
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.mode)}
+                                        </span>
                                     </span>
                                     <span className="block font-medium">
                                         Air Flux Direction:{" "}
-                                        <span className="font-semibold">{item.changes.airFluxDirection}</span>
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.airFluxDirection)}
+                                        </span>
                                     </span>
                                     <span className="block font-medium">
                                         Air Flux Rate:{" "}
-                                        <span className="font-semibold">{item.changes.airFluxRate}</span>
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.airFluxRate)}
+                                        </span>
                                     </span>
                                 </>
                             ) : (
@@ -261,13 +281,6 @@ export default function AutomatizeAirCond({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
-            >
-                +
-            </button>
         </div>
     );
 }

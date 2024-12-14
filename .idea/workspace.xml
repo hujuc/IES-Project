@@ -44,6 +44,13 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages/devices/coffeeMachine" />
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages/devices" />
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

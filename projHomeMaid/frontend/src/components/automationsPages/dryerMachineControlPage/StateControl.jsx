@@ -56,7 +56,7 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
                 updateDeviceState(false, null, null);
 
                 toggleDryer(false); // Update the frontend state to match
-            }, 2000); // 2-minute cycle simulation
+            }, 20000); // 2-minute cycle simulation
 
             return () => clearTimeout(timer); // Cleanup the timer when component unmounts
         }

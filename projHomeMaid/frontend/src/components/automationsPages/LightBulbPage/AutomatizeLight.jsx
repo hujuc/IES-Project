@@ -40,10 +40,21 @@ export default function AutomatizeLight({ deviceId }) {
             console.log("Connected to WebSocket for Lights Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
-                    setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
+                try {
+                    const updatedData = JSON.parse(message.body);
+
+                    if (
+                        updatedData.deviceId === deviceId &&
+                        updatedData.executionTime &&
+                        updatedData.changes &&
+                        updatedData.changes.state !== undefined &&
+                        (updatedData.changes.brightness !== undefined || updatedData.changes.color)
+                    ) {
+                        setAutomatizations((prev) => [...prev, updatedData]);
+                        console.log("Updated automatization received via WebSocket:", updatedData);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
                 }
             });
         };

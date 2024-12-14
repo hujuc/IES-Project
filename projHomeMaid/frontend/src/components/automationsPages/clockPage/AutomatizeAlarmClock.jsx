@@ -54,8 +54,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                         ) {
                             setAutomatizations((prev) => [...prev, updatedData]);
                             console.log("Updated automatization received via WebSocket:", updatedData);
-                        } else {
-                            console.warn("Invalid data received via WebSocket:", updatedData);
                         }
                     } catch (error) {
                         console.error("Error parsing WebSocket message:", error);

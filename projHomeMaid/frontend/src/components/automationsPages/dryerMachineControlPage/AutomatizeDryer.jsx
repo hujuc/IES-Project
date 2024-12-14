@@ -11,7 +11,6 @@ export default function AutomatizeDryer({ deviceId }) {
     const [dryMode, setDryMode] = useState("Regular Dry"); // Default dry mode
 
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -27,7 +26,6 @@ export default function AutomatizeDryer({ deviceId }) {
 
         fetchAutomatizations();
 
-        // WebSocket connection
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -39,10 +37,21 @@ export default function AutomatizeDryer({ deviceId }) {
             console.log("Connected to WebSocket for Dryer Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
-                    setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
+                try {
+                    const updatedData = JSON.parse(message.body);
+                    if (
+                        updatedData.deviceId === deviceId &&
+                        updatedData.executionTime &&
+                        updatedData.changes &&
+                        updatedData.changes.state !== undefined &&
+                        updatedData.changes.temperature !== undefined &&
+                        updatedData.changes.dryMode
+                    ) {
+                        setAutomatizations((prev) => [...prev, updatedData]);
+                        console.log("Updated automatization received via WebSocket:", updatedData);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
                 }
             });
         };

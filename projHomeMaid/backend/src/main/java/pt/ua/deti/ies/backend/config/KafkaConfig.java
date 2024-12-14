@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.homemaid.config;
+/*package pt.ua.deti.ies.homemaid.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -30,3 +30,4 @@ public class KafkaConfig {
         return new KafkaTemplate<>(producerFactory);
     }
 }
+*/

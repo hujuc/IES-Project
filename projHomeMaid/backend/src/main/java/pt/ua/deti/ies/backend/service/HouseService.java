@@ -8,6 +8,7 @@ import pt.ua.deti.ies.backend.repository.HouseRepository;
 import pt.ua.deti.ies.backend.repository.RoomRepository;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import pt.ua.deti.ies.backend.model.User;
 
 import java.util.*;
 import java.util.Optional;
@@ -31,6 +32,13 @@ public class HouseService {
         this.deviceService = deviceService;  // Inicializando o DeviceService
         this.roomService = roomService;      // Inicializando o RoomService
     }
+
+    public boolean userHasAccessToHouse(User user, String houseId) {
+        // Retrieve the house from the repository
+        // Check if the house exists and whether the user's houseId matches
+        return houseId.equals(user.getHouseId());
+    }
+
 
     public Optional<House> getHouseById(String id) {
         return houseRepository.findById(id);

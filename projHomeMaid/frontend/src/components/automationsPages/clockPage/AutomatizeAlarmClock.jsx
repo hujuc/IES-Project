@@ -29,6 +29,8 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
 
         if (deviceId) {
             fetchAutomatizations();
+
+            // WebSocket connection
             const client = new Client({
                 webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
                 reconnectDelay: 5000,
@@ -37,10 +39,26 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
             });
 
             client.onConnect = () => {
+                console.log("Connected to WebSocket for Alarm Clock Automatizations!");
+
                 client.subscribe(`/topic/device-updates`, (message) => {
-                    const updatedData = JSON.parse(message.body);
-                    if (updatedData.deviceId === deviceId) {
-                        setAutomatizations((prev) => [...prev, updatedData]);
+                    try {
+                        const updatedData = JSON.parse(message.body);
+                        if (
+                            updatedData.deviceId === deviceId &&
+                            updatedData.executionTime &&
+                            updatedData.changes &&
+                            updatedData.changes.ringing !== undefined &&
+                            updatedData.changes.alarmSound &&
+                            typeof updatedData.changes.volume === "number"
+                        ) {
+                            setAutomatizations((prev) => [...prev, updatedData]);
+                            console.log("Updated automatization received via WebSocket:", updatedData);
+                        } else {
+                            console.warn("Invalid data received via WebSocket:", updatedData);
+                        }
+                    } catch (error) {
+                        console.error("Error parsing WebSocket message:", error);
                     }
                 });
             };
@@ -60,8 +78,7 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
     };
 
     const handleVolumeChange = (e) => {
-        // Ensure the value is rounded to the nearest multiple of 10
-        const newValue = Math.round(e.target.value / 10) * 10;
+        const newValue = Math.round(e.target.value / 10) * 10; // Ensure multiple of 10
         setVolume(newValue);
     };
 
@@ -72,7 +89,7 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
             changes: {
                 ringing: true,
                 alarmSound,
-                volume: volume,
+                volume,
             },
         };
 
@@ -128,7 +145,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                 {error && <p className="text-red-500">{error}</p>}
 
                 <div className="space-y-4">
-                    {/* Set Time */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Time</label>
                         <input
@@ -139,7 +155,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                         />
                     </div>
 
-                    {/* Select Alarm Sound */}
                     <div className="flex items-center justify-between">
                         <label className="text-gray-600 font-medium">Alarm Sound</label>
                         <select
@@ -155,7 +170,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                         </select>
                     </div>
 
-                    {/* Volume Control */}
                     <div className="flex flex-col items-center justify-between">
                         <label className="text-gray-600 font-medium mb-2">Volume</label>
                         <input
@@ -167,11 +181,6 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                             onChange={handleVolumeChange}
                             className="w-full bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
                         />
-                        <div className="flex justify-between w-full px-2 mt-2 text-sm text-gray-500">
-                            <span>Min</span>
-                            <span>Half</span>
-                            <span>Máx</span>
-                        </div>
                         <p className="text-gray-700 font-medium mt-2">{volume}</p>
                     </div>
                 </div>
@@ -190,12 +199,10 @@ export default function AutomatizeAlarmClock({ deviceId, alarmSounds, selectedSo
                             {item.changes.ringing && (
                                 <>
                                     <span className="block font-medium">
-                                        Alarm Sound:{" "}
-                                        <span className="font-semibold">{item.changes.alarmSound}</span>
+                                        Alarm Sound: <span className="font-semibold">{item.changes.alarmSound}</span>
                                     </span>
                                     <span className="block font-medium">
-                                        Volume:{" "}
-                                        <span className="font-semibold">{item.changes.volume}</span>
+                                        Volume: <span className="font-semibold">{item.changes.volume}</span>
                                     </span>
                                 </>
                             )}

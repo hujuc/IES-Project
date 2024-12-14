@@ -140,7 +140,7 @@ export default function StateControl({ deviceId }) {
                 } catch (error) {
                     console.error("Error fetching updated state:", error);
                 }
-            }, 120000); // Simulate a 2-minute cycle
+            }, 12000); // Simulate a 2-minute cycle
         }
     };
 

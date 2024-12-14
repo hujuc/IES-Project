@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import dryerOnIcon from "../../../assets/washer_aut.png"; // Icon for dryer on
 import dryerOffIcon from "../../../assets/washer_aut.png"; // Icon for dryer off
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
 
-export default function StateControl({ deviceId, toggleDryer, temperature, dryMode }) {
+export default function StateControl({ deviceId }) {
     const [isRunning, setIsRunning] = useState(false); // To track if the dryer is running
     const [currentState, setCurrentState] = useState({
         isDryerOn: false,
@@ -13,20 +15,20 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
     }); // To store the current state of the dryer
     const [loading, setLoading] = useState(true); // Track loading state
 
-    // Fetch the current state from the backend when the component is mounted
     useEffect(() => {
+        // Fetch current state from backend
         const fetchCurrentState = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/${deviceId}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Set the current state from backend data
                     setCurrentState({
                         isDryerOn: data.state,
                         temperature: data.temperature,
                         dryMode: data.mode,
                     });
+                    setIsRunning(data.state); // Sync "isRunning" with the current state
                 } else {
                     console.error("Failed to fetch device state:", data);
                 }
@@ -38,32 +40,39 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
         };
 
         fetchCurrentState();
-    }, [deviceId, toggleDryer, temperature, dryMode]);
 
-    // Simulate the drying cycle when the dryer is turned on
-    useEffect(() => {
-        if (!loading && currentState.isDryerOn && !isRunning) {
-            setIsRunning(true);
+        // Set up WebSocket connection
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
 
-            // Update the dryer’s state to "on" in the backend
-            updateDeviceState(true, currentState.temperature, currentState.dryMode);
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for Dryer updates!");
 
-            // Simulate the cycle by using a timeout
-            const timer = setTimeout(() => {
-                setIsRunning(false); // Set isRunning to false when cycle ends
+            client.subscribe(`/topic/device-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                if (updatedData.deviceId === deviceId) {
+                    setCurrentState((prevState) => ({
+                        ...prevState,
+                        isDryerOn: updatedData.state,
+                        temperature: updatedData.temperature,
+                        dryMode: updatedData.mode,
+                    }));
+                    setIsRunning(updatedData.state); // Sync "isRunning" with updates from the backend
+                    console.log("Updated dryer state received via WebSocket:", updatedData);
+                }
+            });
+        };
 
-                // Update the dryer’s state to "off" in the database
-                updateDeviceState(false, null, null);
+        client.activate();
 
-                toggleDryer(false); // Update the frontend state to match
-            }, 20000); // 2-minute cycle simulation
+        return () => client.deactivate();
+    }, [deviceId]);
 
-            return () => clearTimeout(timer); // Cleanup the timer when component unmounts
-        }
-    }, [currentState.isDryerOn, loading]);
-
-    // Update the device state in the backend (e.g., when the dryer starts/stops)
-    const updateDeviceState = async (state, temp, mode) => {
+    const updateDeviceState = async (state, temp = null, mode = null) => {
         try {
             const payload = { state };
             if (temp !== null) payload.temperature = temp;
@@ -81,13 +90,44 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
                 throw new Error(`Failed to update device state: ${response.statusText}`);
             }
 
-            console.log("Device state updated successfully:", payload);
+            const updatedState = await response.json();
+            setCurrentState({
+                isDryerOn: updatedState.state,
+                temperature: updatedState.temperature,
+                dryMode: updatedState.mode,
+            });
+
+            setIsRunning(updatedState.state); // Ensure "isRunning" syncs with the backend state
+            console.log("Device state updated successfully:", updatedState);
         } catch (error) {
             console.error("Error updating device state:", error);
         }
     };
 
-    // Show loading state while fetching data
+    const handleToggleDryer = async () => {
+        const newState = !currentState.isDryerOn;
+
+        setCurrentState((prevState) => ({
+            ...prevState,
+            isDryerOn: newState,
+        }));
+
+        setIsRunning(newState); // Immediately update "isRunning"
+
+        // Update the dryer’s state in the backend
+        await updateDeviceState(newState, newState ? currentState.temperature : null, newState ? currentState.dryMode : null);
+
+        if (newState) {
+            // Simulate the cycle with a timeout
+            setTimeout(() => {
+                setIsRunning(false);
+
+                // Automatically turn off the dryer in the backend after the cycle
+                updateDeviceState(false, null, null);
+            }, 3000); // 1-minute cycle simulation
+        }
+    };
+
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -95,7 +135,7 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
     return (
         <div className="flex flex-col items-center mt-6">
             <button
-                onClick={() => toggleDryer(!currentState.isDryerOn)}
+                onClick={handleToggleDryer}
                 className={`w-48 h-56 bg-white rounded-3xl flex items-center justify-center shadow-lg relative ${
                     isRunning ? "opacity-50 pointer-events-none" : ""
                 }`}
@@ -123,7 +163,7 @@ export default function StateControl({ deviceId, toggleDryer, temperature, dryMo
                     type="checkbox"
                     className="toggle bg-gray-300 checked:bg-orange-500"
                     checked={currentState.isDryerOn}
-                    onChange={() => toggleDryer(!currentState.isDryerOn)}
+                    onChange={handleToggleDryer}
                     disabled={isRunning} // Prevent toggling during the cycle
                 />
             </div>

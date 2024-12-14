@@ -6,10 +6,16 @@ const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function AutomatizeDryer({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
+    const [currentState, setCurrentState] = useState({
+        isDryerOn: false,
+        temperature: 60,
+        dryMode: "Regular Dry",
+    }); // Estado atual do dispositivo
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(60); // Default temperature for dryer
-    const [dryMode, setDryMode] = useState("Regular Dry"); // Default dry mode
+    const [temperature, setTemperature] = useState(60); // Temperatura padrão
+    const [dryMode, setDryMode] = useState("Regular Dry"); // Modo padrão
 
+    // Fetch automatizations and current state on mount
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
@@ -24,7 +30,26 @@ export default function AutomatizeDryer({ deviceId }) {
             }
         };
 
+        const fetchDeviceState = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setCurrentState({
+                        isDryerOn: data.state,
+                        temperature: data.temperature || 60,
+                        dryMode: data.mode || "Regular Dry",
+                    });
+                } else {
+                    console.error("Failed to fetch device state:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching device state:", err);
+            }
+        };
+
         fetchAutomatizations();
+        fetchDeviceState();
 
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
@@ -39,16 +64,39 @@ export default function AutomatizeDryer({ deviceId }) {
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
-                    if (
-                        updatedData.deviceId === deviceId &&
-                        updatedData.executionTime &&
-                        updatedData.changes &&
-                        updatedData.changes.state !== undefined &&
-                        updatedData.changes.temperature !== undefined &&
-                        updatedData.changes.dryMode
-                    ) {
-                        setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
+
+                    if (updatedData.deviceId === deviceId) {
+                        if (updatedData.executionTime) {
+                            // Update automatizations
+                            setAutomatizations((prev) => {
+                                const exists = prev.some(
+                                    (item) =>
+                                        item.executionTime === updatedData.executionTime &&
+                                        item.deviceId === updatedData.deviceId
+                                );
+                                if (exists) {
+                                    // Update existing automatization
+                                    return prev.map((item) =>
+                                        item.executionTime === updatedData.executionTime
+                                            ? updatedData
+                                            : item
+                                    );
+                                } else {
+                                    // Add new automatization
+                                    return [...prev, updatedData];
+                                }
+                            });
+                        }
+
+                        if (updatedData.changes) {
+                            // Update device state
+                            setCurrentState((prevState) => ({
+                                ...prevState,
+                                isDryerOn: updatedData.changes.state ?? prevState.isDryerOn,
+                                temperature: updatedData.changes.temperature ?? prevState.temperature,
+                                dryMode: updatedData.changes.dryMode ?? prevState.dryMode,
+                            }));
+                        }
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
@@ -60,10 +108,6 @@ export default function AutomatizeDryer({ deviceId }) {
 
         return () => client.deactivate();
     }, [deviceId]);
-
-    const handleOnTimeChange = (e) => {
-        setOnTime(e.target.value);
-    };
 
     const addAutomatization = async () => {
         const newAutomatization = {
@@ -90,7 +134,7 @@ export default function AutomatizeDryer({ deviceId }) {
             }
 
             const data = await response.json();
-            setAutomatizations([...automatizations, data]);
+            setAutomatizations((prev) => [...prev, data]);
             console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
@@ -110,7 +154,7 @@ export default function AutomatizeDryer({ deviceId }) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }
 
-            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            setAutomatizations((prev) => prev.filter((_, i) => i !== index));
             console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
@@ -130,7 +174,7 @@ export default function AutomatizeDryer({ deviceId }) {
                         <input
                             type="time"
                             value={onTime}
-                            onChange={handleOnTimeChange}
+                            onChange={(e) => setOnTime(e.target.value)}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         />
                     </div>

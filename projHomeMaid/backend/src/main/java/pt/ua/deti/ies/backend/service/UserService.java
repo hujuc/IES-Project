@@ -10,6 +10,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
+
 
 @Service
 public class UserService {
@@ -25,6 +27,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> allUsers(){
+        List<User> users = new ArrayList<>();
+
+        userRepository.findAll().forEach(users::add);
+
+        return users;
+    }
+
     public User signUpUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already in use.");
@@ -36,8 +46,8 @@ public class UserService {
         }
 
         // Encrypt the password with SHA-256
-        String encryptedPassword = DigestUtils.sha256Hex(user.getPassword());
-        user.setPassword(encryptedPassword);
+        //String encryptedPassword = DigestUtils.sha256Hex(user.getPassword());
+        user.setPassword(user.getPassword());
 
         // Save the user in the database
         return userRepository.save(user);
@@ -66,8 +76,8 @@ public class UserService {
 
         User user = userOptional.get();
 
-        String encryptedPassword = DigestUtils.sha256Hex(password);
-        if (!user.getPassword().equals(encryptedPassword)) {
+       // String encryptedPassword = DigestUtils.sha256Hex(password);
+        if (!user.getPassword().equals(password)) {
             throw new IllegalArgumentException("Incorrect password.");
         }
 

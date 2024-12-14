@@ -20,6 +20,16 @@ import java.util.TimerTask;
 import java.util.*;
 
 @RestController
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.DELETE,
+                RequestMethod.POST,
+                RequestMethod.PATCH
+        })
 @RequestMapping("/api/devices")
 public class DeviceController {
     private final DeviceService deviceService;

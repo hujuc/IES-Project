@@ -1,4 +1,4 @@
-package pt.ua.deti.ies.backend.kafka;
+/*package pt.ua.deti.ies.backend.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,3 +29,4 @@ public class SensorDataConsumer {
         }
     }
 }
+*/

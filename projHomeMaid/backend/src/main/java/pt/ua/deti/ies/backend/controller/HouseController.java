@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import pt.ua.deti.ies.backend.model.User;
 
 import java.util.*;
 
@@ -30,27 +33,51 @@ public class HouseController {
     // Buscar detalhes da casa pelo ID
     @GetMapping("/{houseId}")
     public ResponseEntity<?> getHouseDetails(@PathVariable String houseId) {
-        Optional<House> houseOptional = houseService.getHouseById(houseId);
+        try {
+            // Retrieve the authenticated user from the security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (houseOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House with ID " + houseId + " not found.");
+            // Ensure the user is authenticated
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized.");
+            }
+
+            // Retrieve the authenticated user details
+            User authenticatedUser = (User) authentication.getPrincipal();
+
+            // Optional: Add authorization logic (e.g., check if the user has access to the house)
+            if (!houseService.userHasAccessToHouse(authenticatedUser, houseId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+            }
+
+            // Fetch house details by houseId
+            Optional<House> houseOptional = houseService.getHouseById(houseId);
+
+            if (houseOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House with ID " + houseId + " not found.");
+            }
+
+            // Populate house details, rooms, and devices
+            House house = houseOptional.get();
+            List<String> roomIds = house.getRooms();
+            List<Room> rooms = houseService.getRoomsByIds(roomIds);
+
+            for (Room room : rooms) {
+                List<String> deviceIds = room.getDevices();
+                List<Device> devices = deviceService.getDevicesByIds(deviceIds);
+                room.setDeviceObjects(devices);
+            }
+
+            // Return house details as a response
+            return ResponseEntity.ok(new HouseDetailsResponse(
+                    house.getHouseId(),
+                    rooms
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error.");
         }
-
-        House house = houseOptional.get();
-        List<String> roomIds = house.getRooms();
-        List<Room> rooms = houseService.getRoomsByIds(roomIds);
-
-        for (Room room : rooms) {
-            List<String> deviceIds = room.getDevices();
-            List<Device> devices = deviceService.getDevicesByIds(deviceIds);
-            room.setDeviceObjects(devices);
-        }
-
-        return ResponseEntity.ok(new HouseDetailsResponse(
-                house.getHouseId(),
-                rooms
-        ));
     }
+
 
     // Criar uma nova casa
     @PostMapping

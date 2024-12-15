@@ -61,17 +61,12 @@ public class UserController {
             // Generate JWT token
             String jwtToken = jwtService.generateToken(authenticatedUser);
 
-            // Create response object
-            LoginResponse loginResponse = new LoginResponse();
-            loginResponse.setToken(jwtToken);
-            loginResponse.setExpiresIn(jwtService.getExpirationTime());
-
             // Retrieve houseId
             String houseId = userService.loginUser(authenticatedUser.getEmail(), authenticatedUser.getPassword());
 
-            // Return response with loginResponse and houseId
+            // Return response with token and houseId only
             return ResponseEntity.ok(Map.of(
-                    "loginResponse", loginResponse,
+                    "token", jwtToken,
                     "houseId", houseId
             ));
         } catch (IllegalArgumentException e) {

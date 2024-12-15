@@ -68,9 +68,16 @@ function RoomInfo({ room }) {
         const updatedState = !currentState; // Toggle the state (On to Off and vice versa)
 
         try {
+            const token = localStorage.getItem("jwtToken"); // Retrieve the token from localStorage (or wherever it's stored)
+
             const response = await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
-                { state: updatedState }
+                { state: updatedState },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Add the Authorization header
+                    },
+                }
             );
 
             if (response.status === 200) {

@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
-import {Client} from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function AutomatizeTV({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
+    const [currentState, setCurrentState] = useState({
+        isTVOn: false,
+        volume: 50,
+        brightness: 50,
+    }); // Estado atual da TV
     const [onTime, setOnTime] = useState("08:00");
+    const [volume, setVolume] = useState(50);
+    const [brightness, setBrightness] = useState(50);
     const [action, setAction] = useState("Turn On");
-    const [volume, setVolume] = useState(50); // Default volume
-    const [brightness, setBrightness] = useState(50); // Default brightness
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -26,29 +30,79 @@ export default function AutomatizeTV({ deviceId }) {
             }
         };
 
-        if (deviceId) {
-            fetchAutomatizations();
+        const fetchDeviceState = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setCurrentState({
+                        isTVOn: data.state,
+                        volume: data.volume || 50,
+                        brightness: data.brightness || 50,
+                    });
+                } else {
+                    console.error("Failed to fetch device state:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching device state:", err);
+            }
+        };
 
-            const client = new Client({
-                webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-                reconnectDelay: 5000,
-                heartbeatIncoming: 4000,
-                heartbeatOutgoing: 4000,
-            });
+        fetchAutomatizations();
+        fetchDeviceState();
 
-            client.onConnect = () => {
-                client.subscribe(`/topic/device-updates`, (message) => {
+        const client = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            console.log("Connected to WebSocket for TV Automatizations!");
+
+            client.subscribe(`/topic/device-updates`, (message) => {
+                try {
                     const updatedData = JSON.parse(message.body);
+
                     if (updatedData.deviceId === deviceId) {
-                        setAutomatizations((prev) => [...prev, updatedData]);
+                        if (updatedData.executionTime) {
+                            setAutomatizations((prev) => {
+                                const exists = prev.some(
+                                    (item) =>
+                                        item.executionTime === updatedData.executionTime &&
+                                        item.deviceId === updatedData.deviceId
+                                );
+                                if (exists) {
+                                    return prev.map((item) =>
+                                        item.executionTime === updatedData.executionTime
+                                            ? updatedData
+                                            : item
+                                    );
+                                } else {
+                                    return [...prev, updatedData];
+                                }
+                            });
+                        }
+
+                        if (updatedData.changes) {
+                            setCurrentState((prevState) => ({
+                                ...prevState,
+                                isTVOn: updatedData.changes.state ?? prevState.isTVOn,
+                                volume: updatedData.changes.volume ?? prevState.volume,
+                                brightness: updatedData.changes.brightness ?? prevState.brightness,
+                            }));
+                        }
                     }
-                });
-            };
+                } catch (error) {
+                    console.error("Error parsing WebSocket message:", error);
+                }
+            });
+        };
 
-            client.activate();
+        client.activate();
 
-            return () => client.deactivate();
-        }
+        return () => client.deactivate();
     }, [deviceId]);
 
     const handleOnTimeChange = (e) => {
@@ -56,11 +110,11 @@ export default function AutomatizeTV({ deviceId }) {
     };
 
     const handleVolumeChange = (e) => {
-        setVolume(e.target.value);
+        setVolume(parseInt(e.target.value));
     };
 
     const handleBrightnessChange = (e) => {
-        setBrightness(e.target.value);
+        setBrightness(parseInt(e.target.value));
     };
 
     const addAutomatization = async () => {
@@ -69,7 +123,7 @@ export default function AutomatizeTV({ deviceId }) {
             executionTime: onTime,
             changes:
                 action === "Turn On"
-                    ? { state: true, volume: parseInt(volume), brightness: parseInt(brightness) }
+                    ? { state: true, volume, brightness }
                     : { state: false },
         };
 
@@ -87,7 +141,7 @@ export default function AutomatizeTV({ deviceId }) {
             }
 
             const data = await response.json();
-            setAutomatizations([...automatizations, data]);
+            setAutomatizations((prev) => [...prev, data]);
             console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
@@ -101,16 +155,14 @@ export default function AutomatizeTV({ deviceId }) {
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                {
-                    method: "DELETE",
-                }
+                { method: "DELETE" }
             );
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }
 
-            setAutomatizations(automatizations.filter((_, i) => i !== index));
+            setAutomatizations((prev) => prev.filter((_, i) => i !== index));
             console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);

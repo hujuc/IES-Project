@@ -144,34 +144,35 @@ const RoomGraph = ({ houseId }) => {
         <div className="bg-white rounded-lg shadow-lg p-4 mt-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Home Analysis Graph</h3>
 
-            {/* Dropdown para selecionar o timeframe */}
-            <div className="flex items-center mb-4">
-                <label className="mr-2 text-gray-700">Select Timeframe:</label>
-                <select
-                    value={timeframe}
-                    onChange={(e) => setTimeframe(e.target.value)}
-                    className="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400"
-                >
-                    <option value="daily">Last 1 Day</option>
-                    <option value="weekly">Last 7 Days</option>
-                    <option value="monthly">Last 30 Days</option>
-                </select>
-            </div>
 
-            {/* Dropdown para selecionar o quarto */}
-            <div className="flex items-center mb-4">
-                <label className="mr-2 text-gray-700">Select Room:</label>
-                <select
-                    value={selectedRoomId || ""}
-                    onChange={(e) => setSelectedRoomId(e.target.value)}
-                    className="bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400"
-                >
-                    {rooms.map((room) => (
-                        <option key={room.roomId} value={room.roomId}>
-                            {capitalizeWords(room.type)}
-                        </option>
-                    ))}
-                </select>
+            {/* Controles de Filtros */}
+            <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Select Timeframe:</label>
+                    <select
+                        value={timeframe}
+                        onChange={(e) => setTimeframe(e.target.value)}
+                        className="w-full sm:w-auto bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400"
+                    >
+                        <option value="daily">Last 1 Day</option>
+                        <option value="weekly">Last 7 Days</option>
+                        <option value="monthly">Last 30 Days</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Select Room:</label>
+                    <select
+                        value={selectedRoomId}
+                        onChange={(e) => setSelectedRoomId(e.target.value)}
+                        className="w-full sm:w-auto bg-gray-100 text-gray-700 text-sm p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400"
+                    >
+                        {rooms.map((room) => (
+                            <option key={room.roomId} value={room.roomId}>
+                                {capitalizeWords(room.type)} {/* Capitaliza o nome do quarto */}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Renderiza o gráfico ou mensagem de dados indisponíveis */}

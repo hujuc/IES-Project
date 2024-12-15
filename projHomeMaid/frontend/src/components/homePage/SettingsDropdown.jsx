@@ -25,9 +25,16 @@ function SettingsDropdown() {
     }, []);
 
     const handleLogOut = () => {
-        // Adicione qualquer lógica de logout aqui, como limpar tokens ou estados globais
-        navigate("/"); // Redireciona para a página Welcome
+        // Clear the JWT from local storage
+        localStorage.removeItem("jwtToken");
+
+        // Optionally, you can clear other user-related data if needed
+        localStorage.removeItem("houseId"); // Example if you're storing user data
+
+        // Redirect the user to the welcome or login page
+        navigate("/");
     };
+
 
     return (
         <div className="relative" ref={dropdownRef}>

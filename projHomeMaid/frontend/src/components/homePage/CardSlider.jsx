@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import RoomInfo from "./RoomInfo";
 import Statistics from "./RoomStatistics.jsx";
 import RoomGraph from "./RoomGraph.jsx";
 
-// Imagens padrão para cada tipo de divisão
+// Default room images
 import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
 import BedroomImage from "../../assets/homePage/roomsImages/bedroom.jpg";
 import KitchenImage from "../../assets/homePage/roomsImages/kitchen.jpg";
@@ -16,25 +16,27 @@ import BathroomImage from "../../assets/homePage/roomsImages/bathroom.jpg";
 import GuestBedroomImage from "../../assets/homePage/roomsImages/guestBedroom.jpg";
 
 function CardSlider() {
-    const { houseId } = useParams(); // Obter houseId do URL
-    const [cards, setCards] = useState([]); // Armazena os dados dos cards
-    const [currentIndex, setCurrentIndex] = useState(0); // Índice atual do slider
+    const { houseId } = useParams(); // Get houseId from URL
+    const navigate = useNavigate(); // Navigation
+    const [cards, setCards] = useState([]); // Store card data
+    const [currentIndex, setCurrentIndex] = useState(0); // Current slider index
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState(""); // For error handling
 
-    // Mapeamento de tipos de divisões para os nomes personalizados
+    // Map room types to custom names
     const roomNames = {
-        "masterBedroom": "Master Bedroom",
-        "guestBedroom": "Guest Bedroom",
-        "kitchen": "Kitchen",
-        "livingRoom": "Living Room",
-        "hall": "Hall",
-        "laundry": "Laundry",
-        "office": "Office",
-        "bathroom": "Bathroom",
-        "house": "House", // Nome da casa
+        masterBedroom: "Master Bedroom",
+        guestBedroom: "Guest Bedroom",
+        kitchen: "Kitchen",
+        livingRoom: "Living Room",
+        hall: "Hall",
+        laundry: "Laundry",
+        office: "Office",
+        bathroom: "Bathroom",
+        house: "House",
     };
 
-    // Ordem personalizada dos cards
+    // Custom order of cards
     const customOrder = [
         "house",
         "hall",
@@ -47,7 +49,7 @@ function CardSlider() {
         "laundry",
     ];
 
-    // Função para verificar e retornar a imagem padrão com base no tipo de divisão
+    // Get the default image for a room type
     const getDefaultImage = (type) => {
         switch (type) {
             case "masterBedroom":
@@ -71,6 +73,7 @@ function CardSlider() {
         }
     };
 
+    // Fetch the latest temperature and humidity for a room
     const fetchLatestValues = async (roomId) => {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/sensors/rooms/${roomId}/latest`);
@@ -90,13 +93,27 @@ function CardSlider() {
         }
     };
 
+    // Fetch house data and populate cards
     useEffect(() => {
         const fetchHouseData = async () => {
             setLoading(true);
+            const token = localStorage.getItem("jwtToken");
+
+            if (!token) {
+                navigate("/login"); // Redirect if no token
+                return;
+            }
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
                 if (response.ok) {
                     const data = await response.json();
+
                     const houseCard = {
                         id: "house",
                         label: roomNames["house"],
@@ -129,19 +146,25 @@ function CardSlider() {
                     });
 
                     setCards(orderedCards);
+                } else if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    navigate("/login");
                 } else {
                     console.error("Failed to fetch house data");
+                    setErrorMessage("Failed to fetch house data.");
                 }
             } catch (error) {
                 console.error("Error fetching house data:", error);
+                setErrorMessage("An error occurred. Please try again later.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchHouseData();
-    }, [houseId]);
+    }, [houseId, navigate]);
 
+    // Slider navigation
     const handlePrev = () => {
         setCurrentIndex((prevIndex) => (prevIndex === 0 ? cards.length - 1 : prevIndex - 1));
     };
@@ -152,6 +175,10 @@ function CardSlider() {
 
     if (loading) {
         return <div>Loading...</div>;
+    }
+
+    if (errorMessage) {
+        return <div>{errorMessage}</div>;
     }
 
     if (cards.length === 0) {
@@ -200,10 +227,7 @@ function CardSlider() {
                 </button>
             </div>
 
-            {/* Informações do Quarto */}
             {currentCard.id !== "house" && <RoomInfo room={currentCard} />}
-
-            {/* Estatísticas e Gráfico apenas no card da casa */}
             {currentCard.id === "house" && (
                 <>
                     <Statistics houseId={houseId} />

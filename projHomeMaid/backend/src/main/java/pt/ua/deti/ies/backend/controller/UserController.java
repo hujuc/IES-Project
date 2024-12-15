@@ -108,4 +108,18 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/{houseId}/editProfile")
+    public ResponseEntity<?> updateUserProfile(
+            @PathVariable String houseId,
+            @RequestPart(value = "name", required = false) String name,
+            @RequestPart(value = "profilePic", required = false) MultipartFile file) {
+        try {
+            User updatedUser = userService.updateUserProfile(houseId, name, file);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user profile.");
+        }
+    }
 }

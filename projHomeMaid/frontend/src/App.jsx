@@ -15,6 +15,7 @@ import StereoControl from "./pages/automations/StereoControl.jsx";
 import HeatedFloorsControl from "./pages/automations/HeatedFloorsControl.jsx";
 import WashingMachineControl from "./pages/automations/WashingMachinaControl.jsx";
 import DryerMachineControl from "./pages/automations/DryerMachineControl.jsx";
+import EditProfile from "./pages/editProfile/EditProfile.jsx";
 
 function App() {
     return (
@@ -63,6 +64,9 @@ function App() {
                 <Route path="/washingMachine/:deviceId" element={<WashingMachineControl />} />
 
                 <Route path="/dryerMachine/:deviceId" element={<DryerMachineControl />} />
+
+                <Route path="/edit-profile/:houseId" element={<EditProfile />} />
+
             </Routes>
         </>
     )

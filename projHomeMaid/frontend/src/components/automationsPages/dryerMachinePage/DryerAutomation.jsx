@@ -4,6 +4,14 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
+const modeMap = {
+    "Regular Dry": "regularDry",
+    "Gentle Dry": "gentleDry",
+    "Permanent Press": "permanentPress",
+};
+
+const reverseModeMap = Object.fromEntries(Object.entries(modeMap).map(([k, v]) => [v, k]));
+
 export default function DryerAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [currentState, setCurrentState] = useState({
@@ -20,9 +28,15 @@ export default function DryerAutomation({ deviceId }) {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
                 const data = await response.json();
-                const deviceAutomatizations = data.filter(
-                    (item) => item.deviceId === deviceId
-                );
+                const deviceAutomatizations = data
+                    .filter((item) => item.deviceId === deviceId)
+                    .map((item) => ({
+                        ...item,
+                        changes: {
+                            ...item.changes,
+                            dryMode: reverseModeMap[item.changes.dryMode] || item.changes.dryMode,
+                        },
+                    }));
                 setAutomatizations(deviceAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
@@ -37,7 +51,7 @@ export default function DryerAutomation({ deviceId }) {
                     setCurrentState({
                         isDryerOn: data.state,
                         temperature: data.temperature || 60,
-                        dryMode: data.mode || "Regular Dry",
+                        dryMode: reverseModeMap[data.mode] || "Regular Dry",
                     });
                 } else {
                     console.error("Failed to fetch device state:", data);
@@ -75,11 +89,30 @@ export default function DryerAutomation({ deviceId }) {
                                 if (exists) {
                                     return prev.map((item) =>
                                         item.executionTime === updatedData.executionTime
-                                            ? updatedData
+                                            ? {
+                                                ...updatedData,
+                                                changes: {
+                                                    ...updatedData.changes,
+                                                    dryMode:
+                                                        reverseModeMap[updatedData.changes.dryMode] ||
+                                                        updatedData.changes.dryMode,
+                                                },
+                                            }
                                             : item
                                     );
                                 } else {
-                                    return [...prev, updatedData];
+                                    return [
+                                        ...prev,
+                                        {
+                                            ...updatedData,
+                                            changes: {
+                                                ...updatedData.changes,
+                                                dryMode:
+                                                    reverseModeMap[updatedData.changes.dryMode] ||
+                                                    updatedData.changes.dryMode,
+                                            },
+                                        },
+                                    ];
                                 }
                             });
                         }
@@ -89,7 +122,8 @@ export default function DryerAutomation({ deviceId }) {
                                 ...prevState,
                                 isDryerOn: updatedData.changes.state ?? prevState.isDryerOn,
                                 temperature: updatedData.changes.temperature ?? prevState.temperature,
-                                dryMode: updatedData.changes.dryMode ?? prevState.dryMode,
+                                dryMode:
+                                    reverseModeMap[updatedData.changes.dryMode] ?? prevState.dryMode,
                             }));
                         }
                     }
@@ -111,7 +145,7 @@ export default function DryerAutomation({ deviceId }) {
             changes: {
                 state: true,
                 temperature: parseFloat(temperature),
-                dryMode,
+                dryMode: modeMap[dryMode],
             },
         };
 
@@ -129,7 +163,16 @@ export default function DryerAutomation({ deviceId }) {
             }
 
             const data = await response.json();
-            setAutomatizations((prev) => [...prev, data]);
+            setAutomatizations((prev) => [
+                ...prev,
+                {
+                    ...data,
+                    changes: {
+                        ...data.changes,
+                        dryMode: reverseModeMap[data.changes.dryMode] || data.changes.dryMode,
+                    },
+                },
+            ]);
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -193,9 +236,11 @@ export default function DryerAutomation({ deviceId }) {
                             onChange={(e) => setDryMode(e.target.value)}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
-                            <option value="Regular Dry">Regular Dry</option>
-                            <option value="Gentle Dry">Gentle Dry</option>
-                            <option value="Permanent Press">Permanent Press</option>
+                            {Object.keys(modeMap).map((mode) => (
+                                <option key={mode} value={mode}>
+                                    {mode}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>

@@ -4,13 +4,20 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeWasher({ deviceId }) {
+const washModeMapping = {
+    "Regular Wash": "regularWash",
+    "Gentle Wash": "gentleWash",
+    "Deep Clean": "deepClean",
+};
+
+const reverseWashModeMapping = {
+    regularWash: "Regular Wash",
+    gentleWash: "Gentle Wash",
+    deepClean: "Deep Clean",
+};
+
+export default function WasherAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
-    const [currentState, setCurrentState] = useState({
-        isWasherOn: false,
-        temperature: 40,
-        washMode: "Regular Wash",
-    });
     const [onTime, setOnTime] = useState("08:00");
     const [temperature, setTemperature] = useState(40);
     const [washMode, setWashMode] = useState("Regular Wash");
@@ -23,32 +30,22 @@ export default function AutomatizeWasher({ deviceId }) {
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
-                setAutomatizations(deviceAutomatizations);
+
+                const mappedAutomatizations = deviceAutomatizations.map((item) => ({
+                    ...item,
+                    changes: {
+                        ...item.changes,
+                        washMode: reverseWashModeMapping[item.changes.washMode] || item.changes.washMode,
+                    },
+                }));
+
+                setAutomatizations(mappedAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
         };
 
-        const fetchDeviceState = async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setCurrentState({
-                        isWasherOn: data.state,
-                        temperature: data.temperature || 40,
-                        washMode: data.mode || "Regular Wash",
-                    });
-                } else {
-                    console.error("Failed to fetch device state:", data);
-                }
-            } catch (err) {
-                console.error("Error fetching device state:", err);
-            }
-        };
-
         fetchAutomatizations();
-        fetchDeviceState();
 
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
@@ -75,22 +72,28 @@ export default function AutomatizeWasher({ deviceId }) {
                                 if (exists) {
                                     return prev.map((item) =>
                                         item.executionTime === updatedData.executionTime
-                                            ? updatedData
+                                            ? {
+                                                ...updatedData,
+                                                changes: {
+                                                    ...updatedData.changes,
+                                                    washMode: reverseWashModeMapping[updatedData.changes.washMode],
+                                                },
+                                            }
                                             : item
                                     );
                                 } else {
-                                    return [...prev, updatedData];
+                                    return [
+                                        ...prev,
+                                        {
+                                            ...updatedData,
+                                            changes: {
+                                                ...updatedData.changes,
+                                                washMode: reverseWashModeMapping[updatedData.changes.washMode],
+                                            },
+                                        },
+                                    ];
                                 }
                             });
-                        }
-
-                        if (updatedData.changes) {
-                            setCurrentState((prevState) => ({
-                                ...prevState,
-                                isWasherOn: updatedData.changes.state ?? prevState.isWasherOn,
-                                temperature: updatedData.changes.temperature ?? prevState.temperature,
-                                washMode: updatedData.changes.washMode ?? prevState.washMode,
-                            }));
                         }
                     }
                 } catch (error) {
@@ -104,10 +107,6 @@ export default function AutomatizeWasher({ deviceId }) {
         return () => client.deactivate();
     }, [deviceId]);
 
-    const handleOnTimeChange = (e) => {
-        setOnTime(e.target.value);
-    };
-
     const addAutomatization = async () => {
         const newAutomatization = {
             deviceId,
@@ -115,7 +114,7 @@ export default function AutomatizeWasher({ deviceId }) {
             changes: {
                 state: true,
                 temperature: parseFloat(temperature),
-                washMode,
+                washMode: washModeMapping[washMode], // Convert to camelCase before sending
             },
         };
 
@@ -133,8 +132,16 @@ export default function AutomatizeWasher({ deviceId }) {
             }
 
             const data = await response.json();
-            setAutomatizations((prev) => [...prev, data]);
-            console.log("Automatization added successfully.");
+            setAutomatizations((prev) => [
+                ...prev,
+                {
+                    ...data,
+                    changes: {
+                        ...data.changes,
+                        washMode: reverseWashModeMapping[data.changes.washMode],
+                    },
+                },
+            ]);
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -154,7 +161,6 @@ export default function AutomatizeWasher({ deviceId }) {
             }
 
             setAutomatizations((prev) => prev.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
@@ -173,7 +179,7 @@ export default function AutomatizeWasher({ deviceId }) {
                         <input
                             type="time"
                             value={onTime}
-                            onChange={handleOnTimeChange}
+                            onChange={(e) => setOnTime(e.target.value)}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         />
                     </div>
@@ -199,13 +205,22 @@ export default function AutomatizeWasher({ deviceId }) {
                             onChange={(e) => setWashMode(e.target.value)}
                             className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
-                            <option value="Regular Wash">Regular Wash</option>
-                            <option value="Gentle Wash">Gentle Wash</option>
-                            <option value="Deep Clean">Deep Clean</option>
+                            {Object.keys(washModeMapping).map((mode) => (
+                                <option key={mode} value={mode}>
+                                    {mode}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
             </div>
+
+            <button
+                onClick={addAutomatization}
+                className="w-14 h-14 mb-6 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
 
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
@@ -232,7 +247,7 @@ export default function AutomatizeWasher({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -253,13 +268,6 @@ export default function AutomatizeWasher({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

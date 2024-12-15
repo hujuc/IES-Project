@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Collections;
 
 @CrossOrigin(
         origins = {
@@ -111,6 +112,26 @@ public class SensorController {
                     .body(Map.of("error", Double.NaN)); // Caso ocorra erro
         }
     }
+    @GetMapping("/rooms/{roomId}/data")
+    public ResponseEntity<List<Map<String, Object>>> getRoomGraphData(
+            @PathVariable String roomId,
+            @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
+    ) {
+        System.out.println("Recebido pedido para roomId: " + roomId + ", timeframe: " + timeframe); // Log dos parâmetros
+
+        try {
+            List<Map<String, Object>> data = sensorService.getRoomGraphData(roomId, timeframe);
+            return ResponseEntity.ok(data);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Erro de validação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
+        } catch (Exception e) {
+            System.err.println("Erro interno: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
+    }
+
 
 
 

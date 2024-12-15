@@ -10,6 +10,8 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.query.FluxRecord;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 
 import java.util.List;
@@ -203,6 +205,58 @@ public class SensorService {
             throw new RuntimeException("Error fetching latest measurement as double: " + e.getMessage(), e);
         }
     }
+
+    public List<Map<String, Object>> getRoomGraphData(String roomId, String timeframe) {
+        String range = switch (timeframe.toLowerCase()) {
+            case "weekly" -> "-7d";
+            case "monthly" -> "-30d";
+            default -> "-1d";
+        };
+
+        String fluxQuery = String.format(
+                "from(bucket: \"sensor_data\") " +
+                        "|> range(start: %s) " +
+                        "|> filter(fn: (r) => r[\"room_id\"] == \"%s\" and (r[\"_measurement\"] == \"temperature\" or r[\"_measurement\"] == \"humidity\")) " +
+                        "|> pivot(rowKey:[\"_time\"], columnKey:[\"_measurement\"], valueColumn:\"_value\") " +
+                        "|> keep(columns: [\"_time\", \"temperature\", \"humidity\"])",
+                range, roomId
+        );
+
+        System.out.println("Executando query no InfluxDB: " + fluxQuery);
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        try {
+            List<FluxTable> tables = queryApi.query(fluxQuery);
+
+            // Debug: Verifique se algum dado foi retornado
+            if (tables.isEmpty()) {
+                System.err.println("Nenhum dado retornado do InfluxDB.");
+                return Collections.emptyList();
+            }
+
+            // Debug: Itere sobre as tabelas para inspecionar os dados
+            for (FluxTable table : tables) {
+                for (FluxRecord record : table.getRecords()) {
+                    System.out.println("Registro encontrado: " + record);
+                }
+            }
+
+            return tables.stream()
+                    .flatMap(table -> table.getRecords().stream())
+                    .map(record -> {
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("time", record.getTime());
+                        result.put("temperature", record.getValueByKey("temperature"));
+                        result.put("humidity", record.getValueByKey("humidity"));
+                        return result;
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Erro ao executar query: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar dados do gráfico: " + e.getMessage(), e);
+        }
+    }
+
 
 
 

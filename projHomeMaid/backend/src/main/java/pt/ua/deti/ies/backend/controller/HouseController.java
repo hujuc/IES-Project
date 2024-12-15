@@ -18,6 +18,7 @@ import pt.ua.deti.ies.backend.model.User;
 
 import java.util.*;
 
+
 @RestController
 @RequestMapping("/api/houses")
 public class HouseController {

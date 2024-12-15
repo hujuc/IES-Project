@@ -22,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import java.util.*;
 
 
-@RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/dryerMachineControlPage/StateControl.jsx";
-import TemperatureControl from "../../components/automationsPages/dryerMachineControlPage/TemperatureControl.jsx";
-import AutomatizeDryer from "../../components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx";
+import StateControl from "../../components/automationsPages/dryerMachinePage/StateControl.jsx";
+import AutomatizeDryer from "../../components/automationsPages/dryerMachinePage/DryerAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function DryerMachineControl() {
     const [isDryerOn, setIsDryerOn] = useState(false);
     const [temperature, setTemperature] = useState(50); // Default temperature
     const [dryMode, setDryMode] = useState("Regular Dry"); // Default dry mode
+    const [deviceName, setDeviceName] = useState("Dryer Machine"); // Default device name
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -27,6 +28,7 @@ export default function DryerMachineControl() {
                 setIsDryerOn(data.state || false);
                 setTemperature(data.temperature || 50);
                 setDryMode(data.mode || "Regular Dry");
+                setDeviceName(data.name || "Dryer Machine");
             } catch (err) {
                 console.error("Error fetching device data:", err);
                 setError("Failed to fetch dryer machine data.");
@@ -55,6 +57,7 @@ export default function DryerMachineControl() {
                     setIsDryerOn(updatedData.state || false);
                     setTemperature(updatedData.temperature || 50);
                     setDryMode(updatedData.mode || "Regular Dry");
+                    if (updatedData.name) setDeviceName(updatedData.name);
                     console.log("Updated data received via WebSocket:", updatedData);
                 }
             });
@@ -140,12 +143,13 @@ export default function DryerMachineControl() {
     }
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
-            <div className="w-full flex justify-between px-6 py-4 items-center">
-                <span className="text-3xl font-semibold">Dryer Machine</span>
+            {/* Título do dispositivo */}
+            <div className="w-full text-center px-6 py-4">
+                <span className="text-3xl font-semibold">{deviceName}</span>
             </div>
 
             {/* State Control */}
@@ -157,34 +161,10 @@ export default function DryerMachineControl() {
                 dryMode={dryMode}
             />
 
-            {/* Temperature Control */}
-            <TemperatureControl
-                isDryerOn={isDryerOn}
-                temperature={temperature}
-                updateTemperature={updateTemperature}
-            />
-
-            {/* Dry Mode Selector */}
-            <div className={`mt-8 w-60 text-center ${isDryerOn ? "opacity-50 pointer-events-none" : ""}`}>
-                <label className="text-lg font-medium">Dry Mode</label>
-                <select
-                    value={dryMode}
-                    onChange={(e) => updateDryMode(e.target.value)}
-                    disabled={isDryerOn}
-                    className="mt-2 block w-full border border-gray-300 rounded-lg p-2 text-gray-700 font-medium bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                    <option value="Regular Dry">Regular Dry</option>
-                    <option value="Gentle Dry">Gentle Dry</option>
-                    <option value="Permanent Press">Permanent Press</option>
-                </select>
-            </div>
-
-            {/* Automatization Section */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md">
-                    <AutomatizeDryer deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Automatização */}
+            <AutomationBox deviceId={deviceId}>
+                <AutomatizeDryer deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

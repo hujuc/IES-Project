@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/ShutterControlPage/StateControl.jsx";
-import PercentageControl from "../../components/automationsPages/ShutterControlPage/PercentageControl.jsx";
-import AutomatizeShutter from "../../components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx";
+import StateControl from "../../components/automationsPages/shutterControlPage/StateControl.jsx";
+import PercentageControl from "../../components/automationsPages/shutterControlPage/PercentageControl.jsx";
+import ShutterAutomation from "../../components/automationsPages/shutterControlPage/shutterAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function ShutterControl() {
-    const DEFAULT_OPEN_PERCENTAGE = 50;
+    const DEFAULT_OPEN_PERCENTAGE = 100; // Valor padrão ao abrir a persiana
     const [isShutterOpen, setIsShutterOpen] = useState(false);
     const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
+    const [deviceName, setDeviceName] = useState("Shutter");
     const [error, setError] = useState(null);
 
     const url = window.location.href;
-    const urlParts = url.split("/");
-    const deviceId = urlParts[urlParts.length - 1];
+    const deviceId = url.split("/").pop();
 
     // Fetch initial shutter data and set up WebSocket
     useEffect(() => {
@@ -23,53 +24,49 @@ export default function ShutterControl() {
                 const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
                 const data = await response.json();
 
+                setDeviceName(data.name || "Shutter");
                 setIsShutterOpen(data.state || false);
-                setOpenPercentage(
-                    data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE
-                );
+                setOpenPercentage(data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE);
             } catch (err) {
-                console.error("Erro ao buscar o estado da persiana:", err);
-                setError("Falha ao buscar o estado da persiana.");
+                console.error("Error fetching shutter data:", err);
+                setError("Failed to fetch shutter data.");
             }
         };
 
         fetchShutterData();
 
-        // Set up WebSocket connection
+        // WebSocket setup
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Retry connection every 5 seconds
-            heartbeatIncoming: 4000, // Check server every 4 seconds
-            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
+            console.log("Connected to WebSocket!");
 
-            // Subscribe to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Mensagem recebida via WebSocket:", updatedData);
-
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsShutterOpen(updatedData.state);
-                    if (updatedData.openPercentage !== undefined)
-                        setOpenPercentage(updatedData.openPercentage);
-                    console.log("Dados atualizados no frontend:", updatedData);
+                    if (updatedData.openPercentage !== undefined) setOpenPercentage(updatedData.openPercentage);
+                    if (updatedData.name) setDeviceName(updatedData.name);
                 }
             });
         };
 
         client.onStompError = (frame) => {
-            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
-            console.error("Detalhes do erro:", frame.body);
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Details:", frame.body);
         };
 
         client.activate();
 
-        return () => client.deactivate(); // Disconnect on component unmount
+        return () => client.deactivate(); // Cleanup on unmount
     }, [deviceId]);
 
+    // Sync open percentage and shutter state
     useEffect(() => {
         if (openPercentage === 0 && isShutterOpen) {
             saveStateToDatabase(false, 0);
@@ -91,22 +88,22 @@ export default function ShutterControl() {
 
             setIsShutterOpen(updatedState);
         } catch (err) {
-            console.error("Erro ao alternar a persiana:", err);
-            setError("Falha ao alternar a persiana.");
+            console.error("Error toggling shutter:", err);
+            setError("Failed to toggle shutter.");
         }
     };
 
     const updateOpenPercentage = async (newPercentage) => {
         try {
-            const percentageNumber = Number(newPercentage);
-            setOpenPercentage(percentageNumber);
+            const percentage = Number(newPercentage);
+            setOpenPercentage(percentage);
 
             if (isShutterOpen) {
-                await saveStateToDatabase(true, percentageNumber);
+                await saveStateToDatabase(true, percentage);
             }
         } catch (err) {
-            console.error("Erro ao atualizar a percentagem de abertura:", err);
-            setError("Falha ao atualizar a percentagem de abertura.");
+            console.error("Error updating open percentage:", err);
+            setError("Failed to update open percentage.");
         }
     };
 
@@ -121,45 +118,36 @@ export default function ShutterControl() {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro na resposta da API: ${response.status}`);
+                throw new Error(`API error: ${response.status}`);
             }
-
-            console.log("State and percentage saved successfully:", { state, percentage });
         } catch (err) {
-            console.error("Erro ao salvar estado e percentagem na base de dados:", err);
-            setError("Falha ao salvar estado e percentagem na base de dados.");
+            console.error("Error saving state and percentage to database:", err);
+            setError("Failed to save state and percentage to database.");
         }
     };
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            {/* Top Bar com o AutomationsHeader */}
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
+            {/* Top Bar */}
             <AutomationsHeader />
 
-            {/* Title Section */}
+            {/* Device Title */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Shutter</span>
+                <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* State Control */}
-            <StateControl isShutterOpen={isShutterOpen} toggleShutter={toggleShutter} />
-
-            {/* Percentage Control */}
-            <PercentageControl
+            <StateControl
                 isShutterOpen={isShutterOpen}
                 openPercentage={openPercentage}
+                toggleShutter={toggleShutter}
                 updateOpenPercentage={updateOpenPercentage}
+                deviceId={deviceId}
             />
 
-            {/* Automatization Section */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <AutomatizeShutter deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Automation Controls */}
+            <AutomationBox deviceId={deviceId}>
+                <ShutterAutomation deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

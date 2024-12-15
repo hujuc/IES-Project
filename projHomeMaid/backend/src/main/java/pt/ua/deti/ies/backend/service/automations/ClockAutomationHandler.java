@@ -8,12 +8,16 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class ClockAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public ClockAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.deviceRepository = deviceRepository;
@@ -43,6 +47,18 @@ public class ClockAutomationHandler implements DeviceAutomationHandler {
                 device.setVolume(volume);
 
                 System.out.println("Clock alarm triggered with sound: " + alarmSound + " and volume: " + volume);
+
+                // Agendar o desligamento automático após 30 segundos
+                scheduler.schedule(() -> {
+                    Device updatedDevice = deviceRepository.findById(device.getDeviceId()).orElse(null);
+                    if (updatedDevice != null && updatedDevice.getRinging() && updatedDevice.getState()) {
+                        updatedDevice.setRinging(false);
+                        updatedDevice.setState(false);
+                        deviceRepository.save(updatedDevice);
+                        broadcastUpdate(updatedDevice);
+                        System.out.println("Clock alarm automatically turned OFF after 30 seconds.");
+                    }
+                }, 30, TimeUnit.SECONDS);
             } else {
                 // Desliga o alarme e o estado do relógio
                 device.setRinging(false);
@@ -52,15 +68,19 @@ public class ClockAutomationHandler implements DeviceAutomationHandler {
 
             // Salva as alterações no repositório
             deviceRepository.save(device);
-            try {
-                String deviceJson = new ObjectMapper().writeValueAsString(device);
-                System.out.println("Broadcasting update: " + deviceJson);
-                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            broadcastUpdate(device);
         } else {
             System.out.println("No ringing state provided for clock automation.");
+        }
+    }
+
+    private void broadcastUpdate(Device device) {
+        try {
+            String deviceJson = new ObjectMapper().writeValueAsString(device);
+            System.out.println("Broadcasting update: " + deviceJson);
+            simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

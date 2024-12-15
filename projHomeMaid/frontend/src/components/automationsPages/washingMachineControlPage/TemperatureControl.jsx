@@ -1,6 +1,6 @@
 import React from "react";
-import lowTempIcon from "../../../assets/low_temperature.png"; // Icon for low temperature
-import highTempIcon from "../../../assets/high_temperature.png"; // Icon for high temperature
+import lowTempIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png"; // Icon for low temperature
+import highTempIcon from "../../../assets/automationsPages/stateIcons/temperature/highTemperature.png"; // Icon for high temperature
 
 export default function TemperatureControl({ isWasherOn, temperature, updateTemperature }) {
     return (

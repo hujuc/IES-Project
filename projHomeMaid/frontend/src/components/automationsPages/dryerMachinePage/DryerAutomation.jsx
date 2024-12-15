@@ -4,18 +4,17 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeDryer({ deviceId }) {
+export default function DryerAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [currentState, setCurrentState] = useState({
         isDryerOn: false,
         temperature: 60,
         dryMode: "Regular Dry",
-    }); // Estado atual do dispositivo
+    });
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(60); // Temperatura padrão
-    const [dryMode, setDryMode] = useState("Regular Dry"); // Modo padrão
+    const [temperature, setTemperature] = useState(60);
+    const [dryMode, setDryMode] = useState("Regular Dry");
 
-    // Fetch automatizations and current state on mount
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
@@ -67,7 +66,6 @@ export default function AutomatizeDryer({ deviceId }) {
 
                     if (updatedData.deviceId === deviceId) {
                         if (updatedData.executionTime) {
-                            // Update automatizations
                             setAutomatizations((prev) => {
                                 const exists = prev.some(
                                     (item) =>
@@ -75,21 +73,18 @@ export default function AutomatizeDryer({ deviceId }) {
                                         item.deviceId === updatedData.deviceId
                                 );
                                 if (exists) {
-                                    // Update existing automatization
                                     return prev.map((item) =>
                                         item.executionTime === updatedData.executionTime
                                             ? updatedData
                                             : item
                                     );
                                 } else {
-                                    // Add new automatization
                                     return [...prev, updatedData];
                                 }
                             });
                         }
 
                         if (updatedData.changes) {
-                            // Update device state
                             setCurrentState((prevState) => ({
                                 ...prevState,
                                 isDryerOn: updatedData.changes.state ?? prevState.isDryerOn,
@@ -135,7 +130,6 @@ export default function AutomatizeDryer({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations((prev) => [...prev, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -155,7 +149,6 @@ export default function AutomatizeDryer({ deviceId }) {
             }
 
             setAutomatizations((prev) => prev.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
@@ -208,6 +201,13 @@ export default function AutomatizeDryer({ deviceId }) {
                 </div>
             </div>
 
+            <button
+                onClick={addAutomatization}
+                className="w-14 h-14 mb-6 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
+
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -233,7 +233,7 @@ export default function AutomatizeDryer({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -254,13 +254,6 @@ export default function AutomatizeDryer({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
+import pt.ua.deti.ies.backend.repository.SensorRepository;
+
 
 
 import java.util.List;
@@ -20,9 +24,15 @@ import java.util.List;
 public class SensorService {
 
     private final InfluxDBClient influxDBClient;
+    private final SensorRepository sensorRepository;
 
-    public SensorService(InfluxDBClient influxDBClient) {
+    public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository) {
         this.influxDBClient = influxDBClient;
+        this.sensorRepository = sensorRepository;
+    }
+
+    public List<Sensor> getAllSensors() {
+        return sensorRepository.findAll();
     }
 
     public void saveSensor(Sensor sensorData) {
@@ -30,6 +40,8 @@ public class SensorService {
                 sensorData.getHouseId() == null || sensorData.getType() == null || sensorData.getValue() == null) {
             throw new IllegalArgumentException("Todos os campos sensorId, roomId, houseId, type e value são obrigatórios.");
         }
+
+        sensorRepository.save(sensorData);
 
         try (WriteApi writeApi = influxDBClient.getWriteApi()) {
             String data = String.format(

@@ -12,7 +12,7 @@ public class InfluxDBConfig {
     public InfluxDBClient influxDBClient() {
         return InfluxDBClientFactory.create(
                 "http://localhost:8086",      // URL do InfluxDB
-                "OgYZx8Gm7-SfLYY6CvDUdO7570P3IHh0r-FXcldomrjO6I2v6j7D2xspJzzY3uvnRG_60QZy4zkMgyuh0OHPsA==".toCharArray(), // Token gerado no InfluxDB
+                "QZHt0YOy9CMogtpOSifvl9MD8TwRhOCsU0AK5RKSYIs0jTSQ1MNbMbZ61bXmziVflYm52Yrj0Ko0kSwahp2gMQ==".toCharArray(), // Token gerado no InfluxDB
                 "HomeMaidOrg",                // Organização
                 "sensor_data"                 // Bucket
         );

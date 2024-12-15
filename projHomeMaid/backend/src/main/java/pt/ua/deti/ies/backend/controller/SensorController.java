@@ -41,6 +41,20 @@ public class SensorController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getAllSensors() {
+        try {
+            List<Sensor> sensors = sensorService.getAllSensors();
+            if (sensors.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Nenhum sensor encontrado.");
+            }
+            return ResponseEntity.ok(sensors);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao buscar sensores: " + e.getMessage());
+        }
+    }
+
 
     // Temperatura média por divisão
     @GetMapping("/rooms/{roomId}/average-temperature")

@@ -1,25 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import axios from "axios";
 
 import coffeeMachineOn from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOn.png"; // Imagem para estado ligado
 import coffeeMachineOff from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOff.png"; // Imagem para estado desligado
 
-export default function CentralControl({ deviceId }) {
+export default function StateControl({ deviceId }) {
     const [device, setDevice] = useState(null);
-    const [error, setError] = useState(null);
     const [lightOn, setLightOn] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
+    const [selectedOption, setSelectedOption] = useState("Espresso");
+    const [error, setError] = useState(null);
 
-    // Fetch device data
+    const options = [
+        { name: "Espresso", icon: "☕" },
+        { name: "Tea", icon: "🍵" },
+        { name: "Latte", icon: "🥛" },
+    ];
+
     useEffect(() => {
+        // Fetch device data
         const fetchDevice = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
-                const data = await response.json();
+                const response = await axios.get(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const data = response.data;
+
                 setDevice(data);
                 setLightOn(data.state || false);
                 setIsLocked(data.state || false);
+                setSelectedOption(capitalize(data.drinkType || "Espresso"));
             } catch (err) {
                 console.error("Error fetching device data:", err);
                 setError("Failed to fetch device data.");
@@ -29,8 +39,8 @@ export default function CentralControl({ deviceId }) {
         if (deviceId) fetchDevice();
     }, [deviceId]);
 
-    // Subscribe to WebSocket updates
     useEffect(() => {
+        // Subscribe to WebSocket updates
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -46,7 +56,10 @@ export default function CentralControl({ deviceId }) {
                 if (updatedDevice.deviceId === deviceId) {
                     setLightOn(updatedDevice.state || false);
                     setIsLocked(updatedDevice.state || false);
-                    console.log("Received update via WebSocket:", updatedDevice);
+                    if (updatedDevice.drinkType) {
+                        setSelectedOption(capitalize(updatedDevice.drinkType));
+                    }
+                    console.log("Device updated via WebSocket:", updatedDevice);
                 }
             });
         };
@@ -56,16 +69,13 @@ export default function CentralControl({ deviceId }) {
         return () => client.deactivate();
     }, [deviceId]);
 
-    // Toggle light manually
     const toggleLight = async () => {
         if (isLocked) return;
 
         try {
             const updatedState = true;
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ state: updatedState }),
+            await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                state: updatedState,
             });
             setLightOn(updatedState);
             setIsLocked(true);
@@ -73,10 +83,8 @@ export default function CentralControl({ deviceId }) {
             // Reset after 30 seconds
             setTimeout(async () => {
                 try {
-                    await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ state: false }),
+                    await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                        state: false,
                     });
                     setLightOn(false);
                     setIsLocked(false);
@@ -90,10 +98,32 @@ export default function CentralControl({ deviceId }) {
         }
     };
 
+    const updateDrinkType = async (optionName) => {
+        try {
+            await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                drinkType: optionName.toLowerCase(),
+            });
+            setSelectedOption(optionName);
+            console.log("Drink type updated successfully");
+        } catch (err) {
+            console.error("Error updating drink type:", err);
+            setError("Failed to update the selected drink type.");
+        }
+    };
+
+    const handleSelection = (optionName) => {
+        setSelectedOption(optionName);
+        updateDrinkType(optionName);
+    };
+
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
     return (
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center">
             {error && <p className="text-red-500">{error}</p>}
-            <div className="w-40 h-52 bg-white rounded-3xl flex items-center justify-center shadow-md relative">
+
+            {/* Toggle Light Section */}
+            <div className="w-40 h-52 bg-white rounded-3xl flex items-center justify-center shadow-md relative mb-6">
                 <div className="w-28 h-28 bg-orange-500 rounded-full flex items-center justify-center">
                     <button
                         onClick={toggleLight}
@@ -103,17 +133,33 @@ export default function CentralControl({ deviceId }) {
                         disabled={isLocked}
                     >
                         <img
-                            src={lightOn ? coffeeMachineOn : coffeeMachineOff} // Condição para alternar a imagem
-                            alt={lightOn ? "Coffee Machine On" : "Coffee Machine Off"} // Texto alternativo
+                            src={lightOn ? coffeeMachineOn : coffeeMachineOff}
+                            alt={lightOn ? "Coffee Machine On" : "Coffee Machine Off"}
                             className="h-14 w-14"
                         />
                     </button>
                 </div>
                 {lightOn && (
-                    <div
-                        className="absolute top-2 w-4 h-4 rounded-full border-2 border-white bg-red-600"
-                    ></div>
+                    <div className="absolute top-2 w-4 h-4 rounded-full border-2 border-white bg-red-600"></div>
                 )}
+            </div>
+
+            {/* Drink Options Section */}
+            <div className="flex space-x-4">
+                {options.map((option, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handleSelection(option.name)}
+                        className={`flex flex-col items-center justify-center w-20 h-20 rounded-lg shadow-md focus:outline-none ${
+                            selectedOption === option.name
+                                ? "bg-orange-500 text-white"
+                                : "bg-white text-gray-800"
+                        }`}
+                    >
+                        <span className="text-3xl">{option.icon}</span>
+                        <span className="text-sm font-medium">{option.name}</span>
+                    </button>
+                ))}
             </div>
         </div>
     );

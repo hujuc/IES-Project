@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/heatedFloorsControlPage/StateControl.jsx";
-import TemperatureControl from "../../components/automationsPages/heatedFloorsControlPage/TemperatureControl.jsx";
-import AutomatizeHeatedFloors from "../../components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx";
+import HeatedFloorAutomation from "../../components/automationsPages/heatedFloorsControlPage/heatedFloorAutomation.jsx";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; // Import the new component
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -16,6 +15,7 @@ export default function HeatedFloorsControl() {
     const url = window.location.href;
     const deviceId = url.split("/").pop();
 
+    // Function to fetch device data
     const fetchHeatedFloorsData = async () => {
         try {
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
@@ -38,6 +38,7 @@ export default function HeatedFloorsControl() {
         }
     };
 
+    // Initialize data and WebSocket
     useEffect(() => {
         fetchHeatedFloorsData();
 
@@ -76,6 +77,7 @@ export default function HeatedFloorsControl() {
         return () => client.deactivate(); // Disconnect on component unmount
     }, [deviceId]);
 
+    // Function to toggle the heated floor state
     const toggleHeatedFloors = async (state) => {
         try {
             const updatedState = state !== undefined ? state : !isHeatedOn;
@@ -89,6 +91,7 @@ export default function HeatedFloorsControl() {
         }
     };
 
+    // Function to update the temperature
     const updateTemperature = async (newTemperature) => {
         try {
             const tempNumber = Number(newTemperature);
@@ -103,6 +106,7 @@ export default function HeatedFloorsControl() {
         }
     };
 
+    // Function to save state and temperature to the backend
     const saveStateToDatabase = async (state, temperature) => {
         try {
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
@@ -123,6 +127,7 @@ export default function HeatedFloorsControl() {
         }
     };
 
+    // Return the UI
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
@@ -133,16 +138,19 @@ export default function HeatedFloorsControl() {
                 <span className="text-2xl font-semibold">{name || "Loading..."}</span>
             </div>
 
-            <StateControl isHeatedOn={isHeatedOn} toggleHeatedFloors={toggleHeatedFloors} />
-            <TemperatureControl
-                isHeatedOn={isHeatedOn}
-                temperature={temperature}
-                updateTemperature={updateTemperature}
-            />
+            {/* State Control */}
+            <div className="mt-8">
+                <StateControl
+                    isHeatedOn={isHeatedOn}
+                    toggleHeatedFloors={toggleHeatedFloors}
+                    temperature={temperature}
+                    updateTemperature={updateTemperature}
+                />
+            </div>
 
-            {/* Use AutomationBox */}
+            {/* Automation Box */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeHeatedFloors deviceId={deviceId} />
+                <HeatedFloorAutomation deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

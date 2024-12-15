@@ -4,13 +4,10 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeAirCond({ deviceId }) {
+export default function HeatedFloorAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(22.0); // Default temperature
-    const [mode, setMode] = useState("hot"); // Default mode
-    const [airFluxDirection, setAirFluxDirection] = useState("up"); // Default air flux direction
-    const [airFluxRate, setAirFluxRate] = useState("medium"); // Default air flux rate
+    const [temperature, setTemperature] = useState(10.0); // Default temperature
     const [action, setAction] = useState("Turn On");
 
     useEffect(() => {
@@ -39,7 +36,7 @@ export default function AutomatizeAirCond({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Air Conditioner Automatizations!");
+            console.log("Connected to WebSocket for Heated Floors Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
@@ -70,13 +67,7 @@ export default function AutomatizeAirCond({ deviceId }) {
             executionTime: onTime,
             changes:
                 action === "Turn On"
-                    ? {
-                        state: true,
-                        temperature: parseFloat(temperature),
-                        mode,
-                        airFluxDirection,
-                        airFluxRate,
-                    }
+                    ? { state: true, temperature: parseFloat(temperature) }
                     : { state: false },
         };
 
@@ -95,7 +86,6 @@ export default function AutomatizeAirCond({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -103,31 +93,28 @@ export default function AutomatizeAirCond({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+
         try {
-            const response = await fetch(
-                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
-            );
+            const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
+                method: "DELETE",
+            });
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
+            setError("Failed to delete automatization.");
         }
     };
-
-    const formatOption = (value) =>
-        value.charAt(0).toUpperCase() + value.slice(1); // Capitalize first letter
 
     return (
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize Air Conditioner</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Heated Floors</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -154,72 +141,30 @@ export default function AutomatizeAirCond({ deviceId }) {
                     </div>
 
                     {action === "Turn On" && (
-                        <>
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Temperature</label>
-                                <input
-                                    type="number"
-                                    min="16"
-                                    max="30"
-                                    step="1"
-                                    value={temperature}
-                                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Mode</label>
-                                <select
-                                    value={mode}
-                                    onChange={(e) => setMode(e.target.value)}
-                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                                >
-                                    <option value="hot">{formatOption("hot")}</option>
-                                    <option value="cold">{formatOption("cold")}</option>
-                                    <option value="air">{formatOption("air")}</option>
-                                    <option value="humid">{formatOption("humid")}</option>
-                                </select>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Air Flux Direction</label>
-                                <select
-                                    value={airFluxDirection}
-                                    onChange={(e) => setAirFluxDirection(e.target.value)}
-                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                                >
-                                    <option value="up">{formatOption("up")}</option>
-                                    <option value="down">{formatOption("down")}</option>
-                                </select>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Air Flux Rate</label>
-                                <select
-                                    value={airFluxRate}
-                                    onChange={(e) => setAirFluxRate(e.target.value)}
-                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                                >
-                                    <option value="low">{formatOption("low")}</option>
-                                    <option value="medium">{formatOption("medium")}</option>
-                                    <option value="high">{formatOption("high")}</option>
-                                </select>
-                            </div>
-                        </>
+                        <div className="flex items-center justify-between">
+                            <label className="text-gray-600 font-medium">Temperature</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="20"
+                                step="0.2"
+                                value={temperature}
+                                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-700 font-medium">{temperature.toFixed(1)}°C</span>
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Add Button */}
             <button
                 onClick={addAutomatization}
-                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
                 +
             </button>
 
-            {/* Automatizations List */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -230,33 +175,13 @@ export default function AutomatizeAirCond({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.state ? (
-                                <>
-                                    <span className="block font-medium">
-                                        Temperature:{" "}
-                                        <span className="font-semibold">{item.changes.temperature}°C</span>
-                                    </span>
-                                    <span className="block font-medium">
-                                        Mode:{" "}
-                                        <span className="font-semibold">
-                                            {formatOption(item.changes.mode)}
-                                        </span>
-                                    </span>
-                                    <span className="block font-medium">
-                                        Air Flux Direction:{" "}
-                                        <span className="font-semibold">
-                                            {formatOption(item.changes.airFluxDirection)}
-                                        </span>
-                                    </span>
-                                    <span className="block font-medium">
-                                        Air Flux Rate:{" "}
-                                        <span className="font-semibold">
-                                            {formatOption(item.changes.airFluxRate)}
-                                        </span>
-                                    </span>
-                                </>
+                            {item.changes && item.changes.state !== undefined ? (
+                                <span className="block font-medium">
+                                    Temperature:{" "}
+                                    <span className="font-semibold">{item.changes.temperature || 0}°C</span>
+                                </span>
                             ) : (
-                                <span className="block font-medium">Action: Turn Off</span>
+                                <span className="block font-medium">Invalid Data</span>
                             )}
                         </div>
                         <button

@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import CentralControl from "../../components/automationsPages/coffeeMachinePage/CentralControl.jsx";
-import DrinkOptions from "../../components/automationsPages/coffeeMachinePage/DrinkOptions.jsx";
-import AutomatizeCoffee from "../../components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx";
+import StateControl from "../../components/automationsPages/coffeeMachinePage/StateControl.jsx"; // Chamar o novo StateControl unificado
+import CoffeeMachAutomation from "../../components/automationsPages/coffeeMachinePage/coffeeMachAutomation.jsx";
 import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function CoffeeMachineControl() {
-    const { deviceId } = useParams(); // Extract deviceId from the URL
+    const { deviceId } = useParams(); // Extrair deviceId da URL
     const [deviceData, setDeviceData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Fetch device data from API
+    // Buscar dados do dispositivo pela API
     useEffect(() => {
         const fetchDeviceData = async () => {
             try {
@@ -29,18 +28,18 @@ export default function CoffeeMachineControl() {
 
         fetchDeviceData();
 
-        // Connect to WebSocket with SockJS
+        // Conectar ao WebSocket com SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Automatically reconnect after 5 seconds if disconnected
-            heartbeatIncoming: 4000, // Check server every 4 seconds
-            heartbeatOutgoing: 4000, // Notify server every 4 seconds that client is alive
+            reconnectDelay: 5000, // Reconectar automaticamente após 5 segundos se desconectado
+            heartbeatIncoming: 4000, // Checar o servidor a cada 4 segundos
+            heartbeatOutgoing: 4000, // Informar ao servidor que o cliente está ativo a cada 4 segundos
         });
 
         client.onConnect = () => {
             console.log("Connected to WebSocket STOMP!");
 
-            // Subscribing to updates for the specific device
+            // Subscribing para atualizações do dispositivo específico
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 console.log("Message received via WebSocket:", updatedData);
@@ -59,7 +58,7 @@ export default function CoffeeMachineControl() {
 
         client.activate();
 
-        return () => client.deactivate(); // Close connection when the component unmounts
+        return () => client.deactivate(); // Fechar conexão quando o componente desmontar
     }, [deviceId]);
 
     if (loading) {
@@ -80,26 +79,22 @@ export default function CoffeeMachineControl() {
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
-            {/* Top Bar with AutomationsHeader */}
+            {/* Top Bar com AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Coffee Machine Title */}
+            {/* Título da Máquina de Café */}
             <div className="flex flex-col items-center justify-center mt-4">
                 <span className="text-2xl font-semibold">{deviceData.name || "Coffee Machine"}</span>
             </div>
 
-            {/* Central Control */}
+            {/* StateControl */}
             <div className="mt-8">
-                <CentralControl deviceId={deviceId} deviceData={deviceData} />
+                <StateControl deviceId={deviceId} deviceData={deviceData} />
             </div>
 
-            {/* Drink Options */}
-            <div className="mt-8">
-                <DrinkOptions deviceId={deviceId} deviceData={deviceData} />
-            </div>
-
+            {/* Automations */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeCoffee deviceId={deviceId} />
+                <CoffeeMachAutomation deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

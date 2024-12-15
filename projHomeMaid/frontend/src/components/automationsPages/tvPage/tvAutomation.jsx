@@ -4,7 +4,7 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeTV({ deviceId }) {
+export default function TvAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [currentState, setCurrentState] = useState({
         isTVOn: false,
@@ -142,7 +142,6 @@ export default function AutomatizeTV({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations((prev) => [...prev, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
             setError("Failed to add automatization.");
@@ -163,7 +162,6 @@ export default function AutomatizeTV({ deviceId }) {
             }
 
             setAutomatizations((prev) => prev.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
             setError("Failed to delete automatization.");
@@ -233,13 +231,22 @@ export default function AutomatizeTV({ deviceId }) {
                                     onChange={handleBrightnessChange}
                                     className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
                                 />
-                                <span className="text-gray-700 font-medium">{brightness}</span>
+                                <span className="text-gray-700 font-medium">{brightness}%</span>
                             </div>
                         </>
                     )}
                 </div>
             </div>
 
+            {/* Add Button */}
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
+
+            {/* Automatizations */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -258,7 +265,7 @@ export default function AutomatizeTV({ deviceId }) {
                                     </span>
                                     <span className="block font-medium">
                                         Brightness:{" "}
-                                        <span className="font-semibold">{item.changes.brightness}</span>
+                                        <span className="font-semibold">{item.changes.brightness}%</span>
                                     </span>
                                 </>
                             ) : (
@@ -267,7 +274,7 @@ export default function AutomatizeTV({ deviceId }) {
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
-                            className="text-gray-500 hover:text-red-500 focus:outline-none"
+                            className="text-red-500 hover:text-red-600 focus:outline-none"
                             aria-label="Delete"
                         >
                             <svg
@@ -288,13 +295,6 @@ export default function AutomatizeTV({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

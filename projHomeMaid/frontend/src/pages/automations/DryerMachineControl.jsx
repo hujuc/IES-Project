@@ -143,7 +143,7 @@ export default function DryerMachineControl() {
     }
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 

@@ -4,11 +4,10 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeShutter({ deviceId }) {
+export default function CoffeeMachAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
-    const [onTime, setOnTime] = useState("08:00");
-    const [openPercentage, setOpenPercentage] = useState(50);
-    const [action, setAction] = useState("Turn On");
+    const [onTime, setOnTime] = useState("10:00");
+    const [selectedType, setSelectedType] = useState("Espresso");
 
     useEffect(() => {
         const fetchAutomatizations = async () => {
@@ -18,7 +17,14 @@ export default function AutomatizeShutter({ deviceId }) {
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
-                setAutomatizations(deviceAutomatizations);
+                const normalizedAutomatizations = deviceAutomatizations.map((item) => ({
+                    ...item,
+                    changes: {
+                        ...item.changes,
+                        drinkType: capitalize(item.changes.drinkType),
+                    },
+                }));
+                setAutomatizations(normalizedAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -34,19 +40,18 @@ export default function AutomatizeShutter({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Shutter Automatizations!");
+            console.log("Connected to WebSocket for Coffee Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
-
                     if (
                         updatedData.deviceId === deviceId &&
                         updatedData.executionTime &&
                         updatedData.changes &&
-                        updatedData.changes.state !== undefined &&
-                        updatedData.changes.openPercentage !== undefined
+                        updatedData.changes.drinkType
                     ) {
+                        updatedData.changes.drinkType = capitalize(updatedData.changes.drinkType);
                         setAutomatizations((prev) => [...prev, updatedData]);
                         console.log("Updated automatization received via WebSocket:", updatedData);
                     }
@@ -67,12 +72,9 @@ export default function AutomatizeShutter({ deviceId }) {
 
     const addAutomatization = async () => {
         const newAutomatization = {
-            deviceId: deviceId,
+            deviceId,
             executionTime: onTime,
-            changes:
-                action === "Turn On"
-                    ? { state: true, openPercentage: parseInt(openPercentage, 10) }
-                    : { state: false, openPercentage: 0 },
+            changes: { drinkType: selectedType.toLowerCase() },
         };
 
         try {
@@ -89,6 +91,7 @@ export default function AutomatizeShutter({ deviceId }) {
             }
 
             const data = await response.json();
+            data.changes.drinkType = capitalize(data.changes.drinkType);
             setAutomatizations([...automatizations, data]);
         } catch (err) {
             console.error("Error adding automatization:", err);
@@ -97,6 +100,7 @@ export default function AutomatizeShutter({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
@@ -113,18 +117,18 @@ export default function AutomatizeShutter({ deviceId }) {
         }
     };
 
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
     return (
         <div className="flex flex-col items-center w-full">
-            {/* Automatize Container */}
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize Shutter</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Coffee Machine</h2>
                 </div>
 
                 <div className="space-y-4">
-                    {/* Input Time */}
                     <div className="flex items-center justify-between">
-                        <label className="text-gray-600 font-medium">Time</label>
+                        <label className="text-gray-600 font-medium">On</label>
                         <input
                             type="time"
                             value={onTime}
@@ -133,38 +137,28 @@ export default function AutomatizeShutter({ deviceId }) {
                         />
                     </div>
 
-                    {/* Action Dropdown */}
                     <div className="flex items-center justify-between">
-                        <label className="text-gray-600 font-medium">Action</label>
+                        <label className="text-gray-600 font-medium">Type</label>
                         <select
-                            value={action}
-                            onChange={(e) => setAction(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                            value={selectedType}
+                            onChange={(e) => setSelectedType(e.target.value)}
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 focus:ring-2 bg-white focus:ring-orange-500 focus:outline-none"
                         >
-                            <option value="Turn On">Turn On</option>
-                            <option value="Turn Off">Turn Off</option>
+                            <option value="Espresso">Espresso</option>
+                            <option value="Tea">Tea</option>
+                            <option value="Latte">Latte</option>
                         </select>
                     </div>
-
-                    {/* Open Percentage Slider */}
-                    {action === "Turn On" && (
-                        <div className="flex items-center justify-between">
-                            <label className="text-gray-600 font-medium">Open Percentage</label>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={openPercentage}
-                                onChange={(e) => setOpenPercentage(e.target.value)}
-                                className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
-                            />
-                            <span className="text-gray-700 font-medium">{openPercentage}%</span>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* List of Automatizations */}
+            <button
+                onClick={addAutomatization}
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+                +
+            </button>
+
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -175,14 +169,9 @@ export default function AutomatizeShutter({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes.state ? (
-                                <span className="block font-medium">
-                                    Open Percentage:{" "}
-                                    <span className="font-semibold">{item.changes.openPercentage}%</span>
-                                </span>
-                            ) : (
-                                <span className="block font-medium">Action: Turn Off</span>
-                            )}
+                            <span className="block font-medium">
+                                Type: <span className="font-semibold">{item.changes.drinkType}</span>
+                            </span>
                         </div>
                         <button
                             onClick={() => deleteAutomatization(index)}
@@ -207,14 +196,6 @@ export default function AutomatizeShutter({ deviceId }) {
                     </div>
                 ))}
             </div>
-
-            {/* Add Automatization Button */}
-            <button
-                onClick={addAutomatization}
-                className="mt-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-                +
-            </button>
         </div>
     );
 }

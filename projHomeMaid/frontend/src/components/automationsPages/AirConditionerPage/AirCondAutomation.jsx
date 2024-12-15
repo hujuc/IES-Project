@@ -4,33 +4,17 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function LampAutomation({ deviceId }) {
+export default function AirCondAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [brightness, setBrightness] = useState(50); // Default brightness
-    const [color, setColor] = useState("#ffffff"); // Default color
+    const [temperature, setTemperature] = useState(22.0); // Default temperature
+    const [mode, setMode] = useState("hot"); // Default mode
+    const [airFluxDirection, setAirFluxDirection] = useState("up"); // Default air flux direction
+    const [airFluxRate, setAirFluxRate] = useState("medium"); // Default air flux rate
     const [action, setAction] = useState("Turn On");
 
-    const predefinedColors = [
-        { name: "White", value: "#ffffff" },
-        { name: "Red", value: "#ff0000" },
-        { name: "Pink", value: "#ffc0cb" },
-        { name: "Orange", value: "#ffa500" },
-        { name: "Warm Yellow", value: "#ffd700" },
-        { name: "Yellow", value: "#ffff00" },
-        { name: "Green", value: "#00ff00" },
-        { name: "Teal", value: "#008080" },
-        { name: "Light Blue", value: "#add8e6" },
-        { name: "Blue", value: "#0000ff" },
-        { name: "Purple", value: "#800080" },
-    ];
-
-    const getColorName = (value) => {
-        const colorObj = predefinedColors.find((color) => color.value === value);
-        return colorObj ? colorObj.name : value;
-    };
-
     useEffect(() => {
+        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
@@ -38,16 +22,7 @@ export default function LampAutomation({ deviceId }) {
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
-
-                const updatedAutomatizations = deviceAutomatizations.map((item) => ({
-                    ...item,
-                    changes: {
-                        ...item.changes,
-                        colorName: getColorName(item.changes.color),
-                    },
-                }));
-
-                setAutomatizations(updatedAutomatizations);
+                setAutomatizations(deviceAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -55,6 +30,7 @@ export default function LampAutomation({ deviceId }) {
 
         fetchAutomatizations();
 
+        // WebSocket connection
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -63,25 +39,18 @@ export default function LampAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Lights Automatizations!");
+            console.log("Connected to WebSocket for Air Conditioner Automatizations!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
-                try {
-                    const updatedData = JSON.parse(message.body);
-
-                    if (
-                        updatedData.deviceId === deviceId &&
-                        updatedData.executionTime &&
-                        updatedData.changes &&
-                        updatedData.changes.state !== undefined &&
-                        (updatedData.changes.brightness !== undefined || updatedData.changes.color)
-                    ) {
-                        updatedData.changes.colorName = getColorName(updatedData.changes.color);
-                        setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
-                    }
-                } catch (error) {
-                    console.error("Error parsing WebSocket message:", error);
+                const updatedData = JSON.parse(message.body);
+                if (
+                    updatedData.deviceId === deviceId &&
+                    updatedData.executionTime &&
+                    updatedData.changes &&
+                    (updatedData.changes.state === true || updatedData.changes.state === false)
+                ) {
+                    setAutomatizations((prev) => [...prev, updatedData]);
+                    console.log("Updated automatization received via WebSocket:", updatedData);
                 }
             });
         };
@@ -103,8 +72,10 @@ export default function LampAutomation({ deviceId }) {
                 action === "Turn On"
                     ? {
                         state: true,
-                        brightness: parseInt(brightness, 10),
-                        color,
+                        temperature: parseFloat(temperature),
+                        mode,
+                        airFluxDirection,
+                        airFluxRate,
                     }
                     : { state: false },
         };
@@ -123,8 +94,8 @@ export default function LampAutomation({ deviceId }) {
             }
 
             const data = await response.json();
-            data.changes.colorName = getColorName(data.changes.color);
             setAutomatizations([...automatizations, data]);
+            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -133,25 +104,30 @@ export default function LampAutomation({ deviceId }) {
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
         try {
-            const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
-                method: "DELETE",
-            });
+            const response = await fetch(
+                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
+                { method: "DELETE" }
+            );
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
+            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }
     };
 
+    const formatOption = (value) =>
+        value.charAt(0).toUpperCase() + value.slice(1); // Capitalize first letter
+
     return (
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize Light</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Air Conditioner</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -180,46 +156,70 @@ export default function LampAutomation({ deviceId }) {
                     {action === "Turn On" && (
                         <>
                             <div className="flex items-center justify-between">
-                                <label className="text-gray-600 font-medium">Brightness</label>
+                                <label className="text-gray-600 font-medium">Temperature</label>
                                 <input
-                                    type="range"
-                                    min="10"
-                                    max="100"
+                                    type="number"
+                                    min="16"
+                                    max="30"
                                     step="1"
-                                    value={brightness}
-                                    onChange={(e) => setBrightness(e.target.value)}
-                                    className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                                    value={temperature}
+                                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                 />
-                                <span className="text-gray-700 font-medium">{brightness}%</span>
                             </div>
 
-                            <div className="flex flex-col">
-                                <label className="text-gray-600 font-medium">Color</label>
-                                <div className="flex justify-center flex-wrap gap-2 mt-2">
-                                    {predefinedColors.map((colorOption) => (
-                                        <button
-                                            key={colorOption.value}
-                                            style={{ backgroundColor: colorOption.value }}
-                                            className={`w-6 h-6 rounded-full border-2 ${
-                                                color === colorOption.value ? "border-black" : "border-transparent"
-                                            }`}
-                                            onClick={() => setColor(colorOption.value)}
-                                        />
-                                    ))}
-                                </div>
+                            <div className="flex items-center justify-between">
+                                <label className="text-gray-600 font-medium">Mode</label>
+                                <select
+                                    value={mode}
+                                    onChange={(e) => setMode(e.target.value)}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                >
+                                    <option value="hot">{formatOption("hot")}</option>
+                                    <option value="cold">{formatOption("cold")}</option>
+                                    <option value="air">{formatOption("air")}</option>
+                                    <option value="humid">{formatOption("humid")}</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <label className="text-gray-600 font-medium">Air Flux Direction</label>
+                                <select
+                                    value={airFluxDirection}
+                                    onChange={(e) => setAirFluxDirection(e.target.value)}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                >
+                                    <option value="up">{formatOption("up")}</option>
+                                    <option value="down">{formatOption("down")}</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <label className="text-gray-600 font-medium">Air Flux Rate</label>
+                                <select
+                                    value={airFluxRate}
+                                    onChange={(e) => setAirFluxRate(e.target.value)}
+                                    className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                >
+                                    <option value="low">{formatOption("low")}</option>
+                                    <option value="medium">{formatOption("medium")}</option>
+                                    <option value="high">{formatOption("high")}</option>
+                                </select>
                             </div>
                         </>
                     )}
                 </div>
             </div>
 
+            {/* Add Button */}
             <button
                 onClick={addAutomatization}
-                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="mb-6 w-14 h-14 bg-orange-500 text-white text-2xl font-bold rounded-full shadow-lg flex items-center justify-center hover:bg-orange-400 focus:outline-none"
             >
                 +
             </button>
 
+            {/* Automatizations List */}
             <div className="w-full space-y-3">
                 {automatizations.map((item, index) => (
                     <div
@@ -233,12 +233,26 @@ export default function LampAutomation({ deviceId }) {
                             {item.changes.state ? (
                                 <>
                                     <span className="block font-medium">
-                                        Brightness:{" "}
-                                        <span className="font-semibold">{item.changes.brightness}</span>
+                                        Temperature:{" "}
+                                        <span className="font-semibold">{item.changes.temperature}°C</span>
                                     </span>
                                     <span className="block font-medium">
-                                        Color:{" "}
-                                        <span className="font-semibold">{item.changes.colorName}</span>
+                                        Mode:{" "}
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.mode)}
+                                        </span>
+                                    </span>
+                                    <span className="block font-medium">
+                                        Air Flux Direction:{" "}
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.airFluxDirection)}
+                                        </span>
+                                    </span>
+                                    <span className="block font-medium">
+                                        Air Flux Rate:{" "}
+                                        <span className="font-semibold">
+                                            {formatOption(item.changes.airFluxRate)}
+                                        </span>
                                     </span>
                                 </>
                             ) : (

@@ -1,7 +1,7 @@
 import React from "react";
 import { FiZapOff, FiZap } from "react-icons/fi";
-import outlineSunIcon from "../../../assets/outlineSun.png";
-import fullSunIcon from "../../../assets/fullSun.png";
+import outlineSunIcon from "../../../assets/automationsPages/stateIcons/suns/outlineSun.png";
+import fullSunIcon from "../../../assets/automationsPages/stateIcons/suns/fullSun.png";
 
 export default function StateControl({
                                          isLightOn,
@@ -43,7 +43,6 @@ export default function StateControl({
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }
 
-            console.log(`Estado da lâmpada atualizado na API para: ${updatedState}`);
             setIsLightOn(updatedState);
         } catch (err) {
             console.error("Erro ao alternar a luz:", err);
@@ -67,8 +66,6 @@ export default function StateControl({
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
                 }
-
-                console.log(`Brilho atualizado na API para: ${newBrightness}`);
             }
         } catch (err) {
             console.error("Erro ao atualizar o brilho:", err);
@@ -92,8 +89,6 @@ export default function StateControl({
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
                 }
-
-                console.log(`Cor atualizada na API para: ${newColor}`);
             }
         } catch (err) {
             console.error("Erro ao atualizar a cor:", err);

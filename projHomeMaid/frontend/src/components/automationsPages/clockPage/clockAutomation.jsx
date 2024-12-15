@@ -4,71 +4,97 @@ import SockJS from "sockjs-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
-export default function AutomatizeHeatedFloors({ deviceId }) {
+// Função para formatar camelCase para Title Case com espaços
+const formatCamelCaseToTitle = (camelCase) => {
+    return camelCase
+        .replace(/([A-Z])/g, " $1") // Adiciona um espaço antes de letras maiúsculas
+        .replace(/^./, (str) => str.toUpperCase()); // Torna a primeira letra maiúscula
+};
+
+export default function ClockAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(10.0); // Default temperature
-    const [action, setAction] = useState("Turn On");
+    const [alarmSound, setAlarmSound] = useState("sound1"); // Default sound
+    const [volume, setVolume] = useState(50); // Default volume
+    const [error, setError] = useState(null);
+
+    const alarmSoundOptions = [
+        { label: "Sound 1", value: "sound1" },
+        { label: "Sound 2", value: "sound2" },
+        { label: "Sound 3", value: "sound3" },
+    ];
 
     useEffect(() => {
-        // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`);
                 const data = await response.json();
-                const deviceAutomatizations = data.filter(
-                    (item) => item.deviceId === deviceId
-                );
+                const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
+                setError("Failed to fetch automatizations.");
             }
         };
 
-        fetchAutomatizations();
+        if (deviceId) {
+            fetchAutomatizations();
 
-        // WebSocket connection
-        const client = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
-        });
-
-        client.onConnect = () => {
-            console.log("Connected to WebSocket for Heated Floors Automatizations!");
-
-            client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (
-                    updatedData.deviceId === deviceId &&
-                    updatedData.executionTime &&
-                    updatedData.changes &&
-                    (updatedData.changes.state === true || updatedData.changes.state === false)
-                ) {
-                    setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
-                }
+            const client = new Client({
+                webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
             });
-        };
 
-        client.activate();
+            client.onConnect = () => {
+                console.log("Connected to WebSocket for Alarm Clock Automatizations!");
 
-        return () => client.deactivate();
+                client.subscribe(`/topic/device-updates`, (message) => {
+                    try {
+                        const updatedData = JSON.parse(message.body);
+                        if (
+                            updatedData.deviceId === deviceId &&
+                            updatedData.executionTime &&
+                            updatedData.changes
+                        ) {
+                            setAutomatizations((prev) => [...prev, updatedData]);
+                            console.log("Updated automatization received via WebSocket:", updatedData);
+                        }
+                    } catch (error) {
+                        console.error("Error parsing WebSocket message:", error);
+                    }
+                });
+            };
+
+            client.activate();
+
+            return () => client.deactivate();
+        }
     }, [deviceId]);
 
     const handleOnTimeChange = (e) => {
         setOnTime(e.target.value);
     };
 
+    const handleVolumeChange = (e) => {
+        const newValue = parseInt(e.target.value, 10);
+        setVolume(newValue);
+    };
+
+    const handleAlarmSoundChange = (e) => {
+        setAlarmSound(e.target.value);
+    };
+
     const addAutomatization = async () => {
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
-            changes:
-                action === "Turn On"
-                    ? { state: true, temperature: parseFloat(temperature) }
-                    : { state: false },
+            changes: {
+                ringing: true,
+                alarmSound,
+                volume,
+            },
         };
 
         try {
@@ -86,14 +112,15 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
+            setError("Failed to add automatization.");
         }
     };
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+
         try {
             const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
                 method: "DELETE",
@@ -104,9 +131,9 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
+            setError("Failed to delete automatization.");
         }
     };
 
@@ -114,8 +141,10 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">Automatize Heated Floors</h2>
+                    <h2 className="text-xl font-semibold text-gray-700">Automatize Alarm Clock</h2>
                 </div>
+
+                {error && <p className="text-red-500">{error}</p>}
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -129,32 +158,35 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <label className="text-gray-600 font-medium">Action</label>
+                        <label className="text-gray-600 font-medium">Alarm Sound</label>
                         <select
-                            value={action}
-                            onChange={(e) => setAction(e.target.value)}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-32 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                            value={alarmSound}
+                            onChange={handleAlarmSoundChange}
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700 font-medium w-48 bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
                         >
-                            <option value="Turn On">Turn On</option>
-                            <option value="Turn Off">Turn Off</option>
+                            {alarmSoundOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
-                    {action === "Turn On" && (
-                        <div className="flex items-center justify-between">
-                            <label className="text-gray-600 font-medium">Temperature</label>
+                    <div className="flex items-center justify-between">
+                        <label className="text-gray-600 font-medium">Volume</label>
+                        <div className="flex items-center w-2/3">
                             <input
                                 type="range"
                                 min="0"
-                                max="20"
-                                step="0.2"
-                                value={temperature}
-                                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                                className="w-32 bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
+                                max="100"
+                                step="1"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                className="w-full bg-gray-300 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500"
                             />
-                            <span className="text-gray-700 font-medium">{temperature.toFixed(1)}°C</span>
+                            <span className="text-gray-700 font-medium ml-4">{volume}</span>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
 
@@ -175,13 +207,18 @@ export default function AutomatizeHeatedFloors({ deviceId }) {
                             <span className="block font-medium">
                                 Time: <span className="font-semibold">{item.executionTime}</span>
                             </span>
-                            {item.changes && item.changes.state !== undefined ? (
-                                <span className="block font-medium">
-                                    Temperature:{" "}
-                                    <span className="font-semibold">{item.changes.temperature || 0}°C</span>
-                                </span>
-                            ) : (
-                                <span className="block font-medium">Invalid Data</span>
+                            {item.changes && (
+                                <>
+                                    <span className="block font-medium">
+                                        Alarm Sound:{" "}
+                                        <span className="font-semibold">
+                                            {formatCamelCaseToTitle(item.changes.alarmSound)}
+                                        </span>
+                                    </span>
+                                    <span className="block font-medium">
+                                        Volume: <span className="font-semibold">{item.changes.volume}</span>
+                                    </span>
+                                </>
                             )}
                         </div>
                         <button

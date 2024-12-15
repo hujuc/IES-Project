@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom"; // Importa useParams do React Router
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import ClockCentralControl from "../../components/automationsPages/clockPage/ClockCentralControl.jsx";
-import AutomatizeAlarmClock from "../../components/automationsPages/clockPage/AutomatizeAlarmClock.jsx";
+import StateControl from "../../components/automationsPages/clockPage/StateControl.jsx";
+import ClockAutomation from "../../components/automationsPages/clockPage/clockAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
@@ -79,12 +79,12 @@ export default function ClockControl() {
 
             {/* Controle Central do Relógio */}
             <div className="mt-6">
-                <ClockCentralControl deviceId={deviceId} />
+                <StateControl deviceId={deviceId} />
             </div>
 
             {/* Automation Box */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeAlarmClock deviceId={deviceId} />
+                <ClockAutomation deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

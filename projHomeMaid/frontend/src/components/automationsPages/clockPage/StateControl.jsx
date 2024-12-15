@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import alarmIcon from "../../../assets/alarm-clock.png"; // Replace with your actual path
+import alarmIcon from "../../../assets/automationsPages/devices/clock/alarm-clock.png"; // Replace with your actual path
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
-export default function ClockCentralControl({ deviceId }) {
+export default function StateControl({ deviceId }) {
     const [lightOn, setLightOn] = useState(false); // Indicates if the alarm is ringing
     const [timerActive, setTimerActive] = useState(false); // Track if the timer is active
 

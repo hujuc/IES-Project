@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import dryerOnIcon from "../../../assets/washer_aut.png"; // Icon for dryer on
-import dryerOffIcon from "../../../assets/washer_aut.png"; // Icon for dryer off
+import dryerOnIcon from "../../../assets/automationsPages/devices/washer/washer_aut.png"; // Icon for dryer on
+import dryerOffIcon from "../../../assets/automationsPages/devices/washer/washer_aut.png"; // Icon for dryer off
 import lowTempIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png"; // Icon for low temperature
 import highTempIcon from "../../../assets/automationsPages/stateIcons/temperature/highTemperature.png";
 

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/TVControlPage/StateControl.jsx";
-import VolumeControl from "../../components/automationsPages/TVControlPage/VolumeControl.jsx";
-import BrightnessControl from "../../components/automationsPages/TVControlPage/BrightnessControl.jsx";
-import AutomatizeTV from "../../components/automationsPages/TVControlPage/AutomatizeTV.jsx";
+import StateControl from "../../components/automationsPages/tvPage/StateControl.jsx";
+import TvAutomation from "../../components/automationsPages/tvPage/tvAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 
 export default function TVControl() {
     const [isTVOn, setIsTVOn] = useState(false);
     const [volume, setVolume] = useState(50); // Volume inicial
     const [brightness, setBrightness] = useState(50); // Brilho inicial
+    const [deviceName, setDeviceName] = useState("Television"); // Nome do dispositivo
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -27,6 +27,7 @@ export default function TVControl() {
                 setIsTVOn(data.state || false);
                 setVolume(data.volume != null ? data.volume : 50);
                 setBrightness(data.brightness != null ? data.brightness : 50);
+                setDeviceName(data.name || "Television"); // Atualiza o nome do dispositivo
             } catch (err) {
                 console.error("Erro ao buscar os dados da TV:", err);
                 setError("Falha ao buscar os dados da TV.");
@@ -54,6 +55,7 @@ export default function TVControl() {
                     if (updatedData.state !== undefined) setIsTVOn(updatedData.state);
                     if (updatedData.volume !== undefined) setVolume(updatedData.volume);
                     if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
+                    if (updatedData.name !== undefined) setDeviceName(updatedData.name); // Atualiza o nome em tempo real
                     console.log("Dados atualizados via WebSocket:", updatedData);
                 }
             });
@@ -124,8 +126,6 @@ export default function TVControl() {
             if (!response.ok) {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }
-
-            console.log("Estado salvo com sucesso:", { state, volumeValue, brightnessValue });
         } catch (err) {
             console.error("Erro ao salvar estado e configurações da TV na base de dados:", err);
             setError("Falha ao salvar os dados na base de dados.");
@@ -133,34 +133,28 @@ export default function TVControl() {
     };
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
             {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
             {/* Title Section */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Television</span>
+                <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* Estado da TV */}
-            <StateControl isTVOn={isTVOn} toggleTV={toggleTV} />
-
-            {/* Controle de Volume */}
-            <VolumeControl volume={volume} updateVolume={updateVolume} isTVOn={isTVOn} />
-
-            {/* Controle de Brilho */}
-            <BrightnessControl
+            {/* Estado da TV, Volume e Brilho */}
+            <StateControl
+                isTVOn={isTVOn}
+                toggleTV={toggleTV}
+                volume={volume}
+                updateVolume={updateVolume}
                 brightness={Math.max(brightness, 10)}
                 updateBrightness={updateBrightness}
-                isTVOn={isTVOn}
             />
 
-            {/* Seção de Automatização */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md">
-                    <AutomatizeTV deviceId={deviceId} />
-                </div>
-            </div>
+            <AutomationBox deviceId={deviceId}>
+                <TvAutomation deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

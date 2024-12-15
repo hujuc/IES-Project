@@ -1,6 +1,6 @@
 import React from "react";
-import fullsunIcon from "../../../assets/fullSun.png"; // Ícone para abertura máxima
-import outlineSunIcon from "../../../assets/outlineSun.png"; // Ícone para abertura mínima
+import fullsunIcon from "../../../assets/automationsPages/stateIcons/suns/fullSun.png"; // Ícone para abertura máxima
+import outlineSunIcon from "../../../assets/automationsPages/stateIcons/suns/outlineSun.png"; // Ícone para abertura mínima
 
 export default function PercentageControl({ isShutterOpen, openPercentage, updateOpenPercentage }) {
     return (

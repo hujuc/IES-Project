@@ -20,7 +20,7 @@ public class InfluxDBService {
         // Substitua pelos valores corretos de URL, Token, Organização e Bucket
         this.influxDBClient = InfluxDBClientFactory.create(
                 "http://localhost:8086",
-                "9pWPR8OUIjUL9AOv3hOxlTSlAO3WPZHoxqQF-g7I0Kj1RRCspCiTrIbtyI_S5K4FYpIAaBzNDszfH7ELTX10AA==I".toCharArray(),
+                "OgYZx8Gm7-SfLYY6CvDUdO7570P3IHh0r-FXcldomrjO6I2v6j7D2xspJzzY3uvnRG_60QZy4zkMgyuh0OHPsA==".toCharArray(),
                 "HomeMaidOrg",
                 "sensor_data"
         );

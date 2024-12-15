@@ -1,8 +1,8 @@
 import React from "react";
-import speakerOnIcon from "../../../assets/automationsPages/devices/Stereo/stereoOn.png"; // Ícone para Speaker ligado
-import speakerOffIcon from "../../../assets/automationsPages/devices/Stereo/stereoOff.png"; // Ícone para Speaker desligado
-import lowVolumeIcon from "../../../assets/automationsPages/stateIcons/volume/volume_min.png"; // Ícone para volume baixo
-import highVolumeIcon from "../../../assets/automationsPages/stateIcons/volume/volume_max.png"; // Ícone para volume alto
+import speakerOnIcon from "../../../assets/automationsPages/devices/stereo/stereoOn.png"; // Ícone para Speaker ligado
+import speakerOffIcon from "../../../assets/automationsPages/devices/stereo/stereoOff.png"; // Ícone para Speaker desligado
+import lowVolumeIcon from "../../../assets/automationsPages/stateIcons/volume/volumeMin.png"; // Ícone para volume baixo
+import highVolumeIcon from "../../../assets/automationsPages/stateIcons/volume/volumeMax.png"; // Ícone para volume alto
 
 export default function StateControl({
                                          isSpeakerOn,

@@ -1,6 +1,6 @@
 import React from "react";
-import lowHeatIcon from "../../../assets/low_temperature.png"; // Ícone para baixa temperatura
-import highHeatIcon from "../../../assets/high_temperature.png"; // Ícone para alta temperatura
+import lowHeatIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png"; // Ícone para baixa temperatura
+import highHeatIcon from "../../../assets/automationsPages/stateIcons/temperature/highTemperature.png"; // Ícone para alta temperatura
 
 export default function TemperatureControl({ isHeatedOn, temperature, updateTemperature }) {
     return (

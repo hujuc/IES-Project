@@ -21,16 +21,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.*;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173"
-        },
-        methods = {
-                RequestMethod.GET,
-                RequestMethod.DELETE,
-                RequestMethod.POST,
-                RequestMethod.PATCH
-        })
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -69,6 +60,11 @@ public class UserController {
 
             // Generate JWT token
             String jwtToken = jwtService.generateToken(authenticatedUser);
+
+            // Create response object
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(jwtToken);
+            loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
             // Retrieve houseId
             String houseId = userService.loginUser(authenticatedUser.getEmail(), authenticatedUser.getPassword());

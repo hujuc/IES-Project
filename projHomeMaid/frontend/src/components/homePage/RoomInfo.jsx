@@ -70,6 +70,12 @@ function RoomInfo({ room }) {
         try {
             const token = localStorage.getItem("jwtToken"); // Retrieve the token from localStorage (or wherever it's stored)
 
+            if (!token) {
+                // Redirect to login if token is missing
+                navigate("/login");
+                return;
+            }
+
             const response = await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
                 { state: updatedState },

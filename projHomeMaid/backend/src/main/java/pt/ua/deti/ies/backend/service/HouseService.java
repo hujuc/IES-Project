@@ -377,14 +377,14 @@ public class HouseService {
                 laundryDryerMachine.setName("Dryer Machine");
                 laundryDryerMachine.setState(false);
                 laundryDryerMachine.setTemperature(50.0);
-                laundryDryerMachine.setMode("Gentle Dry");
+                laundryDryerMachine.setMode("gentleDry");
                 devices.add(laundryDryerMachine);
 
                 Device laundrtWasingMachine = new Device("washingMachine_" + roomType + "_" + houseId, "washingMachine");
                 laundrtWasingMachine.setName("Washing Machine");
                 laundrtWasingMachine.setState(false);
                 laundrtWasingMachine.setTemperature(20.0);
-                laundrtWasingMachine.setMode("Gentle Wash");
+                laundrtWasingMachine.setMode("gentleWash");
                 devices.add(laundrtWasingMachine);
 
                 break;

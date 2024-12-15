@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 import washerOnIcon from "../../../assets/washer_aut.png"; // Icon for washer on
 import washerOffIcon from "../../../assets/washer_aut.png"; // Icon for washer off
+import lowTempIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png"; // Icon for low temperature
+import highTempIcon from "../../../assets/automationsPages/stateIcons/temperature/highTemperature.png";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
+
+// Mapeamento de modos
+const washModeMapping = {
+    "Regular Wash": "regularWash",
+    "Gentle Wash": "gentleWash",
+    "Deep Clean": "deepClean",
+};
+
+const reverseWashModeMapping = {
+    regularWash: "Regular Wash",
+    gentleWash: "Gentle Wash",
+    deepClean: "Deep Clean",
+};
 
 export default function StateControl({ deviceId }) {
     const [isRunning, setIsRunning] = useState(false); // To track if the washer is running
     const [currentState, setCurrentState] = useState({
         isWasherOn: false,
         temperature: 40.0,
-        washMode: "Regular Wash",
+        washMode: "regularWash", // Default mode in camelCase
     }); // To store the current state of the washer
     const [loading, setLoading] = useState(true); // Track loading state
 
@@ -26,7 +39,7 @@ export default function StateControl({ deviceId }) {
                     setCurrentState({
                         isWasherOn: data.state,
                         temperature: data.temperature || 40,
-                        washMode: data.mode || "Regular Wash",
+                        washMode: data.mode || "regularWash",
                     });
                     setIsRunning(data.state); // Sync "isRunning" with the current state
                 } else {
@@ -40,43 +53,13 @@ export default function StateControl({ deviceId }) {
         };
 
         fetchCurrentState();
-
-        // Set up WebSocket connection
-        const client = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
-        });
-
-        client.onConnect = () => {
-            console.log("Connected to WebSocket for Washer updates!");
-
-            client.subscribe(`/topic/device-updates`, (message) => {
-                const updatedData = JSON.parse(message.body);
-                if (updatedData.deviceId === deviceId) {
-                    setCurrentState((prevState) => ({
-                        ...prevState,
-                        isWasherOn: updatedData.state ?? prevState.isWasherOn,
-                        temperature: updatedData.temperature ?? prevState.temperature,
-                        washMode: updatedData.mode ?? prevState.washMode,
-                    }));
-                    setIsRunning(updatedData.state ?? false); // Sync "isRunning" with backend state
-                    console.log("Updated washer state received via WebSocket:", updatedData);
-                }
-            });
-        };
-
-        client.activate();
-
-        return () => client.deactivate();
     }, [deviceId]);
 
     const updateDeviceState = async (state, temp = null, mode = null) => {
         try {
             const payload = { state };
             if (temp !== null) payload.temperature = temp;
-            if (mode !== null) payload.washMode = mode;
+            if (mode !== null) payload.mode = mode;
 
             const response = await fetch(`${API_BASE_URL}/${deviceId}`, {
                 method: "PATCH",
@@ -98,7 +81,6 @@ export default function StateControl({ deviceId }) {
             });
 
             setIsRunning(updatedState.state); // Ensure "isRunning" syncs with the backend state
-            console.log("Device state updated successfully:", updatedState);
         } catch (error) {
             console.error("Error updating device state:", error);
         }
@@ -115,7 +97,7 @@ export default function StateControl({ deviceId }) {
         setIsRunning(newState); // Immediately update "isRunning"
 
         // Update the washer’s state in the backend
-        await updateDeviceState(newState, newState ? currentState.temperature : null, newState ? currentState.washMode : null);
+        await updateDeviceState(newState, currentState.temperature, currentState.washMode);
 
         if (newState) {
             // Simulate the cycle with a timeout
@@ -123,25 +105,31 @@ export default function StateControl({ deviceId }) {
                 setIsRunning(false);
 
                 // Automatically turn off the washer in the backend after the cycle
-                await updateDeviceState(false, null, null);
-
-                // Fetch the latest state to ensure synchronization
-                try {
-                    const response = await fetch(`${API_BASE_URL}/${deviceId}`);
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        setCurrentState({
-                            isWasherOn: data.state,
-                            temperature: data.temperature || 40,
-                            washMode: data.mode || "Regular Wash",
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error fetching updated state:", error);
-                }
-            }, 12000); // Simulate a 2-minute cycle
+                await updateDeviceState(false, currentState.temperature, currentState.washMode);
+            }, 120000); // Simulate a 2-minute cycle
         }
+    };
+
+    const handleTemperatureChange = async (newTemperature) => {
+        const tempValue = Number(newTemperature);
+        setCurrentState((prevState) => ({
+            ...prevState,
+            temperature: tempValue,
+        }));
+
+        // Update temperature in the backend
+        await updateDeviceState(currentState.isWasherOn, tempValue, currentState.washMode);
+    };
+
+    const handleWashModeChange = async (newModeDisplay) => {
+        const newModeBackend = washModeMapping[newModeDisplay];
+        setCurrentState((prevState) => ({
+            ...prevState,
+            washMode: newModeBackend,
+        }));
+
+        // Update the mode in the backend
+        await updateDeviceState(currentState.isWasherOn, currentState.temperature, newModeBackend);
     };
 
     if (loading) {
@@ -182,6 +170,49 @@ export default function StateControl({ deviceId }) {
                     onChange={handleToggleWasher}
                     disabled={isRunning} // Prevent toggling during the cycle
                 />
+            </div>
+
+            {/* Temperature Control */}
+            <div className="mt-6 w-60 text-center">
+                <div className="flex justify-between items-center">
+                    <img src={lowTempIcon} alt="Low Temperature" className="w-8 h-8" />
+                    <input
+                        type="range"
+                        min="20"
+                        max="90"
+                        step="1"
+                        value={currentState.temperature}
+                        onChange={(e) => handleTemperatureChange(e.target.value)}
+                        disabled={isRunning}
+                        className="w-full mx-4 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                            background: `linear-gradient(to right, #FFA726 ${
+                                ((currentState.temperature - 20) / 70) * 100
+                            }%, #e5e7eb ${
+                                ((currentState.temperature - 20) / 70) * 100
+                            }%)`,
+                        }}
+                    />
+                    <img src={highTempIcon} alt="High Temperature" className="w-8 h-8" />
+                </div>
+                <p className="text-orange-500 font-semibold mt-0">{currentState.temperature.toFixed(0)}°C</p>
+            </div>
+
+            {/* Wash Mode Selector */}
+            <div className="mt-6 w-60 text-center">
+                <label className="text-lg font-medium">Wash Mode</label>
+                <select
+                    value={reverseWashModeMapping[currentState.washMode]} // Display mode in readable format
+                    onChange={(e) => handleWashModeChange(e.target.value)} // Update mode in camelCase
+                    disabled={isRunning}
+                    className="mt-2 block w-full border border-gray-300 rounded-lg p-2 text-gray-700 font-medium bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                >
+                    {Object.keys(washModeMapping).map((mode) => (
+                        <option key={mode} value={mode}>
+                            {mode}
+                        </option>
+                    ))}
+                </select>
             </div>
         </div>
     );

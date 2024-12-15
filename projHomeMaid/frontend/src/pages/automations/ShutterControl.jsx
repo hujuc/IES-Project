@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/ShutterControlPage/StateControl.jsx";
-import PercentageControl from "../../components/automationsPages/ShutterControlPage/PercentageControl.jsx";
-import AutomatizeShutter from "../../components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx";
+import StateControl from "../../components/automationsPages/shutterControlPage/StateControl.jsx";
+import PercentageControl from "../../components/automationsPages/shutterControlPage/PercentageControl.jsx";
+import AutomatizeShutter from "../../components/automationsPages/shutterControlPage/AutomatizeShutter.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";

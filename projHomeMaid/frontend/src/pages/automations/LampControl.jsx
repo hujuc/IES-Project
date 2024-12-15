@@ -3,8 +3,8 @@ import AutomationsHeader from "../../components/automationsPages/AutomationsHead
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import LampAutomation from "../../components/automationsPages/LampPage/LampAutomation.jsx";
-import StateControl from "../../components/automationsPages/LampPage/StateControl.jsx";
+import LampAutomation from "../../components/automationsPages/lampPage/LampAutomation.jsx";
+import StateControl from "../../components/automationsPages/lampPage/StateControl.jsx";
 
 export default function LampControl() {
     const [isLightOn, setIsLightOn] = useState(false);

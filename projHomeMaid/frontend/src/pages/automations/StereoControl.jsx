@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/StereoPage/StateControl.jsx"; // Novo StateControl combinado
-import StereoAutomation from "../../components/automationsPages/StereoPage/StereoAutomation.jsx";
+import StateControl from "../../components/automationsPages/stereoPage/StateControl.jsx"; // Novo StateControl combinado
+import StereoAutomation from "../../components/automationsPages/stereoPage/StereoAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";

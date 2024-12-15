@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoMdNotifications } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 
 // Importing the automation notification icon
 import automationNotificationIcon from "../../assets/homePage/notifications/automationNotificationIcon.png";
@@ -10,6 +11,7 @@ function NotificationDropdown() {
     const { houseId } = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("new");
+    const navigate = useNavigate(); // Initialize useNavigate
     const [notifications, setNotifications] = useState({
         new: [],
         read: [],
@@ -20,9 +22,25 @@ function NotificationDropdown() {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
+                // Retrieve the JWT token from localStorage
+                const token = localStorage.getItem("jwtToken");
+
+                if (!token) {
+                    // Redirect to login if token is missing
+                    navigate("/login");
+                    return;
+                }
+
+                // Perform the request with Authorization header
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`
+                    `${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
+
                 const allNotifications = response.data;
 
                 // Categorize notifications
@@ -41,6 +59,7 @@ function NotificationDropdown() {
             fetchNotifications();
         }
     }, [houseId]);
+
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);

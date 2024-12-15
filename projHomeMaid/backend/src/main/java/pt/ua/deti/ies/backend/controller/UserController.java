@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import java.util.*;
 
 
+@RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
@@ -59,6 +60,11 @@ public class UserController {
 
             // Generate JWT token
             String jwtToken = jwtService.generateToken(authenticatedUser);
+
+            // Create response object
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(jwtToken);
+            loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
             // Retrieve houseId
             String houseId = userService.loginUser(authenticatedUser.getEmail(), authenticatedUser.getPassword());

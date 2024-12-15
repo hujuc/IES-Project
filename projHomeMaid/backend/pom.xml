@@ -140,6 +140,18 @@
             <version>1.3.2</version>
         </dependency>
 
+        <!-- Dependência para tratamento de arquivos Multipart (upload) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Dependência para manipular imagens em Base64 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
 
 
     </dependencies>

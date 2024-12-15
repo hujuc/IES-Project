@@ -8,10 +8,9 @@ function SignUpForm() {
         name: '',
         email: '',
         password: '',
-        profilePic: 'projHomeMaid/frontend/public/no-profile.png',
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [profilePic, setProfilePic] = useState(null);
+    const [profilePic, setProfilePic] = useState(null); // Armazenar o arquivo da imagem
     const navigate = useNavigate(); // Inicializar useNavigate
 
     const handleChange = (e) => {
@@ -23,27 +22,36 @@ function SignUpForm() {
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files[0]; // Acessa o primeiro arquivo selecionado
         if (file) {
-            setProfilePic(URL.createObjectURL(file));
+            setProfilePic(file); // Salva o arquivo no estado
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const formPayload = new FormData();
+        formPayload.append("houseId", formData.contractCode);
+        formPayload.append("name", formData.name);
+        formPayload.append("email", formData.email);
+        formPayload.append("password", formData.password);
+
+        if (profilePic) {
+            formPayload.append("profilePicture", profilePic); // Adiciona a imagem apenas se existir
+        }
+
         try {
-            const response = await axios.post(import.meta.env.VITE_API_URL + "/users/signUp", {
-                houseId: formData.contractCode,
-                name: formData.name,
-                email: formData.email,
-                password: formData.password,
-                profilePic: formData.profilePic,
+            const response = await axios.post(import.meta.env.VITE_API_URL + "/users/signUp", formPayload, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
             });
 
             console.log("User created:", response.data);
             navigate("/login"); // Redirecionar para a página de login
         } catch (error) {
-            console.error("Error signing up:", error);
+            console.error("Error signing up:", error.response?.data || error.message);
         }
     };
 
@@ -129,7 +137,7 @@ function SignUpForm() {
                 />
                 {profilePic && (
                     <div className="mt-4">
-                        <img src={profilePic} alt="Profile Preview" className="w-20 h-20 rounded-full mt-2" />
+                        <img src={URL.createObjectURL(profilePic)} alt="Profile Preview" className="w-20 h-20 rounded-full mt-2" />
                     </div>
                 )}
             </div>

@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.util.*;
 
@@ -35,20 +38,29 @@ public class UserController {
         this.houseService = houseService;
     }
 
-    @PostMapping("/signUp")
-    public ResponseEntity<?> signUpUser(@RequestBody User user) {
+    @PostMapping(value = "/signUp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> signUpUser(
+            @RequestParam("houseId") String houseId,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
+            // Converta o arquivo em base64 (ou salve em algum lugar)
+            String encodedImage = Base64.getEncoder().encodeToString(profilePicture.getBytes());
+
+            User user = new User(houseId, email, name, password, encodedImage);
             userService.signUpUser(user);
 
             House newHouse = houseService.createHouseWithRoomsAndDevices(user.getHouseId());
 
             return ResponseEntity.ok("User successfully registered.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal server error.");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {

@@ -43,10 +43,11 @@ function UserHeader() {
                 <div>
                     <div className="w-20 h-20 rounded-full overflow-hidden">
                         <img
-                            src={userData.profilePicture || "https://via.placeholder.com/150"} // Default image if not available
+                            src={`data:image/png;base64,${userData.profilePicture}`} // Usa a imagem Base64
                             alt="User Avatar"
                             className="w-full h-full object-cover"
                         />
+
                     </div>
                 </div>
 

@@ -18,9 +18,11 @@ import pt.ua.deti.ies.backend.service.AuthenticationService;
 import pt.ua.deti.ies.backend.service.JwtService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.util.*;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,20 +39,29 @@ public class UserController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/signUp")
-    public ResponseEntity<?> signUpUser(@RequestBody RegisterUserDto registerUserDto) {
+    @PostMapping(value = "/signUp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> signUpUser(
+            @RequestParam("houseId") String houseId,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
-            User registeredUser = authenticationService.signup(registerUserDto);
+            // Converta o arquivo em base64 (ou salve em algum lugar)
+            String encodedImage = Base64.getEncoder().encodeToString(profilePicture.getBytes());
 
-            House newHouse = houseService.createHouseWithRoomsAndDevices(registeredUser.getHouseId());
+            User user = new User(houseId, email, name, password, encodedImage);
+            userService.signUpUser(user);
 
-            return ResponseEntity.ok("User successfully registered." + registeredUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            House newHouse = houseService.createHouseWithRoomsAndDevices(user.getHouseId());
+
+            return ResponseEntity.ok("User successfully registered.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal server error.");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginUserDto loginUserDto) {
@@ -136,21 +147,18 @@ public class UserController {
         }
     }
 
-
-    @GetMapping("/me")
-    public ResponseEntity<User> authenticatedUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        User currentUser = (User) authentication.getPrincipal();
-
-        return ResponseEntity.ok(currentUser);
+    @PatchMapping("/{houseId}/editProfile")
+    public ResponseEntity<?> updateUserProfile(
+            @PathVariable String houseId,
+            @RequestPart(value = "name", required = false) String name,
+            @RequestPart(value = "profilePic", required = false) MultipartFile file) {
+        try {
+            User updatedUser = userService.updateUserProfile(houseId, name, file);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user profile.");
+        }
     }
-
-    @GetMapping("/")
-    public ResponseEntity<List<User>> allUsers(){
-        List<User> users = userService.allUsers();
-
-        return ResponseEntity.ok(users);
-    }
-
 }

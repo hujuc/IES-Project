@@ -175,11 +175,13 @@ function CardSlider() {
         });
 
         socketClient.onConnect = () => {
+            console.log("Connected to WebSocket for sensor updates!");
+
             // Subscribe to the sensor updates topic
             socketClient.subscribe(`/topic/sensor-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
+                console.log("Received sensor update:", updatedData);
 
-                // Destructure the data from the message
                 const { roomId, field, value } = updatedData;
 
                 // Round the value to 2 decimal places
@@ -242,6 +244,7 @@ function CardSlider() {
 
             if (response.ok) {
                 const newDevice = await response.json();
+                console.log("Device successfully added:", newDevice);
 
                 // Update the correct card
                 const updatedCards = [...cards];
@@ -275,11 +278,9 @@ function CardSlider() {
     const currentCard = cards[currentIndex];
 
     return (
-// CardSlider.jsx
-
         <div className="relative flex flex-col items-center space-y-4">
             {/* Room Card */}
-            <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-auto">
+            <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-64">
                 <img
                     src={currentCard.image}
                     alt={currentCard.label}
@@ -307,17 +308,7 @@ function CardSlider() {
                 </div>
             </div>
 
-            {/* Exibir informações apenas se o card for a "House" */}
-            {currentCard.id === "house" && (
-                <>
-                    {/* Exibe RoomInfo, Statistics e Graph apenas quando for a "House" */}
-                    <RoomInfo room={currentCard} />
-                    <Statistics houseId={houseId} />
-                    <RoomGraph houseId={houseId} />
-                </>
-            )}
-
-            {/* Modal para adicionar dispositivo */}
+            {/* Modal */}
             <AddDeviceModal
                 isOpen={isModalOpen}
                 onRequestClose={() => setIsModalOpen(false)}
@@ -329,13 +320,24 @@ function CardSlider() {
             />
 
             <div className="flex space-x-4">
-                <button onClick={handlePrev} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handlePrev}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Prev
                 </button>
-                <button onClick={handleNext} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handleNext}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Next
                 </button>
             </div>
+
+            <RoomInfo key={currentCard.deviceObjects?.length} room={currentCard} />
+
+            {currentCard.id === "house" && (
+                <>
+                    <Statistics houseId={houseId} />
+                    <RoomGraph houseId={houseId} />
+                </>
+            )}
         </div>
     );
 }

@@ -117,7 +117,7 @@ def send_data_to_kafka(topic, data):
 # Loop principal
 if __name__ == "__main__":
     last_automation_time = 0  # Timestamp do último envio de automatizações
-    automation_interval = 60  # Intervalo em segundos
+    automation_interval = 43200  # Intervalo em segundos
 
     while True:
         # Buscar sensores e dispositivos
@@ -134,7 +134,6 @@ if __name__ == "__main__":
             time.sleep(10)
             continue
 
-        # Gerar e enviar dados de sensores (a cada 20 segundos)
         for sensor in sensors:
             sensor_data = generate_sensor_data(sensor)
             send_data_to_kafka(TOPIC_SENSOR_DATA, sensor_data)
@@ -149,5 +148,5 @@ if __name__ == "__main__":
                 print(f"Automatização do dispositivo enviada: {device_automation}")
             last_automation_time = current_time  # Atualizar o timestamp do último envio
 
-        # Esperar 20 segundos antes de gerar os próximos dados de sensores
-        time.sleep(3600)
+        # Esperar 30 minutos antes de gerar os próximos dados de sensores
+        time.sleep(1800)

@@ -18,7 +18,7 @@ public class InfluxDBConfig {
 //        );
         return InfluxDBClientFactory.create(
                 "http://influxdb:8086",      // URL do InfluxDB
-                "6ShJLV6O6TJAXikzMo9CYN9ufzFAUzhwfE0itLOXJAKKPvkycdgbdQh6ZcW8G6W4zfHRHJpXzh8rlBdCuM0rlw==".toCharArray(), // Token gerado no InfluxDB
+                "freltKC8NZ1U1x3CdkvBm-PSXRFEMi16VBPtu_X3h2c2tKsbO0uxfF0XLxZ92Tm2evKo5d8rdOcjcUhv8tdU7g==".toCharArray(), // Token gerado no InfluxDB
                 "HomeMaidOrg",                // Organização
                 "sensor_data"                 // Bucket
         );

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.backend.model.House;
 import pt.ua.deti.ies.backend.model.Room;
 import pt.ua.deti.ies.backend.model.Device;
+import pt.ua.deti.ies.backend.model.Sensor;
 import pt.ua.deti.ies.backend.repository.HouseRepository;
 import pt.ua.deti.ies.backend.repository.RoomRepository;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,15 +23,18 @@ public class HouseService {
     private final ImageStorageService imageStorageService;
     private final DeviceService deviceService;  // Adicionando o serviço de Device
     private final RoomService roomService;      // Adicionando o serviço de Room
+    private final SensorService sensorService;
 
     // Injeção das dependências no construtor
     public HouseService(HouseRepository houseRepository, RoomRepository roomRepository,
-                        ImageStorageService imageStorageService, DeviceService deviceService, RoomService roomService) {
+                        ImageStorageService imageStorageService, DeviceService deviceService,
+                        RoomService roomService, SensorService sensorService) {
         this.houseRepository = houseRepository;
         this.roomRepository = roomRepository;
         this.imageStorageService = imageStorageService;
         this.deviceService = deviceService;  // Inicializando o DeviceService
         this.roomService = roomService;      // Inicializando o RoomService
+        this.sensorService = sensorService;
     }
 
     public boolean userHasAccessToHouse(User user, String houseId) {
@@ -60,8 +64,7 @@ public class HouseService {
                 .orElseThrow(() -> new RuntimeException("[ERROR] Casa associada ao dispositivo não encontrada."));
     }
 
-    public House    createHouseWithRoomsAndDevices(String houseId) {
-        // Criar os tipos de room
+    public House createHouseWithRoomsAndDevices(String houseId) {
         List<String> roomTypes = List.of(
                 "hall", "masterBedroom", "guestBedroom", "kitchen",
                 "livingRoom", "bathroom", "office", "laundry"
@@ -82,6 +85,9 @@ public class HouseService {
                 Device savedDevice = deviceService.createDevice(device);
                 savedDeviceIds.add(savedDevice.getDeviceId());
             }
+
+            // Criar e salvar os sensores associados ao room
+            createSensorsForRoom(roomId, houseId);
 
             // Criar o room com os devices
             Room room = new Room(roomId, savedDeviceIds, roomType);
@@ -400,4 +406,22 @@ public class HouseService {
 
         return devices;
     }
+
+    private void createSensorsForRoom(String roomId, String houseId) {
+        // Sensor de temperatura
+        Sensor temperatureSensor = new Sensor(
+                "temperatureSensor_" + roomId, roomId, houseId,
+                "temperature", 20.0, "°C", "Temperature Sensor"
+        );
+        System.out.println("here");
+        sensorService.saveSensor(temperatureSensor); // Salvar no banco
+
+        // Sensor de umidade
+        Sensor humiditySensor = new Sensor(
+                "humiditySensor_" + roomId, roomId, houseId,
+                "humidity", 50.0, "%", "Humidity Sensor"
+        );
+        sensorService.saveSensor(humiditySensor); // Salvar no banco
+    }
+
 }

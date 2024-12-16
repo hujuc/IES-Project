@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -12,17 +14,33 @@ export default function AirCondAutomation({ deviceId }) {
     const [airFluxDirection, setAirFluxDirection] = useState("up"); // Default air flux direction
     const [airFluxRate, setAirFluxRate] = useState("medium"); // Default air flux rate
     const [action, setAction] = useState("Turn On");
+    const navigate = useNavigate(); // For navigation
+
 
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         // Fetch existing automatizations
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const response = await fetch(`${API_BASE_URL}`, {
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
+                if(response.ok){
+                    console.log("Fetched Automation Success");
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -79,12 +97,19 @@ export default function AirCondAutomation({ deviceId }) {
                     }
                     : { state: false },
         };
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
 
         try {
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
@@ -103,10 +128,19 @@ export default function AirCondAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
+                { method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }}
             );
 
             if (!response.ok) {

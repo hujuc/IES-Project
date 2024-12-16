@@ -5,6 +5,8 @@ import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 import LampAutomation from "../../components/automationsPages/lampPage/LampAutomation.jsx";
 import StateControl from "../../components/automationsPages/lampPage/StateControl.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+
 
 export default function LampControl() {
     const [isLightOn, setIsLightOn] = useState(false);
@@ -12,6 +14,7 @@ export default function LampControl() {
     const [color, setColor] = useState("#ffffff"); // Cor padrão (branca)
     const [deviceName, setDeviceName] = useState("Light Bulb"); // Nome padrão
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     // Obter ID do dispositivo da URL
     const url = window.location.href;
@@ -21,7 +24,18 @@ export default function LampControl() {
     useEffect(() => {
         const fetchLightData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
 
                 // Atualizar os estados com os valores retornados do backend
@@ -29,6 +43,12 @@ export default function LampControl() {
                 setBrightness(data.brightness || 50); // Brilho inicial
                 setColor(data.color || "#ffffff"); // Cor inicial
                 setDeviceName(data.name || "Light Bulb"); // Nome do dispositivo
+                if (response.ok){
+                    console.log("Fetched Light Data Successfully");
+                }else if(response.status === 403){
+                    console.log("Unauthorized Access");
+                    navigate("/login");
+                }
             } catch (err) {
                 console.error("Erro ao buscar o estado da lâmpada:", err);
                 setError("Falha ao buscar o estado da lâmpada.");

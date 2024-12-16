@@ -6,20 +6,39 @@ import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function CoffeeMachineControl() {
     const { deviceId } = useParams(); // Extrair deviceId da URL
     const [deviceData, setDeviceData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // For navigation
 
     // Buscar dados do dispositivo pela API
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         const fetchDeviceData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 setDeviceData(data);
                 setLoading(false);
+                if(response.ok){
+                    console.log("Coffe Machine Data Fetched Success");
+                }else if (response.status === 403){
+                    console.log("Unauthorized Access");
+                    navigate("/login")
+                }
             } catch (error) {
                 console.error("Error fetching device data:", error);
                 setLoading(false);

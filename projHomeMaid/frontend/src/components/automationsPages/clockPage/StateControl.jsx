@@ -2,20 +2,39 @@ import React, { useState, useEffect } from "react";
 import alarmIcon from "../../../assets/automationsPages/devices/clock/alarm-clock.png"; // Replace with your actual path
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function StateControl({ deviceId }) {
     const [lightOn, setLightOn] = useState(false); // Indicates if the alarm is ringing
     const [timerActive, setTimerActive] = useState(false); // Track if the timer is active
+    const navigate = useNavigate(); // For navigation
 
     // Fetch the initial state from the backend
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         const fetchDeviceState = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
 
                 // Initialize `lightOn` with the ringing state from the backend
                 setLightOn(data.ringing || false);
+                if(response.ok){
+                    console.log("Fetched Data Success");
+                }else if(response.status === 403){
+                    console.log("Unauthrized Accesss");
+                    navigate("/login");
+                }
             } catch (error) {
                 console.error("Error fetching device state:", error);
             }
@@ -53,11 +72,19 @@ export default function StateControl({ deviceId }) {
 
     // Function to update the state in the backend
     const updateDeviceState = async (ringing, state) => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         try {
             await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ ringing, state }),
             });

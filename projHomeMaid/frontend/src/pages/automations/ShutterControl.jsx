@@ -5,7 +5,9 @@ import PercentageControl from "../../components/automationsPages/shutterControlP
 import ShutterAutomation from "../../components/automationsPages/shutterControlPage/shutterAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+
 
 export default function ShutterControl() {
     const DEFAULT_OPEN_PERCENTAGE = 100; // Valor padrão ao abrir a persiana
@@ -13,20 +15,38 @@ export default function ShutterControl() {
     const [openPercentage, setOpenPercentage] = useState(DEFAULT_OPEN_PERCENTAGE);
     const [deviceName, setDeviceName] = useState("Shutter");
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     const url = window.location.href;
     const deviceId = url.split("/").pop();
 
     // Fetch initial shutter data and set up WebSocket
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         const fetchShutterData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
-
                 setDeviceName(data.name || "Shutter");
                 setIsShutterOpen(data.state || false);
                 setOpenPercentage(data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE);
+                if(response.ok){
+                    console.log("Data fetched Successfully");
+                }else if(response.status === 403){
+                    console.log("Redirecting to Login. Unaithorized Access");
+                    navigate("/login");
+                }
             } catch (err) {
                 console.error("Error fetching shutter data:", err);
                 setError("Failed to fetch shutter data.");
@@ -109,16 +129,26 @@ export default function ShutterControl() {
 
     const saveStateToDatabase = async (state, percentage) => {
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ state, openPercentage: percentage }),
             });
 
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
+            if (response.ok) {
+                console.log("Data Saved to the Database");
+            }else if(response.status === 403){
+                console.log("Unauthorizes Access, redirecting to the database");
+                navigate("/login");
             }
         } catch (err) {
             console.error("Error saving state and percentage to database:", err);

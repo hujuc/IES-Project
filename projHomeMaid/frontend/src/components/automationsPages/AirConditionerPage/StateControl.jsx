@@ -3,6 +3,7 @@ import hotIcon from "../../../assets/automationsPages/stateIcons/airConditioner/
 import coldIcon from "../../../assets/automationsPages/stateIcons/airConditioner/cold.png";
 import airIcon from "../../../assets/automationsPages/stateIcons/airConditioner/air.png";
 import humidIcon from "../../../assets/automationsPages/stateIcons/airConditioner/humid.png";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function StateControl({ deviceId, deviceData }) {
     const [state, setState] = useState(deviceData.state);
@@ -11,6 +12,7 @@ export default function StateControl({ deviceId, deviceData }) {
     const [airFluxDirection, setAirFluxDirection] = useState(deviceData.airFluxDirection || "up");
     const [selectedMode, setSelectedMode] = useState(deviceData.mode || "hot");
     const [isDisabled, setIsDisabled] = useState(!deviceData.state);
+    const navigate = useNavigate(); // For navigation
 
     const directions = ["up", "down"];
     const rates = ["low", "medium", "high"];
@@ -29,14 +31,22 @@ export default function StateControl({ deviceId, deviceData }) {
         setSelectedMode(deviceData.mode || "hot");
         setIsDisabled(!deviceData.state);
     }, [deviceData]);
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        console.log("Token not found. Redirecting to login page.");
+        navigate("/login");
+        return;
+    }
 
     const toggleAirConditioner = async () => {
+
         try {
             const updatedState = !state;
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ state: updatedState }),
             });
@@ -44,6 +54,7 @@ export default function StateControl({ deviceId, deviceData }) {
             if (response.ok) {
                 setState(updatedState);
                 setIsDisabled(!updatedState);
+                console.log("Saved Data Success");
             } else {
                 console.error("Failed to update device state:", response.statusText);
             }
@@ -61,9 +72,11 @@ export default function StateControl({ deviceId, deviceData }) {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ temperature: newTemperature }),
             });
+
         } catch (error) {
             console.error("Error updating temperature:", error);
         }
@@ -76,6 +89,7 @@ export default function StateControl({ deviceId, deviceData }) {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ mode }),
             });
@@ -98,6 +112,7 @@ export default function StateControl({ deviceId, deviceData }) {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ airFluxRate: newRate }),
             });
@@ -120,6 +135,7 @@ export default function StateControl({ deviceId, deviceData }) {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ airFluxDirection: newDirection }),
             });

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -17,6 +19,7 @@ export default function ClockAutomation({ deviceId }) {
     const [alarmSound, setAlarmSound] = useState("sound1"); // Default sound
     const [volume, setVolume] = useState(50); // Default volume
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     const alarmSoundOptions = [
         { label: "Sound 1", value: "sound1" },
@@ -25,12 +28,26 @@ export default function ClockAutomation({ deviceId }) {
     ];
 
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const response = await fetch(`${API_BASE_URL}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
+                if(response.ok){
+                    console.log("Fetched Automations Success");
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
                 setError("Failed to fetch automatizations.");
@@ -96,18 +113,27 @@ export default function ClockAutomation({ deviceId }) {
                 volume,
             },
         };
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
 
         try {
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }else{
+                console.log("Add Automations Success");
             }
 
             const data = await response.json();
@@ -120,14 +146,25 @@ export default function ClockAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
                 method: "DELETE",
+                headers : {
+                    Authorization: `Bearer ${token}`,
+                }
             });
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }else {
+                console.log("Deleted Automation Success")
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

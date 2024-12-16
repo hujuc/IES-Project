@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -9,17 +11,30 @@ export default function StereoAutomation({ deviceId }) {
     const [onTime, setOnTime] = useState("08:00"); // Hora de ativação
     const [volume, setVolume] = useState(50); // Volume do speaker
     const [action, setAction] = useState("Turn On"); // Ação (Ligar ou Desligar)
+    const navigate = useNavigate(); // For navigation
 
     useEffect(() => {
         // Fetch automatizations from backend
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+                const response = await fetch(`${API_BASE_URL}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
+                console.log("Fetched Automations Successfully")
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -81,13 +96,23 @@ export default function StereoAutomation({ deviceId }) {
         };
 
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
+            if(response.ok){
+                console.log("Added Automation Successfully")
+            }
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
@@ -102,12 +127,24 @@ export default function StereoAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
+                { method: "DELETE" ,
+                headers : {
+                    Authorization: `Bearer ${token}`,
+                }}
             );
-
+            if(response.ok){
+                console.log("Deleted Automation Successfully");
+            }
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }

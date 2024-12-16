@@ -26,7 +26,7 @@ public class AutomationThreadManager {
     private final DeviceRepository deviceRepository;
     private final NotificationRepository notificationRepository;
     private final AutomationHandlerFactory automationHandlerFactory;
-    private final DeviceService deviceService; // Injete o DeviceService aqui
+    private final DeviceService deviceService;
 
     private final ExecutorService executorService;
 
@@ -34,13 +34,13 @@ public class AutomationThreadManager {
                                    DeviceRepository deviceRepository,
                                    NotificationRepository notificationRepository,
                                    AutomationHandlerFactory automationHandlerFactory,
-                                   DeviceService deviceService) { // Receba o DeviceService no construtor
+                                   DeviceService deviceService) {
         this.automationRepository = automationRepository;
         this.deviceRepository = deviceRepository;
         this.notificationRepository = notificationRepository;
         this.automationHandlerFactory = automationHandlerFactory;
         this.deviceService = deviceService;
-        this.executorService = Executors.newCachedThreadPool(); // Pool dinâmico de threads
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     @PostConstruct
@@ -48,8 +48,12 @@ public class AutomationThreadManager {
         Thread automationThread = new Thread(() -> {
             while (true) {
                 try {
+                    // Sincronizar com o próximo minuto
+                    long waitTime = calculateWaitTimeUntilNextMinute();
+                    Thread.sleep(waitTime);
+
+                    // Processar as automações
                     processAutomations();
-                    Thread.sleep(60000); // Verifica automatizações a cada 1 minuto
                 } catch (InterruptedException e) {
                     System.err.println("[ERROR] Automation thread interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt();
@@ -63,10 +67,17 @@ public class AutomationThreadManager {
         System.out.println("[INFO] Automation thread started.");
     }
 
+    private long calculateWaitTimeUntilNextMinute() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMinute = now.plusMinutes(1).truncatedTo(ChronoUnit.MINUTES);
+        return ChronoUnit.MILLIS.between(now, nextMinute);
+    }
+
     private void processAutomations() {
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
         System.out.println("[INFO] Checking automations for execution at: " + now);
 
+        // Buscar automações que estão programadas para este minuto
         List<Automation> automations = automationRepository.findAllByExecutionTime(now);
         System.out.println("[INFO] Found " + automations.size() + " automations to process.");
 
@@ -86,7 +97,7 @@ public class AutomationThreadManager {
             Device device = deviceRepository.findById(automation.getDeviceId())
                     .orElseThrow(() -> new RuntimeException("[ERROR] Device not found: " + automation.getDeviceId()));
 
-            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId()); // Use o método do serviço
+            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId());
             if (houseId == null) {
                 throw new RuntimeException("[ERROR] House associated with device not found.");
             }
@@ -114,8 +125,8 @@ public class AutomationThreadManager {
                     houseId,
                     notificationText,
                     LocalDateTime.now(),
-                    false, // Marca como não lida
-                    "automationNotification" // Tipo de notificação
+                    false,
+                    "automationNotification"
             );
 
             notificationRepository.save(notification);
@@ -125,5 +136,4 @@ public class AutomationThreadManager {
             System.err.println("[ERROR] Error creating notification: " + e.getMessage());
         }
     }
-
 }

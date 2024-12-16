@@ -6,11 +6,13 @@ import ClockAutomation from "../../components/automationsPages/clockPage/clockAu
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function ClockControl() {
     const { deviceId } = useParams(); // Captura o deviceId da URL
     const [deviceName, setDeviceName] = useState("Clock"); // Nome padrão
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     useEffect(() => {
         if (!deviceId) {
@@ -18,12 +20,26 @@ export default function ClockControl() {
             setError("Device ID is missing");
             return;
         }
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
 
         const fetchClockData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch device: ${response.statusText}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                if (response.status === 403) {
+                    console.log("Unauthorized Access");
+                    navigate("/login");
+                }else {
+                    console.log("Fetched Clock Data Success")
                 }
                 const data = await response.json();
                 setDeviceName(data.name || "Clock"); // Define o nome do dispositivo

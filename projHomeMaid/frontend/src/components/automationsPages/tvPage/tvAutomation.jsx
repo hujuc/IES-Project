@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -16,14 +17,31 @@ export default function TvAutomation({ deviceId }) {
     const [brightness, setBrightness] = useState(50);
     const [action, setAction] = useState("Turn On");
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}`, {
+                    method : "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 const data = await response.json();
                 const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
+                if (response.ok){
+                    console.log("Automations Fetched Successfully")
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
                 setError("Failed to fetch automatizations.");
@@ -32,9 +50,23 @@ export default function TvAutomation({ deviceId }) {
 
         const fetchDeviceState = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`, {
+                    method : "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 if (response.ok) {
+                    console.log("Device State fetched Successfully")
                     setCurrentState({
                         isTVOn: data.state,
                         volume: data.volume || 50,
@@ -128,14 +160,23 @@ export default function TvAutomation({ deviceId }) {
         };
 
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
-
+            if (response.ok){
+                console.log("Automation added Successfully");
+            }
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
             }
@@ -150,13 +191,26 @@ export default function TvAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
-
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`, // Correctly placed under 'headers'
+                        "Content-Type": "application/json", // Optional but good to include
+                    },
+                }
             );
-
+            if(response.ok){
+                console.log("Automation Deleted Successfully")
+            }
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -22,11 +23,27 @@ export default function DryerAutomation({ deviceId }) {
     const [onTime, setOnTime] = useState("08:00");
     const [temperature, setTemperature] = useState(60);
     const [dryMode, setDryMode] = useState("Regular Dry");
+    const navigate = useNavigate();
 
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const response = await fetch(`${API_BASE_URL}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if(response.ok) {
+                    console.log("Dryer Machine Automation Data Fetched")
+                }
+                if (!response.ok) throw new Error("Failed to fetch automatizations");
+
                 const data = await response.json();
                 const deviceAutomatizations = data
                     .filter((item) => item.deviceId === deviceId)
@@ -45,17 +62,23 @@ export default function DryerAutomation({ deviceId }) {
 
         const fetchDeviceState = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setCurrentState({
-                        isDryerOn: data.state,
-                        temperature: data.temperature || 60,
-                        dryMode: reverseModeMap[data.mode] || "Regular Dry",
-                    });
-                } else {
-                    console.error("Failed to fetch device state:", data);
+                const response = await fetch(
+                    `${API_BASE_URL.replace("/automations", `/devices/${deviceId}`)}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+                if (!response.ok) throw new Error("Failed to fetch device state");
+                if(response.ok){
+                    console.log("Dryer Machine Data Fetched Successfully");
                 }
+
+                const data = await response.json();
+                setCurrentState({
+                    isDryerOn: data.state,
+                    temperature: data.temperature || 60,
+                    dryMode: reverseModeMap[data.mode] || "Regular Dry",
+                });
             } catch (err) {
                 console.error("Error fetching device state:", err);
             }
@@ -64,8 +87,15 @@ export default function DryerAutomation({ deviceId }) {
         fetchAutomatizations();
         fetchDeviceState();
 
+        // WebSocket connection
         const client = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            webSocketFactory: () =>
+                new SockJS(
+                    `${import.meta.env.VITE_API_URL.replace(
+                        "/api",
+                        "/ws/devices"
+                    )}?token=${token}`
+                ),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
@@ -94,8 +124,9 @@ export default function DryerAutomation({ deviceId }) {
                                                 changes: {
                                                     ...updatedData.changes,
                                                     dryMode:
-                                                        reverseModeMap[updatedData.changes.dryMode] ||
-                                                        updatedData.changes.dryMode,
+                                                        reverseModeMap[
+                                                            updatedData.changes.dryMode
+                                                            ] || updatedData.changes.dryMode,
                                                 },
                                             }
                                             : item
@@ -108,8 +139,9 @@ export default function DryerAutomation({ deviceId }) {
                                             changes: {
                                                 ...updatedData.changes,
                                                 dryMode:
-                                                    reverseModeMap[updatedData.changes.dryMode] ||
-                                                    updatedData.changes.dryMode,
+                                                    reverseModeMap[
+                                                        updatedData.changes.dryMode
+                                                        ] || updatedData.changes.dryMode,
                                             },
                                         },
                                     ];
@@ -136,9 +168,11 @@ export default function DryerAutomation({ deviceId }) {
         client.activate();
 
         return () => client.deactivate();
-    }, [deviceId]);
+    }, [deviceId, navigate]);
 
     const addAutomatization = async () => {
+        const token = localStorage.getItem("jwtToken");
+
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
@@ -154,12 +188,14 @@ export default function DryerAutomation({ deviceId }) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
 
-            if (!response.ok) {
-                throw new Error(`Failed to add automatization: ${response.statusText}`);
+            if (!response.ok) throw new Error("Failed to add automatization");
+            if(response.ok){
+                console.log("Added Automation Successfully");
             }
 
             const data = await response.json();
@@ -179,16 +215,21 @@ export default function DryerAutomation({ deviceId }) {
     };
 
     const deleteAutomatization = async (index) => {
+        const token = localStorage.getItem("jwtToken");
         const automatization = automatizations[index];
 
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
+                {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                }
             );
 
-            if (!response.ok) {
-                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            if (!response.ok) throw new Error("Failed to delete automatization");
+            if(response.ok){
+                console.log("Automation Deleted Successfully")
             }
 
             setAutomatizations((prev) => prev.filter((_, i) => i !== index));
@@ -197,7 +238,7 @@ export default function DryerAutomation({ deviceId }) {
         }
     };
 
-    return (
+return (
         <div className="flex flex-col items-center w-full">
             <div className="w-full bg-white text-gray-800 p-6 rounded-xl shadow-lg mb-6">
                 <div className="flex items-center justify-between mb-6">

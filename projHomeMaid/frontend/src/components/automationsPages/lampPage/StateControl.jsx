@@ -2,6 +2,7 @@ import React from "react";
 import { FiZapOff, FiZap } from "react-icons/fi";
 import outlineSunIcon from "../../../assets/automationsPages/stateIcons/suns/outlineSun.png";
 import fullSunIcon from "../../../assets/automationsPages/stateIcons/suns/fullSun.png";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function StateControl({
                                          isLightOn,
@@ -26,21 +27,32 @@ export default function StateControl({
         { name: "Blue", value: "#0000ff" },
         { name: "Purple", value: "#800080" },
     ];
+    const navigate = useNavigate(); // For navigation
 
     // Alternar o estado da lâmpada
     const toggleLight = async () => {
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
             const updatedState = !isLightOn;
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ state: updatedState }),
             });
 
             if (!response.ok) {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
+            }else {
+                console.log("Toggle Light Success")
             }
 
             setIsLightOn(updatedState);
@@ -53,18 +65,27 @@ export default function StateControl({
     const updateBrightness = async (newBrightness) => {
         try {
             setBrightness(newBrightness);
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
 
             if (isLightOn) {
                 const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ brightness: newBrightness }),
                 });
 
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
+                }else {
+                    console.log("Updated brightness success");
                 }
             }
         } catch (err) {
@@ -76,6 +97,12 @@ export default function StateControl({
     const updateColor = async (newColor) => {
         try {
             setColor(newColor);
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
 
             if (isLightOn) {
                 const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
@@ -88,6 +115,8 @@ export default function StateControl({
 
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
+                }else {
+                    console.log("Updated Color Success");
                 }
             }
         } catch (err) {

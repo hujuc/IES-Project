@@ -64,7 +64,7 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
 
     private void runWashCycle(Device device) {
         try {
-            Thread.sleep(12000); // Simulate 2-minute washing cycle
+            Thread.sleep(120000); // Simulate 2-minute washing cycle
             device.setState(false); // Set state to false after the cycle
             deviceRepository.save(device);
             try {

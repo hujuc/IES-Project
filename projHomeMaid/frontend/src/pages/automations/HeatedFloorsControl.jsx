@@ -5,6 +5,7 @@ import HeatedFloorAutomation from "../../components/automationsPages/heatedFloor
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; // Import the new component
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function HeatedFloorsControl() {
     const [isHeatedOn, setIsHeatedOn] = useState(false);
@@ -14,11 +15,24 @@ export default function HeatedFloorsControl() {
 
     const url = window.location.href;
     const deviceId = url.split("/").pop();
+    const navigate = useNavigate(); // For navigation
 
     // Function to fetch device data
     const fetchHeatedFloorsData = async () => {
         try {
-            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
+            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                method : "GET",
+                headers : {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
             const data = await response.json();
 
             if (data.state !== undefined) {
@@ -31,6 +45,13 @@ export default function HeatedFloorsControl() {
 
             if (data.name !== undefined) {
                 setName(data.name); // Set the device name
+            }
+
+            if(response.ok){
+                console.log("Fetched Data Success");
+            }else if (response.status === 403){
+                console.log("Unauthorized Access, redirecting to the login");
+                navigate("/login");
             }
         } catch (err) {
             console.error("Error fetching heated floors data:", err);
@@ -109,16 +130,25 @@ export default function HeatedFloorsControl() {
     // Function to save state and temperature to the backend
     const saveStateToDatabase = async (state, temperature) => {
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ state, temperature }),
             });
 
             if (!response.ok) {
                 throw new Error(`API response error: ${response.status}`);
+            }else {
+                console.log("Saved data to database Successfully");
             }
 
         } catch (err) {

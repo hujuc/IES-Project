@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
 export default function CoffeeMachAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("10:00");
     const [selectedType, setSelectedType] = useState("Espresso");
+    const navigate = useNavigate(); // For navigation
 
     useEffect(() => {
         const fetchAutomatizations = async () => {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const response = await fetch(`${API_BASE_URL}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
+
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
                 );
@@ -25,6 +38,9 @@ export default function CoffeeMachAutomation({ deviceId }) {
                     },
                 }));
                 setAutomatizations(normalizedAutomatizations);
+                if(response.ok){
+                    console.log("Fetched automations Success");
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -76,18 +92,28 @@ export default function CoffeeMachAutomation({ deviceId }) {
             executionTime: onTime,
             changes: { drinkType: selectedType.toLowerCase() },
         };
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
 
         try {
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }else {
+                console.log("Added Automation Success");
             }
 
             const data = await response.json();
@@ -100,15 +126,25 @@ export default function CoffeeMachAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
-
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         try {
             const response = await fetch(
                 `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
+                { method: "DELETE" ,
+                headers : {
+                    Authorization: `Bearer ${token}`,
+                }}
             );
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }else {
+                console.log("Deleted Automation SUccess.")
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

@@ -14,17 +14,32 @@ export default function AutomationsHeader() {
 
     const handleRemoveDevice = async () => {
         try {
+            // Retrieve the token from localStorage
+            const token = localStorage.getItem("jwtToken");
+
+            // If token is missing, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Include the Authorization header
                 },
-                body: JSON.stringify({ deviceId }), // Envia o deviceId no corpo
+                body: JSON.stringify({ deviceId }), // Send deviceId in the body
             });
 
             if (response.ok) {
-                const houseId = deviceId.split("_")[2]; // Extrair o `houseId` do deviceId
-                navigate(`/homePage/${houseId}`); // Redireciona para a homePage da casa
+                const houseId = deviceId.split("_")[2]; // Extract the houseId from the deviceId
+                navigate(`/homePage/${houseId}`); // Redirect to the homePage of the house
+            } else if (response.status === 401) {
+                // If the token is invalid or expired, redirect to login
+                console.log("Unauthorized. Redirecting to login page.");
+                navigate("/login");
             } else {
                 console.log("Failed to remove device. Please try again.");
             }
@@ -33,6 +48,7 @@ export default function AutomationsHeader() {
             console.log("An error occurred. Please try again.");
         }
     };
+
 
     return (
         <div className="w-full flex justify-between px-4 py-4">

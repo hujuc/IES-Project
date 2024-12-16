@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -21,25 +22,48 @@ export default function WasherAutomation({ deviceId }) {
     const [onTime, setOnTime] = useState("08:00");
     const [temperature, setTemperature] = useState(40);
     const [washMode, setWashMode] = useState("Regular Wash");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
-                const data = await response.json();
-                const deviceAutomatizations = data.filter(
-                    (item) => item.deviceId === deviceId
-                );
+                const token = localStorage.getItem("jwtToken");
 
-                const mappedAutomatizations = deviceAutomatizations.map((item) => ({
-                    ...item,
-                    changes: {
-                        ...item.changes,
-                        washMode: reverseWashModeMapping[item.changes.washMode] || item.changes.washMode,
+                // If token is missing, redirect to login page
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include the token in Authorization header
+                        "Content-Type": "application/json",
                     },
-                }));
+                });
 
-                setAutomatizations(mappedAutomatizations);
+                if (response.ok) {
+                    const data = await response.json();
+                    const deviceAutomatizations = data.filter(
+                        (item) => item.deviceId === deviceId
+                    );
+
+                    const mappedAutomatizations = deviceAutomatizations.map((item) => ({
+                        ...item,
+                        changes: {
+                            ...item.changes,
+                            washMode: reverseWashModeMapping[item.changes.washMode] || item.changes.washMode,
+                        },
+                    }));
+                    console.log("Automation Machine fetch Successful");
+                    setAutomatizations(mappedAutomatizations);
+                } else if (response.status === 401) {
+                    console.log("Unauthorized. Redirecting to login page.");
+                    navigate("/login");
+                } else {
+                    console.error("Failed to fetch automatizations.");
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -105,7 +129,7 @@ export default function WasherAutomation({ deviceId }) {
         client.activate();
 
         return () => client.deactivate();
-    }, [deviceId]);
+    }, [deviceId, navigate]);
 
     const addAutomatization = async () => {
         const newAutomatization = {
@@ -119,29 +143,42 @@ export default function WasherAutomation({ deviceId }) {
         };
 
         try {
+            const token = localStorage.getItem("jwtToken");
+
+            // If token is missing, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
             const response = await fetch(API_BASE_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Include the token in Authorization header
                 },
                 body: JSON.stringify(newAutomatization),
             });
 
-            if (!response.ok) {
+            if (response.ok) {
+                const data = await response.json();
+                setAutomatizations((prev) => [
+                    ...prev,
+                    {
+                        ...data,
+                        changes: {
+                            ...data.changes,
+                            washMode: reverseWashModeMapping[data.changes.washMode],
+                        },
+                    },
+                ]);
+            } else if (response.status === 401) {
+                console.log("Unauthorized. Redirecting to login page.");
+                navigate("/login");
+            } else {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
             }
-
-            const data = await response.json();
-            setAutomatizations((prev) => [
-                ...prev,
-                {
-                    ...data,
-                    changes: {
-                        ...data.changes,
-                        washMode: reverseWashModeMapping[data.changes.washMode],
-                    },
-                },
-            ]);
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -151,16 +188,34 @@ export default function WasherAutomation({ deviceId }) {
         const automatization = automatizations[index];
 
         try {
-            const response = await fetch(
-                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
-                { method: "DELETE" }
-            );
+            const token = localStorage.getItem("jwtToken");
 
-            if (!response.ok) {
-                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            // If token is missing, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
             }
 
-            setAutomatizations((prev) => prev.filter((_, i) => i !== index));
+            const response = await fetch(
+                `${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include the token in Authorization header
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setAutomatizations((prev) => prev.filter((_, i) => i !== index));
+                console.log("Automation Deleted Successfully");
+            } else if (response.status === 401) {
+                console.log("Unauthorized. Redirecting to login page.");
+                navigate("/login");
+            } else {
+                throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }

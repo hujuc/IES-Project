@@ -5,12 +5,14 @@ import TvAutomation from "../../components/automationsPages/tvPage/tvAutomation.
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function TVControl() {
     const [isTVOn, setIsTVOn] = useState(false);
     const [volume, setVolume] = useState(50); // Volume inicial
     const [brightness, setBrightness] = useState(50); // Brilho inicial
     const [deviceName, setDeviceName] = useState("Television"); // Nome do dispositivo
+    const navigate = useNavigate(); // For navigation
     const [error, setError] = useState(null);
 
     const url = window.location.href;
@@ -21,13 +23,31 @@ export default function TVControl() {
     useEffect(() => {
         const fetchTVData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
-                const data = await response.json();
+                const token = localStorage.getItem("jwtToken");
 
+                if (!token) {
+                    console.error("Token not found. Redirecting to login.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
                 setIsTVOn(data.state || false);
                 setVolume(data.volume != null ? data.volume : 50);
                 setBrightness(data.brightness != null ? data.brightness : 50);
                 setDeviceName(data.name || "Television"); // Atualiza o nome do dispositivo
+                if(response.status === 403){
+                    console.log("Non authorized Access, navigating to login");
+                    navigate("/login");
+                }else if (response.ok){
+                    console.log("Tv Data Fetched Successfully")
+                }
             } catch (err) {
                 console.error("Erro ao buscar os dados da TV:", err);
                 setError("Falha ao buscar os dados da TV.");
@@ -111,10 +131,20 @@ export default function TVControl() {
 
     const saveStateToDatabase = async (state, volumeValue, brightnessValue) => {
         try {
+
+            const token = localStorage.getItem("jwtToken");
+
+            if (!token) {
+                console.error("Token not found. Redirecting to login.");
+                navigate("/login");
+                return;
+            }
+
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     state,
@@ -123,6 +153,9 @@ export default function TVControl() {
                 }),
             });
 
+            if(response.ok){
+                console.log("Saved Data Succes")
+            }
             if (!response.ok) {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }

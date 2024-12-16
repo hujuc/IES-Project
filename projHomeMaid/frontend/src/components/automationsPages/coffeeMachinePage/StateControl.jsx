@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 import coffeeMachineOn from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOn.png"; // Imagem para estado ligado
 import coffeeMachineOff from "../../../assets/automationsPages/devices/coffeeMachine/coffeeMachineOff.png"; // Imagem para estado desligado
 
@@ -12,6 +12,7 @@ export default function StateControl({ deviceId }) {
     const [isLocked, setIsLocked] = useState(false);
     const [selectedOption, setSelectedOption] = useState("Espresso");
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     const options = [
         { name: "Espresso", icon: "☕" },
@@ -20,16 +21,30 @@ export default function StateControl({ deviceId }) {
     ];
 
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         // Fetch device data
         const fetchDevice = async () => {
             try {
-                const response = await axios.get(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const response = await axios.get(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = response.data;
 
                 setDevice(data);
                 setLightOn(data.state || false);
                 setIsLocked(data.state || false);
                 setSelectedOption(capitalize(data.drinkType || "Espresso"));
+                if(response.ok){
+                    console.log("Device Data Fetched Success");
+                }
             } catch (err) {
                 console.error("Error fetching device data:", err);
                 setError("Failed to fetch device data.");
@@ -70,22 +85,44 @@ export default function StateControl({ deviceId }) {
     }, [deviceId]);
 
     const toggleLight = async () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         if (isLocked) return;
 
         try {
             const updatedState = true;
-            await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                state: updatedState,
-            });
+            // Update light state to ON
+            await axios.patch(
+                `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
+                { state: updatedState },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Authorization header
+                    },
+                }
+            );
+
             setLightOn(updatedState);
             setIsLocked(true);
 
             // Reset after 30 seconds
             setTimeout(async () => {
                 try {
-                    await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                        state: false,
-                    });
+                    // Update light state to OFF
+                    await axios.patch(
+                        `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
+                        { state: false },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`, // Authorization header
+                            },
+                        }
+                    );
+
                     setLightOn(false);
                     setIsLocked(false);
                 } catch (resetError) {
@@ -99,10 +136,25 @@ export default function StateControl({ deviceId }) {
     };
 
     const updateDrinkType = async (optionName) => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         try {
-            await axios.patch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                drinkType: optionName.toLowerCase(),
-            });
+            // Update drink type
+            await axios.patch(
+                `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
+                { drinkType: optionName.toLowerCase() },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Authorization header
+                    },
+                }
+            );
+
             setSelectedOption(optionName);
             console.log("Drink type updated successfully");
         } catch (err) {

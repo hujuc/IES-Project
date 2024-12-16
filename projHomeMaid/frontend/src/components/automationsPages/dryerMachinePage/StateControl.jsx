@@ -1,59 +1,92 @@
 import React, { useState, useEffect } from "react";
-import dryerOnIcon from "../../../assets/automationsPages/devices/washer/washer_aut.png"; // Icon for dryer on
-import dryerOffIcon from "../../../assets/automationsPages/devices/washer/washer_aut.png"; // Icon for dryer off
-import lowTempIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png"; // Icon for low temperature
+import { useNavigate } from "react-router-dom";
+import dryerOnIcon from "../../../assets/automationsPages/devices/dryer/dryerAut.png";
+import dryerOffIcon from "../../../assets/automationsPages/devices/dryer/dryerAut.png";
+import lowTempIcon from "../../../assets/automationsPages/stateIcons/temperature/lowTemperature.png";
 import highTempIcon from "../../../assets/automationsPages/stateIcons/temperature/highTemperature.png";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices"; // Base URL for API requests
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/devices";
 
-// Utility functions to handle mode conversion
-const formatModeToDisplay = (mode) =>
-    mode.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()); // Converts camelCase to "Title Case"
+const modeMap = {
+    "Regular Dry": "regularDry",
+    "Gentle Dry": "gentleDry",
+    "Permanent Press": "permanentPress",
+};
 
-const formatModeToBackend = (mode) =>
-    mode.replace(/ /g, "").replace(/^./, (str) => str.toLowerCase()); // Converts "Title Case" to camelCase
+const formatModeToDisplay = (backendMode) =>
+    Object.keys(modeMap).find((key) => modeMap[key] === backendMode) || backendMode;
+
+const formatModeToBackend = (displayMode) => modeMap[displayMode] || displayMode;
 
 export default function StateControl({ deviceId }) {
     const [isRunning, setIsRunning] = useState(false);
     const [currentState, setCurrentState] = useState({
         isDryerOn: false,
         temperature: 50.0,
-        mode: "regularDry", // Default mode in camelCase
-    }); // To store the current state of the dryer
-    const [loading, setLoading] = useState(true); // Track loading state
+        mode: "regularDry",
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
+    const isTokenExpired = (token) => {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            return payload.exp * 1000 < Date.now();
+        } catch {
+            return true;
+        }
+    };
 
     useEffect(() => {
-        // Fetch current state from backend
         const fetchCurrentState = async () => {
+            const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                console.log("Token is missing or expired. Redirecting to login.");
+                navigate("/login");
+                return;
+            }
             try {
-                const response = await fetch(`${API_BASE_URL}/${deviceId}`);
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/${deviceId}`, {
+                    method: "GET",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-                if (response.ok) {
-                    setCurrentState({
-                        isDryerOn: data.state,
-                        temperature: data.temperature,
-                        mode: data.mode,
-                    });
-                    setIsRunning(data.state); // Sync "isRunning" with the current state
-                } else {
-                    console.error("Failed to fetch device state:", data);
+                if (!response.ok) {
+                    if (response.status === 403) navigate("/login");
+                    throw new Error(`Failed to fetch device state: ${response.status}`);
                 }
+
+                const data = await response.json();
+                setCurrentState({
+                    isDryerOn: data.state,
+                    temperature: data.temperature,
+                    mode: data.mode,
+                });
+                setIsRunning(data.state);
             } catch (error) {
                 console.error("Error fetching device state:", error);
+                setError("Failed to fetch device state.");
             } finally {
-                setLoading(false); // Set loading to false once fetch is complete
+                setLoading(false);
             }
         };
 
         fetchCurrentState();
-    }, [deviceId]);
+    }, [deviceId, navigate]);
 
     const updateDeviceState = async (newState) => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            console.log("Token is missing or expired. Redirecting to login.");
+            navigate("/login");
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/${deviceId}`, {
                 method: "PATCH",
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(newState),
@@ -69,24 +102,16 @@ export default function StateControl({ deviceId }) {
                 temperature: updatedState.temperature,
                 mode: updatedState.mode,
             });
-
-            setIsRunning(updatedState.state); // Ensure "isRunning" syncs with the backend state
+            setIsRunning(updatedState.state);
         } catch (error) {
             console.error("Error updating device state:", error);
+            setError("Failed to update device state.");
         }
     };
 
     const handleToggleDryer = async () => {
         const newState = !currentState.isDryerOn;
-
-        setCurrentState((prevState) => ({
-            ...prevState,
-            isDryerOn: newState,
-        }));
-
-        setIsRunning(newState); // Immediately update "isRunning"
-
-        // Update the dryer’s state in the backend
+        setIsRunning(newState);
         await updateDeviceState({
             state: newState,
             temperature: currentState.temperature,
@@ -94,19 +119,17 @@ export default function StateControl({ deviceId }) {
         });
 
         if (newState) {
-            // Simulate the cycle with a timeout
             setTimeout(() => {
                 setIsRunning(false);
-
-                // Automatically turn off the dryer in the backend
                 updateDeviceState({
                     state: false,
                     temperature: currentState.temperature,
                     mode: currentState.mode,
                 });
-            }, 120000); // 2-minute cycle simulation
+            }, 120000);
         }
     };
+
 
     const handleModeChange = async (newModeDisplay) => {
         const newModeBackend = formatModeToBackend(newModeDisplay);
@@ -138,9 +161,7 @@ export default function StateControl({ deviceId }) {
         });
     };
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+    if (loading) return <p>Loading...</p>;
 
     return (
         <div className="flex flex-col items-center mt-6">

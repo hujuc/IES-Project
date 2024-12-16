@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 
@@ -10,6 +11,7 @@ export default function LampAutomation({ deviceId }) {
     const [brightness, setBrightness] = useState(50); // Default brightness
     const [color, setColor] = useState("#ffffff"); // Default color
     const [action, setAction] = useState("Turn On");
+    const navigate = useNavigate(); // For navigation
 
     const predefinedColors = [
         { name: "White", value: "#ffffff" },
@@ -33,7 +35,18 @@ export default function LampAutomation({ deviceId }) {
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+                const response = await fetch(`${API_BASE_URL}`,{
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 const deviceAutomatizations = data.filter(
                     (item) => item.deviceId === deviceId
@@ -48,6 +61,9 @@ export default function LampAutomation({ deviceId }) {
                 }));
 
                 setAutomatizations(updatedAutomatizations);
+                if(response.ok){
+                    console.log("Fetched Automations Complete");
+                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -96,6 +112,13 @@ export default function LampAutomation({ deviceId }) {
     };
 
     const addAutomatization = async () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
         const newAutomatization = {
             deviceId,
             executionTime: onTime,
@@ -114,12 +137,15 @@ export default function LampAutomation({ deviceId }) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(newAutomatization),
             });
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
+            }else {
+                console.log("Added Automation Successfully");
             }
 
             const data = await response.json();
@@ -132,13 +158,24 @@ export default function LampAutomation({ deviceId }) {
 
     const deleteAutomatization = async (index) => {
         const automatization = automatizations[index];
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
                 method: "DELETE",
+                headers : {
+                    Authorization: `Bearer ${token}`,
+                }
             });
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
+            }else {
+                console.log("Deteted Automation Successfully");
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

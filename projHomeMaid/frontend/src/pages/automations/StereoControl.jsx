@@ -5,6 +5,7 @@ import StereoAutomation from "../../components/automationsPages/stereoPage/Stere
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function StereoControl() {
     const DEFAULT_VOLUME = 50;
@@ -12,6 +13,7 @@ export default function StereoControl() {
     const [volume, setVolume] = useState(DEFAULT_VOLUME);
     const [deviceName, setDeviceName] = useState("Speaker"); // Nome padrão
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // For navigation
 
     const url = window.location.href;
     const deviceId = url.split("/").pop();
@@ -20,12 +22,30 @@ export default function StereoControl() {
     useEffect(() => {
         const fetchSpeakerData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    console.log("Token not found. Redirecting to login page.");
+                    navigate("/login");
+                    return;
+                }
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
 
                 setIsSpeakerOn(data.state || false);
                 setVolume(data.volume != null ? Number(data.volume) : DEFAULT_VOLUME);
                 setDeviceName(data.name || "Speaker"); // Define o nome do dispositivo
+                if(response.ok){
+                    console.log("Fetched Speaker Data Successfully")
+                }else if(response.status === 403){
+                    console.log("Unauthorizes Access. Redirecting to Login");
+                    navigate("/login");
+                }
+
             } catch (err) {
                 console.error("Error fetching speaker data:", err);
                 setError("Failed to fetch speaker data.");
@@ -96,14 +116,24 @@ export default function StereoControl() {
 
     const saveStateToDatabase = async (state, volume) => {
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
             const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+
                 },
                 body: JSON.stringify({ state, volume }),
             });
-
+            if(response.ok){
+                console.log("Saved Stereo Data Successfully")
+            }
             if (!response.ok) {
                 throw new Error(`API response error: ${response.status}`);
             }

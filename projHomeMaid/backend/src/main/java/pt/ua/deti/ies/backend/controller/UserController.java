@@ -72,7 +72,8 @@ public class UserController {
             // Return response with token and houseId only
             return ResponseEntity.ok(Map.of(
                     "token", jwtToken,
-                    "houseId", houseId
+                    "houseId", houseId,
+                    "username", authenticatedUser.getEmail()
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

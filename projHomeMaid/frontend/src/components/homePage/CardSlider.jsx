@@ -170,25 +170,21 @@ function CardSlider() {
         setCurrentIndex((prevIndex) => (prevIndex === cards.length - 1 ? 0 : prevIndex + 1));
     };
 
-    const handleAddDevice = async () => {
-        if (!deviceData.name || !deviceData.type) {
-            alert("Device name and type are required.");
-            return;
-        }
+    const handleAddDevice = async (deviceData) => {
+        console.log("Received Device Data:", deviceData);
 
         try {
             const token = localStorage.getItem("jwtToken");
-            console.log("Device data:", deviceData);
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}/devices/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`, // Inclui o token JWT
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     houseId,
-                    roomType: deviceData.room || cards[currentIndex].type,
+                    roomType: deviceData.room || "house", // Garantindo que 'house' seja enviado como roomType
                     type: deviceData.type,
                     name: deviceData.name,
                 }),
@@ -196,12 +192,24 @@ function CardSlider() {
 
             if (response.ok) {
                 const newDevice = await response.json();
-                console.log("Device added:", newDevice);
+                console.log("Device successfully added:", newDevice);
 
+                // Atualiza o card correto
                 const updatedCards = [...cards];
-                updatedCards[currentIndex].deviceObjects.push(newDevice);
+                const targetCardIndex = updatedCards.findIndex(
+                    (card) => card.type === (deviceData.room || "house")
+                );
+
+                if (targetCardIndex > -1) {
+                    if (!updatedCards[targetCardIndex].deviceObjects) {
+                        updatedCards[targetCardIndex].deviceObjects = [];
+                    }
+                    updatedCards[targetCardIndex].deviceObjects.push(newDevice);
+                }
+
                 setCards(updatedCards);
-                setIsModalOpen(false);
+                setIsModalOpen(false); // Fecha o modal
+                setErrorMessage(""); // Reseta mensagens de erro
             } else {
                 console.error("Failed to add device:", response.statusText);
                 alert("Failed to add device. Please try again.");
@@ -219,8 +227,14 @@ function CardSlider() {
 
     return (
         <div className="relative flex flex-col items-center space-y-4">
+
+            {/* Room Card */}
             <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-64">
-                <img src={currentCard.image} alt={currentCard.label} className="w-full h-full object-cover rounded-lg p-2" />
+                <img
+                    src={currentCard.image}
+                    alt={currentCard.label}
+                    className="w-full h-full object-cover rounded-lg p-2"
+                />
                 {currentCard.id !== "house" && (
                     <div className="absolute top-4 left-4 bg-white text-gray-700 px-2 py-1 text-sm rounded-lg shadow">
                         <p><strong>Temperature:</strong> {currentCard.temperature}°C</p>
@@ -234,6 +248,12 @@ function CardSlider() {
                     >
                         Add Device
                     </button>
+                </div>
+                <div
+                    className="absolute left-0 right-0 py-1 bg-black bg-opacity-50 text-center"
+                    style={{bottom: '5%', borderTopLeftRadius: "0", borderTopRightRadius: "0"}}
+                >
+                    <p className="text-xl font-semibold text-white">{currentCard.label}</p>
                 </div>
             </div>
 
@@ -249,19 +269,23 @@ function CardSlider() {
             />
 
             <div className="flex space-x-4">
-                <button onClick={handlePrev} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handlePrev}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Prev
                 </button>
-                <button onClick={handleNext} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handleNext}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Next
                 </button>
             </div>
 
-            <RoomInfo room={currentCard} />
+            {/*<RoomInfo room={currentCard}/>*/}
+            <RoomInfo key={currentCard.deviceObjects?.length} room={currentCard} />
+
             {currentCard.id === "house" && (
                 <>
-                    <Statistics houseId={houseId} />
-                    <RoomGraph houseId={houseId} />
+                    <Statistics houseId={houseId}/>
+                    <RoomGraph houseId={houseId}/>
                 </>
             )}
 

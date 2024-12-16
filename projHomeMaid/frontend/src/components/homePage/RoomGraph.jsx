@@ -32,12 +32,27 @@ const RoomGraph = ({ houseId }) => {
     // Buscar os quartos da casa
     useEffect(() => {
         const fetchRooms = async () => {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.error("No token found. Redirecting to login.");
+                navigate("/login"); // Certifique-se de que o `navigate` esteja disponível
+                return;
+            }
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     setRooms(data.rooms || []);
                     setSelectedRoomId(data.rooms[0]?.roomId || null); // Seleciona o primeiro quarto por padrão
+                } else if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem("jwtToken");
+                    navigate("/login"); // Redireciona para login se o token for inválido
                 } else {
                     console.error("Failed to fetch rooms");
                 }
@@ -52,13 +67,26 @@ const RoomGraph = ({ houseId }) => {
     // Buscar os dados para o gráfico
     useEffect(() => {
         const fetchGraphData = async () => {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                console.error("No token found. Redirecting to login.");
+                navigate("/login");
+                return;
+            }
+
             if (!selectedRoomId) return;
 
             setLoading(true);
             try {
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/sensors/rooms/${selectedRoomId}/data?timeframe=${timeframe}`
+                    `${import.meta.env.VITE_API_URL}/sensors/rooms/${selectedRoomId}/data?timeframe=${timeframe}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
+
                 if (response.ok) {
                     const data = await response.json();
 
@@ -76,6 +104,9 @@ const RoomGraph = ({ houseId }) => {
                     console.log("Graph data fetched:", { temperatures, humidities });
 
                     setGraphData({ temperatures, humidities });
+                } else if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem("jwtToken");
+                    navigate("/login"); // Redireciona para login se o token for inválido
                 } else {
                     console.error("Failed to fetch graph data");
                     setGraphData(null);

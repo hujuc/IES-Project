@@ -12,6 +12,7 @@ const RoomStatistics = ({ houseId }) => {
     const [timeframe, setTimeframe] = useState("daily");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(true); // Controle de autenticação
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -19,11 +20,27 @@ const RoomStatistics = ({ houseId }) => {
             setError(null);
 
             try {
-                const houseDataResponse = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`);
+                const token = localStorage.getItem("jwtToken"); // Pega o token JWT do localStorage
+
+                if (!token) {
+                    setIsAuthenticated(false); // Se não houver token, o usuário não está autenticado
+                    return;
+                }
+
+                const houseDataResponse = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`, {
+                    headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                });
+
+                if (houseDataResponse.status === 401 || houseDataResponse.status === 403) {
+                    localStorage.removeItem("jwtToken"); // Remove o token se a resposta for de erro de autorização
+                    setIsAuthenticated(false); // Marca o usuário como não autenticado
+                    return;
+                }
+
                 const houseData = await houseDataResponse.json();
 
                 setRooms(houseData.rooms);
-                setSelectedRoomId(houseData.rooms[0]?.roomId || null); // Selecionar o primeiro quarto como padrão
+                setSelectedRoomId(houseData.rooms[0]?.roomId || null); // Seleciona o primeiro quarto como padrão
             } catch (error) {
                 console.error("Error fetching rooms:", error);
                 setError("Failed to load rooms. Please try again later.");
@@ -40,13 +57,30 @@ const RoomStatistics = ({ houseId }) => {
             if (!selectedRoomId) return;
 
             try {
+                const token = localStorage.getItem("jwtToken");
+
+                if (!token) {
+                    setIsAuthenticated(false); // Se não houver token, marca o usuário como não autenticado
+                    return;
+                }
+
                 const roomTemperatureEndpoint = `${import.meta.env.VITE_API_URL}/sensors/rooms/${selectedRoomId}/average-temperature?timeframe=${timeframe}`;
                 const roomHumidityEndpoint = `${import.meta.env.VITE_API_URL}/sensors/rooms/${selectedRoomId}/average-humidity?timeframe=${timeframe}`;
 
                 const [roomTemperatureResponse, roomHumidityResponse] = await Promise.all([
-                    fetch(roomTemperatureEndpoint),
-                    fetch(roomHumidityEndpoint),
+                    fetch(roomTemperatureEndpoint, {
+                        headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                    }),
+                    fetch(roomHumidityEndpoint, {
+                        headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                    }),
                 ]);
+
+                if (roomTemperatureResponse.status === 401 || roomHumidityResponse.status === 401) {
+                    localStorage.removeItem("jwtToken"); // Remove o token se a resposta for de erro de autorização
+                    setIsAuthenticated(false); // Marca o usuário como não autenticado
+                    return;
+                }
 
                 const roomTemperatureData = await roomTemperatureResponse.text();
                 const roomHumidityData = await roomHumidityResponse.text();
@@ -63,6 +97,14 @@ const RoomStatistics = ({ houseId }) => {
 
         fetchRoomStatistics();
     }, [selectedRoomId, timeframe]);
+
+    if (!isAuthenticated) {
+        return (
+            <div className="text-red-500 text-center">
+                <p>You are not authenticated. Please log in.</p>
+            </div>
+        );
+    }
 
     if (loading) {
         return <div className="text-gray-500">Loading statistics...</div>;
@@ -128,12 +170,9 @@ const RoomStatistics = ({ houseId }) => {
                     </p>
                     <p className="text-lg text-gray-600">Average Humidity</p>
                 </div>
-
             )}
         </div>
-
-
-);
+    );
 };
 
 export default RoomStatistics;

@@ -92,8 +92,8 @@ function CardSlider() {
             if (response.ok) {
                 const data = await response.json();
                 return {
-                    temperature: data.temperature ?? "N/A",
-                    humidity: data.humidity ?? "N/A",
+                    temperature: data.temperature ? parseFloat(data.temperature).toFixed(2) : "N/A",
+                    humidity: data.humidity ? parseFloat(data.humidity).toFixed(2) : "N/A",
                 };
             }
 

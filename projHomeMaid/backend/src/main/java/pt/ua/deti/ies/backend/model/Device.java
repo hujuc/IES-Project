@@ -9,7 +9,7 @@ public class Device {
     private String deviceId;
     private String name;
     private String type;
-    private Boolean state;
+    private Boolean state = false;
     private Integer brightness;
     private String color;
     private Integer openPercentage;

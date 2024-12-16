@@ -10,9 +10,15 @@ public class InfluxDBConfig {
 
     @Bean
     public InfluxDBClient influxDBClient() {
+//        return InfluxDBClientFactory.create(
+//                "http://localhost:8086",      // URL do InfluxDB
+//                "6ShJLV6O6TJAXikzMo9CYN9ufzFAUzhwfE0itLOXJAKKPvkycdgbdQh6ZcW8G6W4zfHRHJpXzh8rlBdCuM0rlw==".toCharArray(), // Token gerado no InfluxDB
+//                "HomeMaidOrg",                // Organização
+//                "sensor_data"                 // Bucket
+//        );
         return InfluxDBClientFactory.create(
-                "http://localhost:8086",      // URL do InfluxDB
-                "QZHt0YOy9CMogtpOSifvl9MD8TwRhOCsU0AK5RKSYIs0jTSQ1MNbMbZ61bXmziVflYm52Yrj0Ko0kSwahp2gMQ==".toCharArray(), // Token gerado no InfluxDB
+                "http://influxdb:8086",      // URL do InfluxDB
+                "6ShJLV6O6TJAXikzMo9CYN9ufzFAUzhwfE0itLOXJAKKPvkycdgbdQh6ZcW8G6W4zfHRHJpXzh8rlBdCuM0rlw==".toCharArray(), // Token gerado no InfluxDB
                 "HomeMaidOrg",                // Organização
                 "sensor_data"                 // Bucket
         );

@@ -49,7 +49,8 @@ def generate_sensor_data(sensor):
         "type": sensor["type"],
         "value": random.uniform(10, 50),  # Valor aleatório ajustável
         "unit": sensor["unit"],  # Assume-se que a unidade existe no sensor
-        "houseId": sensor["houseId"]
+        "houseId": sensor["houseId"],
+        "roomId": sensor["roomId"],
     }
 
 # Função para gerar um timestamp aleatório no futuro

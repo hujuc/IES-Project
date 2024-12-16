@@ -5,31 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/kafka/AutomationConsumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/kafka/SensorDataConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/SensorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/SensorController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Sensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/model/Sensor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/SensorRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/SensorRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/SensorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/SensorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/deployment/docker-compose.prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/deployment/docker-compose.prod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/AirConditionerPage/AutomatizeAirCond.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/LightBulbPage/AutomatizeLight.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/ShutterControlPage/AutomatizeShutter.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/TVControlPage/AutomatizeTV.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/TVControlPage/AutomatizeTV.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/clockPage/AutomatizeAlarmClock.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/dryerMachineControlPage/AutomatizeDryer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/heatedFloorsControlPage/AutomatizeHeatedFloors.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/speakersControlPage/AutomatizeSpeaker.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/speakersControlPage/AutomatizeSpeaker.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/AutomatizeWasher.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/washingMachineControlPage/AutomatizeWasher.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JSX File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -48,17 +37,25 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature/data-generation",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "dev",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie",
+    "ts.external.directory.path": "/opt/intellij/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages/devices/coffeeMachine" />
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages/devices" />
+      <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -78,23 +75,28 @@
       <workItem from="1730730776829" duration="50000" />
       <workItem from="1731772791962" duration="1640000" />
       <workItem from="1731968553203" duration="4455000" />
+      <workItem from="1733868868173" duration="4479000" />
+      <workItem from="1734312311354" duration="7405000" />
+      <workItem from="1734349217399" duration="2440000" />
+      <workItem from="1734379300278" duration="6728000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="LAST_COMMIT_MESSAGE" value="" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/projHomeMaid/frontend/src/pages/Login.jsx</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

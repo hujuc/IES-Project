@@ -1,25 +1,44 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import CentralControl from "../../components/automationsPages/coffeeMachinePage/CentralControl.jsx";
-import DrinkOptions from "../../components/automationsPages/coffeeMachinePage/DrinkOptions.jsx";
-import Automatize from "../../components/automationsPages/coffeeMachinePage/AutomatizeCoffee.jsx";
+import StateControl from "../../components/automationsPages/coffeeMachinePage/StateControl.jsx"; // Chamar o novo StateControl unificado
+import CoffeeMachAutomation from "../../components/automationsPages/coffeeMachinePage/coffeeMachAutomation.jsx";
 import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
+import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function CoffeeMachineControl() {
-    const { deviceId } = useParams(); // Extract deviceId from the URL
+    const { deviceId } = useParams(); // Extrair deviceId da URL
     const [deviceData, setDeviceData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // For navigation
 
-    // Fetch device data from API
+    // Buscar dados do dispositivo pela API
     useEffect(() => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
         const fetchDeviceData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`);
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                    method : "GET",
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
                 const data = await response.json();
                 setDeviceData(data);
                 setLoading(false);
+                if(response.ok){
+                    console.log("Coffe Machine Data Fetched Success");
+                }else if (response.status === 403){
+                    console.log("Unauthorized Access");
+                    navigate("/login")
+                }
             } catch (error) {
                 console.error("Error fetching device data:", error);
                 setLoading(false);
@@ -31,34 +50,34 @@ export default function CoffeeMachineControl() {
         // Conectar ao WebSocket com SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Reconecta automaticamente após 5 segundos em caso de falha
-            heartbeatIncoming: 4000, // Checa o servidor a cada 4 segundos
-            heartbeatOutgoing: 4000, // Informa o servidor que está vivo a cada 4 segundos
+            reconnectDelay: 5000, // Reconectar automaticamente após 5 segundos se desconectado
+            heartbeatIncoming: 4000, // Checar o servidor a cada 4 segundos
+            heartbeatOutgoing: 4000, // Informar ao servidor que o cliente está ativo a cada 4 segundos
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
+            console.log("Connected to WebSocket STOMP!");
 
-            // Subscribing to updates for the specific device
+            // Subscribing para atualizações do dispositivo específico
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Mensagem recebida via WebSocket:", updatedData);
+                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                    console.log("Dados atualizados no frontend:", updatedData);
+                    console.log("Data updated in frontend:", updatedData);
                 }
             });
         };
 
         client.onStompError = (frame) => {
-            console.error("Erro no WebSocket STOMP:", frame.headers["message"]);
-            console.error("Detalhes do erro:", frame.body);
+            console.error("WebSocket STOMP error:", frame.headers["message"]);
+            console.error("Error details:", frame.body);
         };
 
         client.activate();
 
-        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
+        return () => client.deactivate(); // Fechar conexão quando o componente desmontar
     }, [deviceId]);
 
     if (loading) {
@@ -78,34 +97,24 @@ export default function CoffeeMachineControl() {
     }
 
     return (
-        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#2E2A27] text-white">
-            {/* Top Bar com o AutomationsHeader */}
+        <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
+            {/* Top Bar com AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Coffee Machine Title */}
+            {/* Título da Máquina de Café */}
             <div className="flex flex-col items-center justify-center mt-4">
-                <span className="text-2xl font-semibold">Coffee Machine</span>
+                <span className="text-2xl font-semibold">{deviceData.name || "Coffee Machine"}</span>
             </div>
 
-            {/* Central Control */}
+            {/* StateControl */}
             <div className="mt-8">
-                <CentralControl deviceId={deviceId} deviceData={deviceData} />
+                <StateControl deviceId={deviceId} deviceData={deviceData} />
             </div>
 
-            {/* Drink Options */}
-            <div className="mt-8">
-                <DrinkOptions deviceId={deviceId} deviceData={deviceData} />
-            </div>
-
-            {/* Automatize */}
-            <div className="flex flex-col items-center justify-center mt-8 mb-6 w-full px-4">
-                <div
-                    className="w-full bg-[#3B342D] text-white p-6 rounded-lg shadow-md"
-                    style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.4)" }}
-                >
-                    <Automatize deviceId={deviceId} />
-                </div>
-            </div>
+            {/* Automations */}
+            <AutomationBox deviceId={deviceId}>
+                <CoffeeMachAutomation deviceId={deviceId} />
+            </AutomationBox>
         </div>
     );
 }

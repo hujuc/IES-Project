@@ -19,8 +19,17 @@ import java.util.TimerTask;
 
 import java.util.*;
 
-
 @RestController
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173"
+        },
+        methods = {
+                RequestMethod.GET,
+                RequestMethod.DELETE,
+                RequestMethod.POST,
+                RequestMethod.PATCH
+        })
 @RequestMapping("/api/devices")
 public class DeviceController {
     private final DeviceService deviceService;
@@ -105,4 +114,48 @@ public class DeviceController {
 
         return ResponseEntity.ok(device);
     }
+
+    @PostMapping("/add")
+    public ResponseEntity<Device> addDeviceByUser(@RequestBody Map<String, String> payload) {
+        try {
+            String houseId = payload.get("houseId");
+            String roomType = payload.get("roomType");
+            String type = payload.get("type");
+            String name = payload.get("name");
+
+            if (houseId == null || roomType == null || type == null || name == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(null); // Retorna erro se algum parâmetro estiver ausente
+            }
+
+            // Adicionar o dispositivo à casa e ao Room correspondente
+            Device newDevice = deviceService.addDeviceByUser(houseId, roomType, type, name);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newDevice);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Erro de validação
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Room não encontrado
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Outro erro
+        }
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<String> removeDeviceByUser(@RequestBody Map<String, String> body) {
+        String deviceId = body.get("deviceId");
+
+        if (deviceId == null || deviceId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Device ID is required.");
+        }
+
+        try {
+            deviceService.removeDeviceByUser(deviceId);
+            return ResponseEntity.ok("Device removed successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error removing device.");
+        }
+    }
+
 }

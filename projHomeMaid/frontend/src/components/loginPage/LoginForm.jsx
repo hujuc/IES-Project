@@ -38,7 +38,18 @@ function LoginForm() {
                 }
             );
 
-            navigate(`/homePage/${response.data.houseId}`);
+            // Step 2: Store the JWT token securely
+            const token = response.data.token;
+
+            // Use localStorage (or sessionStorage) to store the JWT token
+            localStorage.setItem("jwtToken", token);
+
+            // Optionally store additional data (e.g., houseId)
+            const houseId = response.data.houseId;
+            localStorage.setItem("houseId", houseId);
+
+            // Navigate to the home page
+            navigate(`/homePage/${houseId}`);
         } catch (error) {
             if (error.response && error.response.status === 400) {
                 setErrorMessage(error.response.data.error);

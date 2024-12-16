@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import pt.ua.deti.ies.backend.model.Sensor;
+import pt.ua.deti.ies.backend.service.SensorService;
 
 import java.util.Map;
 
@@ -11,9 +13,11 @@ import java.util.Map;
 public class SensorDataConsumer {
 
     private final ObjectMapper objectMapper;
+    private final SensorService sensorService;
 
-    public SensorDataConsumer(ObjectMapper objectMapper) {
+    public SensorDataConsumer(ObjectMapper objectMapper, SensorService sensorService) {
         this.objectMapper = objectMapper;
+        this.sensorService = sensorService;
     }
 
     @KafkaListener(topics = "sensor_data", groupId = "sensor-data-group")
@@ -22,10 +26,22 @@ public class SensorDataConsumer {
             // Deserializar a mensagem recebida
             Map<String, Object> sensorData = objectMapper.readValue(record.value(), Map.class);
 
-            // Imprimir no console os dados recebidos
-            System.out.println("Dados do sensor recebidos: " + sensorData);
+            // Criar objeto Sensor com os dados
+            Sensor sensor = new Sensor();
+            sensor.setSensorId((String) sensorData.get("sensorId"));
+            sensor.setRoomId((String) sensorData.get("roomId"));
+            sensor.setHouseId((String) sensorData.get("houseId"));
+            sensor.setType((String) sensorData.get("type"));
+            sensor.setValue(Double.parseDouble(sensorData.get("value").toString()));
+            sensor.setUnit((String) sensorData.get("unit"));
+            sensor.setName((String) sensorData.get("name"));
+
+            // Salvar no MongoDB e InfluxDB
+            sensorService.saveSensor(sensor);
+
+            System.out.println("Dados do sensor processados e salvos: " + sensor);
         } catch (Exception e) {
-            System.err.println("Erro ao processar os dados do sensor: " + e.getMessage());
+            System.err.println("Erro ao processar os dados do sensor: " + e.getMessage() + "\n Dados tentados: " + record.value());
         }
     }
 }

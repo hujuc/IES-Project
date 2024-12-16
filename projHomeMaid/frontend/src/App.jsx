@@ -8,13 +8,14 @@ import Help from "./pages/Help.jsx";
 import CoffeeMachineControl from "./pages/automations/CoffeeMachineControl.jsx";
 import AirConditionerControl from "./pages/automations/AirConditionerControl.jsx";
 import ClockControl from "./pages/automations/ClockControl.jsx";
-import LightBulbControl from "./pages/automations/LightBulbControl.jsx";
+import LampControl from "./pages/automations/LampControl.jsx";
 import ShutterControl from "./pages/automations/ShutterControl.jsx";
 import TVControl from "./pages/automations/TVControl.jsx";
-import SpeakerControl from "./pages/automations/SpeakerControl.jsx";
+import StereoControl from "./pages/automations/StereoControl.jsx";
 import HeatedFloorsControl from "./pages/automations/HeatedFloorsControl.jsx";
 import WashingMachineControl from "./pages/automations/WashingMachinaControl.jsx";
 import DryerMachineControl from "./pages/automations/DryerMachineControl.jsx";
+import EditProfile from "./pages/editProfile/EditProfile.jsx";
 
 function App() {
     return (
@@ -44,7 +45,7 @@ function App() {
 
                 <Route path="/clock/:deviceId" element={<ClockControl />} />
 
-                <Route path="/lamp/:deviceId" element={<LightBulbControl />} />
+                <Route path="/lamp/:deviceId" element={<LampControl />} />
 
                 <Route path="/shutter/:deviceId" element={<ShutterControl />} />
 
@@ -56,13 +57,16 @@ function App() {
 
                 <Route path="/television/:deviceId" element={<TVControl />} />
 
-                <Route path="/stereo/:deviceId" element={<SpeakerControl />} />
+                <Route path="/stereo/:deviceId" element={<StereoControl />} />
 
                 <Route path="/heatedFloor/:deviceId" element={<HeatedFloorsControl />} />
 
                 <Route path="/washingMachine/:deviceId" element={<WashingMachineControl />} />
 
                 <Route path="/dryerMachine/:deviceId" element={<DryerMachineControl />} />
+
+                <Route path="/edit-profile/:houseId" element={<EditProfile />} />
+
             </Routes>
         </>
     )

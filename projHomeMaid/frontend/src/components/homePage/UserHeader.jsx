@@ -1,21 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // Import React Router to access URL params
+import { useParams, useNavigate } from "react-router-dom"; // Import React Router to access URL params and navigation
 import NotificationDropdown from "./NotificationDropdown";
 import SettingsDropdown from "./SettingsDropdown";
 
 function UserHeader() {
     const { houseId } = useParams(); // Get the houseId from the URL
+    const navigate = useNavigate(); // Use navigate to redirect users
     const [userData, setUserData] = useState(null); // Store user data
     const [loading, setLoading] = useState(true); // Loading state
 
     useEffect(() => {
         // Fetch user data based on houseId
         const fetchUserData = async () => {
+            const token = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
+
+            if (!token) {
+                // Redirect to login if token is missing
+                navigate("/login");
+                return;
+            }
+
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/users/${houseId}`); // Fetch user data from the API
+                const response = await fetch(import.meta.env.VITE_API_URL + `/users/${houseId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include JWT token in the header
+                    },
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     setUserData(data);
+                } else if (response.status === 401) {
+                    // If unauthorized, clear the token and redirect to login
+                    localStorage.removeItem("jwtToken");
+                    navigate("/login");
                 } else {
                     console.error("User not found or server error");
                 }
@@ -27,7 +45,7 @@ function UserHeader() {
         };
 
         fetchUserData();
-    }, [houseId]);
+    }, [houseId, navigate]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -43,10 +61,11 @@ function UserHeader() {
                 <div>
                     <div className="w-20 h-20 rounded-full overflow-hidden">
                         <img
-                            src={userData.profilePicture || "https://via.placeholder.com/150"} // Default image if not available
+                            src={`data:image/png;base64,${userData.profilePicture}`} // Usa a imagem Base64
                             alt="User Avatar"
                             className="w-full h-full object-cover"
                         />
+
                     </div>
                 </div>
 

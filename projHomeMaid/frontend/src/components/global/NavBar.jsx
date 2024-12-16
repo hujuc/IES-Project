@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import logo from "../../assets/navBar/logo.png"
+
 function NavBar() {
     const navigate = useNavigate(); // Hook para redirecionar
 
@@ -9,7 +11,7 @@ function NavBar() {
             <div className="navbar-start">
                 {/* Clique no logo redireciona para "/" */}
                 <img
-                    src="/public/logo.png"
+                    src={logo}
                     className="w-12 h-12 lg:w-16 lg:h-16 mx-2 cursor-pointer"
                     alt="HomeMaid Logo"
                     onClick={() => navigate("/")} // Redireciona para "/"

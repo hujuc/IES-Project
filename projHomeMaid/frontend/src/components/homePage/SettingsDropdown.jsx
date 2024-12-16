@@ -1,11 +1,12 @@
-import React, {useEffect, useRef, useState} from "react";
-import {useNavigate} from "react-router-dom"; // Para redirecionar o usuário
-import {IoMdSettings} from "react-icons/io";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom"; // Para redirecionar o usuário
+import { IoMdSettings } from "react-icons/io";
 
 function SettingsDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate(); // Hook para redirecionar
+    const { houseId } = useParams(); // Pegando o houseId para direcionar corretamente
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -25,8 +26,19 @@ function SettingsDropdown() {
     }, []);
 
     const handleLogOut = () => {
-        // Adicione qualquer lógica de logout aqui, como limpar tokens ou estados globais
-        navigate("/"); // Redireciona para a página Welcome
+        // Clear the JWT from local storage
+        localStorage.removeItem("jwtToken");
+
+        // Optionally, you can clear other user-related data if needed
+        localStorage.removeItem("houseId"); // Example if you're storing user data
+
+        // Redirect the user to the welcome or login page
+        navigate("/");
+    };
+
+
+    const handleEditProfile = () => {
+        navigate(`/edit-profile/${houseId}`); // Redireciona para a página de edição de perfil
     };
 
     return (
@@ -43,7 +55,10 @@ function SettingsDropdown() {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-[#E7E7E7] text-gray-800 rounded-lg shadow-lg">
                     <ul className="py-2">
-                        <li className="px-4 py-2 hover:bg-gray-300 cursor-pointer">
+                        <li
+                            className="px-4 py-2 hover:bg-gray-300 cursor-pointer"
+                            onClick={handleEditProfile}
+                        >
                             Edit My Profile
                         </li>
                         {/* Divisor */}

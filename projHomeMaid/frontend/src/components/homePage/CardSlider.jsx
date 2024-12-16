@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import Modal from "react-modal";
 import RoomInfo from "./RoomInfo";
+import Statistics from "./RoomStatistics.jsx";
+import RoomGraph from "./RoomGraph.jsx";
+import AddDeviceModal from "./AddDeviceModal.jsx"; // New component
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
-// Imagens padrão para cada tipo de divisão
+// Default room images
 import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
 import BedroomImage from "../../assets/homePage/roomsImages/bedroom.jpg";
 import KitchenImage from "../../assets/homePage/roomsImages/kitchen.jpg";
@@ -13,187 +19,325 @@ import OfficeImage from "../../assets/homePage/roomsImages/office.jpg";
 import BathroomImage from "../../assets/homePage/roomsImages/bathroom.jpg";
 import GuestBedroomImage from "../../assets/homePage/roomsImages/guestBedroom.jpg";
 
+Modal.setAppElement("#root");
+
 function CardSlider() {
-    const { houseId } = useParams(); // Obter houseId do URL
-    const [cards, setCards] = useState([]); // Armazena os dados dos cards
-    const [currentIndex, setCurrentIndex] = useState(0); // Índice atual do slider
+    const { houseId } = useParams();
+    const navigate = useNavigate();
+    const [cards, setCards] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [deviceData, setDeviceData] = useState({ name: "", type: "", room: "" });
 
-    // Mapeamento de tipos de divisões para os nomes personalizados
-    const roomNames = {
-        "masterBedroom": "Master Bedroom",
-        "guestBedroom": "Guest Bedroom",
-        "kitchen": "Kitchen",
-        "livingRoom": "Living Room",
-        "hall": "Hall",
-        "laundry": "Laundry",
-        "office": "Office",
-        "bathroom": "Bathroom",
-        "house": "House", // Aqui também pode ser o nome da casa, por exemplo.
-    };
+    // State for WebSocket
+    const [client, setClient] = useState(null);
+    const [sensorData, setSensorData] = useState({ temperature: "N/A", humidity: "N/A" });
 
-    // Definir a ordem dos cards (com base no ID ou tipo)
-    const customOrder = [
-        "house",
-        "hall",
-        "livingRoom",
-        "kitchen",
-        "masterBedroom",
-        "guestBedroom",
-        "bathroom",
-        "office",
-        "laundry"
+    const deviceTypes = [
+        "airConditioner", "coffeeMachine", "heatedFloor", "lamp", "shutter",
+        "stereo", "television", "washingMachine", "dryerMachine", "clock",
     ];
 
-    // UseEffect para buscar os dados da casa e quartos do backend
+    const rooms = [
+        "hall", "masterBedroom", "guestBedroom", "kitchen",
+        "livingRoom", "bathroom", "office", "laundry",
+    ];
+
+    const roomNames = {
+        masterBedroom: "Master Bedroom",
+        guestBedroom: "Guest Bedroom",
+        kitchen: "Kitchen",
+        livingRoom: "Living Room",
+        hall: "Hall",
+        laundry: "Laundry",
+        office: "Office",
+        bathroom: "Bathroom",
+        house: "House",
+    };
+
+    const customOrder = [
+        "house", "hall", "livingRoom", "kitchen",
+        "masterBedroom", "guestBedroom", "bathroom", "office", "laundry",
+    ];
+
+    const getDefaultImage = (type) => {
+        switch (type) {
+            case "masterBedroom": return BedroomImage;
+            case "guestBedroom": return GuestBedroomImage;
+            case "kitchen": return KitchenImage;
+            case "livingRoom": return LivingRoomImage;
+            case "hall": return HallImage;
+            case "laundry": return LaundryImage;
+            case "office": return OfficeImage;
+            case "bathroom": return BathroomImage;
+            default: return HouseImage;
+        }
+    };
+
+    const fetchLatestValues = async (roomId) => {
+        try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                navigate("/login");
+                return { temperature: "N/A", humidity: "N/A" };
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/sensors/rooms/${roomId}/latest`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem("jwtToken");
+                navigate("/login");
+                return { temperature: "N/A", humidity: "N/A" };
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                return {
+                    temperature: data.temperature ? parseFloat(data.temperature).toFixed(2) : "N/A",
+                    humidity: data.humidity ? parseFloat(data.humidity).toFixed(2) : "N/A",
+                };
+            }
+
+            console.error(`Failed to fetch latest values for room ${roomId}:`, response.status);
+            return { temperature: "N/A", humidity: "N/A" };
+        } catch (error) {
+            console.error("Error fetching latest values:", error);
+            return { temperature: "N/A", humidity: "N/A" };
+        }
+    };
+
     useEffect(() => {
         const fetchHouseData = async () => {
+            setLoading(true);
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+
             try {
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/houses/${houseId}`
-                );
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 if (response.ok) {
                     const data = await response.json();
 
                     const houseCard = {
-                        id: "house", // ID da casa
-                        label: roomNames["house"], // Usar o nome do mapeamento para a casa
+                        id: "house",
+                        label: roomNames["house"],
                         image: HouseImage,
                         type: "House",
                         deviceObjects: data.devices,
+                        temperature: "N/A",
+                        humidity: "N/A",
                     };
 
-                    const roomCards = data.rooms.map((room) => ({
-                        id: room.type, // Certifique-se de que o `type` esteja no customOrder
-                        label: roomNames[room.type] || room.type, // Nome personalizado
-                        image: getDefaultImage(room.type), // Imagem da divisão
-                        type: room.type,
-                        deviceObjects: room.deviceObjects,
+                    const roomCards = await Promise.all(data.rooms.map(async (room) => {
+                        const latestValues = await fetchLatestValues(room.roomId);
+                        return {
+                            id: room.roomId,
+                            label: roomNames[room.type] || room.type,
+                            image: getDefaultImage(room.type),
+                            type: room.type,
+                            deviceObjects: room.deviceObjects,
+                            temperature: latestValues.temperature,
+                            humidity: latestValues.humidity,
+                        };
                     }));
 
-                    // Ordenar os cards com base na ordem personalizada
                     const orderedCards = [houseCard, ...roomCards].sort((a, b) => {
-                        const aIndex = customOrder.indexOf(a.id);
-                        const bIndex = customOrder.indexOf(b.id);
-
-                        // Se algum ID não for encontrado, movê-lo para o final
-                        if (aIndex === -1) return 1;
-                        if (bIndex === -1) return -1;
-
-                        // Comparar índices para garantir a ordem personalizada
+                        const aIndex = customOrder.indexOf(a.type);
+                        const bIndex = customOrder.indexOf(b.type);
                         return aIndex - bIndex;
                     });
 
                     setCards(orderedCards);
-                } else {
-                    console.error("Failed to fetch house data");
                 }
-            } catch (error) {
-                console.error("Error fetching house data:", error);
+            } catch {
+                setErrorMessage("Failed to fetch house data.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchHouseData();
-    }, [houseId]);
 
-    // Função para verificar e retornar a imagem padrão com base no tipo de divisão
-    const getDefaultImage = (type) => {
-        const roomType = type;
+        // Set up WebSocket connection
+        const socketClient = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
 
-        switch (roomType) {
-            case "masterBedroom":
-                return BedroomImage;
-            case "guestBedroom":
-                return GuestBedroomImage;
-            case "kitchen":
-                return KitchenImage;
-            case "livingRoom":
-                return LivingRoomImage;
-            case "hall":
-                return HallImage;
-            case "laundry":
-                return LaundryImage;
-            case "office":
-                return OfficeImage;
-            case "bathroom":
-                return BathroomImage;
-            default:
-                return HouseImage; // Imagem padrão para a casa
-        }
-    };
+        socketClient.onConnect = () => {
+            console.log("Connected to WebSocket for sensor updates!");
 
-    // Funções de navegação do slider
+            // Subscribe to the sensor updates topic
+            socketClient.subscribe(`/topic/sensor-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+                console.log("Received sensor update:", updatedData);
+
+                const { roomId, field, value } = updatedData;
+
+                // Round the value to 2 decimal places
+                const roundedValue = parseFloat(value).toFixed(2);
+
+                // Update the relevant card with the received data
+                setCards((prevCards) =>
+                    prevCards.map((card) => {
+                        if (card.id === roomId) {
+                            // Update temperature or humidity based on the field received
+                            if (field === 'temperature') {
+                                return {
+                                    ...card,
+                                    temperature: roundedValue, // Update temperature with rounded value
+                                };
+                            } else if (field === 'humidity') {
+                                return {
+                                    ...card,
+                                    humidity: roundedValue, // Update humidity with rounded value
+                                };
+                            }
+                        }
+                        return card; // Keep the rest of the cards unchanged
+                    })
+                );
+            });
+        };
+
+        socketClient.activate();
+        setClient(socketClient);
+
+        return () => socketClient.deactivate();
+    }, [houseId, navigate]);
+
     const handlePrev = () => {
-        setCurrentIndex((prevIndex) =>
-            prevIndex === 0 ? cards.length - 1 : prevIndex - 1
-        );
+        setCurrentIndex((prevIndex) => (prevIndex === 0 ? cards.length - 1 : prevIndex - 1));
     };
 
     const handleNext = () => {
-        setCurrentIndex((prevIndex) =>
-            prevIndex === cards.length - 1 ? 0 : prevIndex + 1
-        );
+        setCurrentIndex((prevIndex) => (prevIndex === cards.length - 1 ? 0 : prevIndex + 1));
     };
 
-    // Exibir mensagem de carregamento ou de dados não disponíveis
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const handleAddDevice = async (deviceData) => {
+        try {
+            const token = localStorage.getItem("jwtToken");
 
-    if (cards.length === 0) {
-        return <div>No data available</div>;
-    }
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/devices/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    houseId,
+                    roomType: deviceData.room || "house", // Ensuring 'house' is sent as roomType
+                    type: deviceData.type,
+                    name: deviceData.name,
+                }),
+            });
+
+            if (response.ok) {
+                const newDevice = await response.json();
+                console.log("Device successfully added:", newDevice);
+
+                // Update the correct card
+                const updatedCards = [...cards];
+                const targetCardIndex = updatedCards.findIndex(
+                    (card) => card.type === (deviceData.room || "house")
+                );
+
+                if (targetCardIndex > -1) {
+                    if (!updatedCards[targetCardIndex].deviceObjects) {
+                        updatedCards[targetCardIndex].deviceObjects = [];
+                    }
+                    updatedCards[targetCardIndex].deviceObjects.push(newDevice);
+                }
+
+                setCards(updatedCards);
+                setIsModalOpen(false); // Close the modal
+                setErrorMessage(""); // Reset error messages
+            } else {
+                console.error("Failed to add device:", response.statusText);
+                alert("Failed to add device. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error adding device:", error);
+            alert("An error occurred. Please try again.");
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (cards.length === 0) return <div>No data available</div>;
+
+    const currentCard = cards[currentIndex];
 
     return (
         <div className="relative flex flex-col items-center space-y-4">
-            {/* Card Display */}
+            {/* Room Card */}
             <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-64">
-                {/* Imagem */}
                 <img
-                    src={cards[currentIndex].image}
-                    alt={cards[currentIndex].label}
+                    src={currentCard.image}
+                    alt={currentCard.label}
                     className="w-full h-full object-cover rounded-lg p-2"
                 />
-                {/* Informações no canto superior esquerdo */}
-                <div className="absolute top-4 left-4 flex flex-col space-y-1">
-                    <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Temperature:</strong> {22}°C
+                {currentCard.id !== "house" && (
+                    <div className="absolute top-4 left-4 bg-white text-gray-700 px-2 py-1 text-sm rounded-lg shadow">
+                        <p><strong>Temperature:</strong> {currentCard.temperature}°C</p>
+                        <p><strong>Humidity:</strong> {currentCard.humidity}%</p>
                     </div>
-                    <div className="bg-white text-gray-700 px-2 py-1 text-sm rounded-full shadow">
-                        <strong>Humidity:</strong> {22}%
-                    </div>
+                )}
+                <div className="absolute top-4 right-4">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600"
+                    >
+                        Add Device
+                    </button>
                 </div>
-                {/* Título no centro inferior */}
-                <div className="absolute bottom-4 left-0 right-0 text-center">
-                    <p className="text-xl font-semibold text-white bg-black bg-opacity-50 py-1 rounded-md">
-                        {cards[currentIndex].label} {/* Exibindo o nome personalizado */}
-                    </p>
+                <div
+                    className="absolute left-0 right-0 py-1 bg-black bg-opacity-50 text-center"
+                    style={{bottom: '5%', borderTopLeftRadius: "0", borderTopRightRadius: "0"}}
+                >
+                    <p className="text-xl font-semibold text-white">{currentCard.label}</p>
                 </div>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Modal */}
+            <AddDeviceModal
+                isOpen={isModalOpen}
+                onRequestClose={() => setIsModalOpen(false)}
+                deviceTypes={deviceTypes}
+                rooms={rooms}
+                roomNames={roomNames}
+                currentCard={currentCard}
+                onAddDevice={handleAddDevice}
+            />
+
             <div className="flex space-x-4">
-                {/* Botão Prev */}
-                <button
-                    onClick={handlePrev}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
-                >
+                <button onClick={handlePrev}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Prev
                 </button>
-
-                {/* Botão Next */}
-                <button
-                    onClick={handleNext}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
-                >
+                <button onClick={handleNext}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Next
                 </button>
             </div>
 
-            {/* Room Info */}
-            <RoomInfo room={cards[currentIndex]} />
+            <RoomInfo key={currentCard.deviceObjects?.length} room={currentCard} />
+
+            {currentCard.id === "house" && (
+                <>
+                    <Statistics houseId={houseId} />
+                    <RoomGraph houseId={houseId} />
+                </>
+            )}
         </div>
     );
 }

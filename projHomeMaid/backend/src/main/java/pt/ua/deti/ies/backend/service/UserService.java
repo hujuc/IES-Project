@@ -10,6 +10,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
+
+import java.util.Base64;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestPart;
+import java.io.IOException;
 
 @Service
 public class UserService {
@@ -25,6 +31,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> allUsers(){
+        List<User> users = new ArrayList<>();
+
+        userRepository.findAll().forEach(users::add);
+
+        return users;
+    }
+
     public User signUpUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already in use.");
@@ -36,8 +50,8 @@ public class UserService {
         }
 
         // Encrypt the password with SHA-256
-        String encryptedPassword = DigestUtils.sha256Hex(user.getPassword());
-        user.setPassword(encryptedPassword);
+        //String encryptedPassword = DigestUtils.sha256Hex(user.getPassword());
+        user.setPassword(user.getPassword());
 
         // Save the user in the database
         return userRepository.save(user);
@@ -66,11 +80,42 @@ public class UserService {
 
         User user = userOptional.get();
 
-        String encryptedPassword = DigestUtils.sha256Hex(password);
-        if (!user.getPassword().equals(encryptedPassword)) {
+       // String encryptedPassword = DigestUtils.sha256Hex(password);
+        if (!user.getPassword().equals(password)) {
             throw new IllegalArgumentException("Incorrect password.");
         }
 
         return user.getHouseId();
     }
+
+    public User updateUserProfile(String houseId, String name, MultipartFile file) {
+        // Busca o usuário pelo houseId
+        Optional<User> userOpt = userRepository.findByHouseId(houseId);
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        User user = userOpt.get();
+
+        // Atualiza o nome, se fornecido
+        if (name != null && !name.isEmpty()) {
+            user.setName(name);
+        }
+
+        // Atualiza a imagem de perfil, se fornecida
+        if (file != null && !file.isEmpty()) {
+            try {
+                String base64Image = Base64.getEncoder().encodeToString(file.getBytes());
+                user.setProfilePicture(base64Image);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to update profile picture.", e);
+            }
+        }
+
+        // Salva o usuário atualizado no MongoDB
+        return userRepository.save(user);
+    }
+
+
+
 }

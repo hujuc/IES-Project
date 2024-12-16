@@ -3,93 +3,152 @@ package pt.ua.deti.ies.backend.thread;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.ies.backend.model.Automation;
 import pt.ua.deti.ies.backend.model.Device;
+import pt.ua.deti.ies.backend.model.Notification;
 import pt.ua.deti.ies.backend.repository.AutomationRepository;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
+import pt.ua.deti.ies.backend.repository.NotificationRepository;
 import pt.ua.deti.ies.backend.service.AutomationHandlerFactory;
 import pt.ua.deti.ies.backend.service.DeviceAutomationHandler;
+import pt.ua.deti.ies.backend.service.DeviceService;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class AutomationThreadManager {
 
     private final AutomationRepository automationRepository;
     private final DeviceRepository deviceRepository;
+    private final NotificationRepository notificationRepository;
     private final AutomationHandlerFactory automationHandlerFactory;
+    private final DeviceService deviceService;
 
     private final ExecutorService executorService;
 
     public AutomationThreadManager(AutomationRepository automationRepository,
                                    DeviceRepository deviceRepository,
-                                   AutomationHandlerFactory automationHandlerFactory) {
+                                   NotificationRepository notificationRepository,
+                                   AutomationHandlerFactory automationHandlerFactory,
+                                   DeviceService deviceService) {
         this.automationRepository = automationRepository;
         this.deviceRepository = deviceRepository;
+        this.notificationRepository = notificationRepository;
         this.automationHandlerFactory = automationHandlerFactory;
-        this.executorService = Executors.newCachedThreadPool(); // Pool de threads dinâmico
+        this.deviceService = deviceService;
+        this.executorService = Executors.newFixedThreadPool(10); // Fixed thread pool
     }
 
     @PostConstruct
-    public void startAutomationThread() {
-        Thread automationThread = new Thread(() -> {
-            while (true) {
-                try {
-                    System.out.println("[DEBUG] Master thread: Verificando automatizações...");
-                    processAutomations();
-                    Thread.sleep(60000); // Aguarda 1 minuto antes de verificar novamente
-                } catch (InterruptedException e) {
-                    System.err.println("[ERROR] Master thread interrompida: " + e.getMessage());
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        });
+    public void startAutomationScheduler() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        automationThread.setDaemon(true); // Termina automaticamente com a aplicação
-        automationThread.start();
-        System.out.println("[DEBUG] Master thread iniciada.");
+        long initialDelay = calculateInitialDelay();
+        System.out.println("[INFO] Initial delay for scheduler: " + initialDelay + " ms");
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+                System.out.println("[INFO] Processing automations for time: " + now);
+
+                processAutomations();
+            } catch (Exception e) {
+                System.err.println("[ERROR] Exception in automation scheduler: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, initialDelay, 60 * 1000, TimeUnit.MILLISECONDS);
+
+        System.out.println("[INFO] Automation scheduler started.");
+    }
+
+    private long calculateInitialDelay() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMinute = now.plusMinutes(1).truncatedTo(ChronoUnit.MINUTES);
+        return ChronoUnit.MILLIS.between(now, nextMinute);
+    }
+
+    private long calculateWaitTimeUntilNextMinute() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMinute = now.plusMinutes(1).truncatedTo(ChronoUnit.MINUTES);
+        return ChronoUnit.MILLIS.between(now, nextMinute);
     }
 
     private void processAutomations() {
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        System.out.println("[DEBUG] Master thread: Checando automatizações para " + now);
 
-        List<Automation> automations = automationRepository.findAllByExecutionTime(now);
+        try {
+            List<Automation> automations = automationRepository.findAllByExecutionTime(now);
 
-        System.out.println("[DEBUG] Master thread: Encontradas " + automations.size() + " automatizações.");
-        for (Automation automation : automations) {
-            System.out.println("[DEBUG] Delegando execução para automatização(ões)");
+            if (automations.isEmpty()) {
+                System.out.println("[INFO] No automations scheduled for: " + now);
+            } else {
+                System.out.println("[INFO] Found " + automations.size() + " automations to process.");
+            }
 
-            executorService.submit(() -> {
-                try {
-                    executeAutomation(automation);
-                } catch (Exception e) {
-                    System.err.println("[ERROR]: " + e.getMessage());
-                }
-            });
+            for (Automation automation : automations) {
+                executorService.submit(() -> {
+                    try {
+                        executeAutomation(automation);
+                    } catch (Exception e) {
+                        System.err.println("[ERROR] Error executing automation: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Error fetching automations: " + e.getMessage());
         }
     }
 
     private void executeAutomation(Automation automation) {
         try {
-            System.out.println("[DEBUG] Executando automação para dispositivo: " + automation.getDeviceId());
             Device device = deviceRepository.findById(automation.getDeviceId())
-                    .orElseThrow(() -> new RuntimeException("[ERROR] Dispositivo não encontrado: " + automation.getDeviceId()));
+                    .orElseThrow(() -> new RuntimeException("[ERROR] Device not found: " + automation.getDeviceId()));
 
-            System.out.println("[DEBUG] Encontrado dispositivo: " + device.getName() + " do tipo " + device.getType());
+            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId());
+            if (houseId == null) {
+                throw new RuntimeException("[ERROR] House associated with device not found.");
+            }
+
             DeviceAutomationHandler handler = automationHandlerFactory.getHandler(device.getType());
             handler.executeAutomation(device, automation.getChanges());
+
+            sendAutomationNotification(device, houseId);
+
+            System.out.println("[INFO] Automation executed for device: " + device.getName());
         } catch (Exception e) {
-            System.err.println("[ERROR] Erro ao executar automação: " + e.getMessage());
+            System.err.println("[ERROR] Error during automation execution: " + e.getMessage());
         }
     }
 
-    public void shutdown() {
-        System.out.println("[DEBUG] Finalizando executor de threads.");
-        executorService.shutdown();
+    private void sendAutomationNotification(Device device, String houseId) {
+        try {
+            if (Boolean.FALSE.equals(device.getReceiveAutomationNotification())) {
+                System.out.println("[INFO] Device opted out of automation notifications: " + device.getName());
+                return;
+            }
+
+            String notificationText = "The automation for " + device.getName() + " was activated.";
+            Notification notification = new Notification(
+                    houseId,
+                    notificationText,
+                    LocalDateTime.now(),
+                    false,
+                    "automationNotification"
+            );
+
+            notificationRepository.save(notification);
+
+            System.out.println("[INFO] Notification created: " + notificationText);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Error creating notification: " + e.getMessage());
+        }
     }
 }

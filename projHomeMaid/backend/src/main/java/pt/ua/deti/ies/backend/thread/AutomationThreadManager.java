@@ -18,6 +18,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class AutomationThreadManager {
@@ -40,31 +43,35 @@ public class AutomationThreadManager {
         this.notificationRepository = notificationRepository;
         this.automationHandlerFactory = automationHandlerFactory;
         this.deviceService = deviceService;
-        this.executorService = Executors.newCachedThreadPool();
+        this.executorService = Executors.newFixedThreadPool(10); // Fixed thread pool
     }
 
     @PostConstruct
-    public void startAutomationThread() {
-        Thread automationThread = new Thread(() -> {
-            while (true) {
-                try {
-                    // Sincronizar com o próximo minuto
-                    long waitTime = calculateWaitTimeUntilNextMinute();
-                    Thread.sleep(waitTime);
+    public void startAutomationScheduler() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-                    // Processar as automações
-                    processAutomations();
-                } catch (InterruptedException e) {
-                    System.err.println("[ERROR] Automation thread interrupted: " + e.getMessage());
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+        long initialDelay = calculateInitialDelay();
+        System.out.println("[INFO] Initial delay for scheduler: " + initialDelay + " ms");
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+                System.out.println("[INFO] Processing automations for time: " + now);
+
+                processAutomations();
+            } catch (Exception e) {
+                System.err.println("[ERROR] Exception in automation scheduler: " + e.getMessage());
+                e.printStackTrace();
             }
-        });
+        }, initialDelay, 60 * 1000, TimeUnit.MILLISECONDS);
 
-        automationThread.setDaemon(true); // Thread termina com a aplicação
-        automationThread.start();
-        System.out.println("[INFO] Automation thread started.");
+        System.out.println("[INFO] Automation scheduler started.");
+    }
+
+    private long calculateInitialDelay() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMinute = now.plusMinutes(1).truncatedTo(ChronoUnit.MINUTES);
+        return ChronoUnit.MILLIS.between(now, nextMinute);
     }
 
     private long calculateWaitTimeUntilNextMinute() {
@@ -75,20 +82,28 @@ public class AutomationThreadManager {
 
     private void processAutomations() {
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        System.out.println("[INFO] Checking automations for execution at: " + now);
 
-        // Buscar automações que estão programadas para este minuto
-        List<Automation> automations = automationRepository.findAllByExecutionTime(now);
-        System.out.println("[INFO] Found " + automations.size() + " automations to process.");
+        try {
+            List<Automation> automations = automationRepository.findAllByExecutionTime(now);
 
-        for (Automation automation : automations) {
-            executorService.submit(() -> {
-                try {
-                    executeAutomation(automation);
-                } catch (Exception e) {
-                    System.err.println("[ERROR] Error executing automation: " + e.getMessage());
-                }
-            });
+            if (automations.isEmpty()) {
+                System.out.println("[INFO] No automations scheduled for: " + now);
+            } else {
+                System.out.println("[INFO] Found " + automations.size() + " automations to process.");
+            }
+
+            for (Automation automation : automations) {
+                executorService.submit(() -> {
+                    try {
+                        executeAutomation(automation);
+                    } catch (Exception e) {
+                        System.err.println("[ERROR] Error executing automation: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Error fetching automations: " + e.getMessage());
         }
     }
 

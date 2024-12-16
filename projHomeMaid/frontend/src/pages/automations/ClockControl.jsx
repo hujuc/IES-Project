@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Importa useParams do React Router
+import { useParams } from "react-router-dom"; // Import useParams from React Router
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/clockPage/StateControl.jsx";
 import ClockAutomation from "../../components/automationsPages/clockPage/clockAutomation.jsx";
@@ -9,17 +9,17 @@ import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function ClockControl() {
-    const { deviceId } = useParams(); // Captura o deviceId da URL
-    const [deviceName, setDeviceName] = useState("Clock"); // Nome padrão
-    const [error, setError] = useState(null);
-    const navigate = useNavigate(); // For navigation
+    const { deviceId } = useParams(); // Capture deviceId from the URL
+    const [deviceName, setDeviceName] = useState("Clock"); // Default device name
+    const [lightOn, setLightOn] = useState(false); // Ringing state
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!deviceId) {
             console.error("Device ID is missing");
-            setError("Device ID is missing");
             return;
         }
+
         const token = localStorage.getItem("jwtToken");
         if (!token) {
             console.log("Token not found. Redirecting to login page.");
@@ -29,29 +29,29 @@ export default function ClockControl() {
 
         const fetchClockData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
-                    method : "GET",
-                    headers : {
+                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                    method: "GET",
+                    headers: {
                         Authorization: `Bearer ${token}`,
-                    }
+                    },
                 });
-                if (response.status === 403) {
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setDeviceName(data.name || "Clock");
+                    setLightOn(data.ringing || false); // Initialize the ringing state
+                } else if (response.status === 403) {
                     console.log("Unauthorized Access");
                     navigate("/login");
-                }else {
-                    console.log("Fetched Clock Data Success")
                 }
-                const data = await response.json();
-                setDeviceName(data.name || "Clock"); // Define o nome do dispositivo
             } catch (err) {
                 console.error("Error fetching clock data:", err);
-                setError("Failed to fetch the clock data.");
             }
         };
 
         fetchClockData();
 
-        // Configuração do WebSocket
+        // Set up WebSocket connection
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -60,42 +60,63 @@ export default function ClockControl() {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket STOMP!");
+            console.log("Connected to WebSocket!");
 
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.name) setDeviceName(updatedData.name);
-                    console.log("Updated data in frontend:", updatedData);
+                    if (updatedData.ringing !== undefined) setLightOn(updatedData.ringing);
                 }
             });
         };
 
-        client.onStompError = (frame) => {
-            console.error("WebSocket STOMP error:", frame.headers["message"]);
-            console.error("Error details:", frame.body);
-        };
-
         client.activate();
 
-        return () => client.deactivate(); // Desconecta no unmount
-    }, [deviceId]);
+        return () => client.deactivate();
+    }, [deviceId, navigate]);
+
+    const updateDeviceState = async (ringing, state) => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
+
+        try {
+            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ ringing, state }),
+            });
+        } catch (error) {
+            console.error("Error updating device state:", error);
+        }
+    };
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
-            {/* Top Bar com o AutomationsHeader */}
+            {/* Top Bar with AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Título */}
+            {/* Title */}
             <div className="flex flex-col items-center justify-center mt-4">
                 <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* Controle Central do Relógio */}
+            {/* Central Clock Control */}
             <div className="mt-6">
-                <StateControl deviceId={deviceId} />
+                <StateControl
+                    deviceId={deviceId}
+                    lightOn={lightOn}
+                    setLightOn={setLightOn}
+                    updateDeviceState={updateDeviceState}
+                />
             </div>
 
             {/* Automation Box */}

@@ -3,7 +3,7 @@ import hotIcon from "../../../assets/automationsPages/stateIcons/airConditioner/
 import coldIcon from "../../../assets/automationsPages/stateIcons/airConditioner/cold.png";
 import airIcon from "../../../assets/automationsPages/stateIcons/airConditioner/air.png";
 import humidIcon from "../../../assets/automationsPages/stateIcons/airConditioner/humid.png";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom"; // For redirecting to login
 
 export default function StateControl({ deviceId, deviceData }) {
     const [state, setState] = useState(deviceData.state);
@@ -12,7 +12,7 @@ export default function StateControl({ deviceId, deviceData }) {
     const [airFluxDirection, setAirFluxDirection] = useState(deviceData.airFluxDirection || "up");
     const [selectedMode, setSelectedMode] = useState(deviceData.mode || "hot");
     const [isDisabled, setIsDisabled] = useState(!deviceData.state);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
     const directions = ["up", "down"];
     const rates = ["low", "medium", "high"];
@@ -31,18 +31,18 @@ export default function StateControl({ deviceId, deviceData }) {
         setSelectedMode(deviceData.mode || "hot");
         setIsDisabled(!deviceData.state);
     }, [deviceData]);
-    const token = localStorage.getItem("jwtToken");
-    if (!token) {
-        console.log("Token not found. Redirecting to login page.");
-        navigate("/login");
-        return;
-    }
 
     const toggleAirConditioner = async () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            console.log("Token not found. Redirecting to login page.");
+            navigate("/login");
+            return;
+        }
 
         try {
             const updatedState = !state;
-            const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -54,12 +54,12 @@ export default function StateControl({ deviceId, deviceData }) {
             if (response.ok) {
                 setState(updatedState);
                 setIsDisabled(!updatedState);
-                console.log("Saved Data Success");
+                console.log("Updated state successfully.");
             } else {
-                console.error("Failed to update device state:", response.statusText);
+                console.error("Failed to update state:", response.statusText);
             }
         } catch (error) {
-            console.error("Error updating device state:", error);
+            console.error("Error updating state:", error);
         }
     };
 
@@ -67,8 +67,12 @@ export default function StateControl({ deviceId, deviceData }) {
         if (newTemperature < 12 || newTemperature > 32) return;
 
         setTemperature(newTemperature);
+
+        const token = localStorage.getItem("jwtToken");
+        if (!token) return;
+
         try {
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -76,7 +80,6 @@ export default function StateControl({ deviceId, deviceData }) {
                 },
                 body: JSON.stringify({ temperature: newTemperature }),
             });
-
         } catch (error) {
             console.error("Error updating temperature:", error);
         }
@@ -84,8 +87,12 @@ export default function StateControl({ deviceId, deviceData }) {
 
     const handleModeChange = async (mode) => {
         setSelectedMode(mode);
+
+        const token = localStorage.getItem("jwtToken");
+        if (!token) return;
+
         try {
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -107,8 +114,11 @@ export default function StateControl({ deviceId, deviceData }) {
         const newRate = rates[newIndex];
         setAirFluxRate(newRate);
 
+        const token = localStorage.getItem("jwtToken");
+        if (!token) return;
+
         try {
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -130,8 +140,11 @@ export default function StateControl({ deviceId, deviceData }) {
         const newDirection = directions[newIndex];
         setAirFluxDirection(newDirection);
 
+        const token = localStorage.getItem("jwtToken");
+        if (!token) return;
+
         try {
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

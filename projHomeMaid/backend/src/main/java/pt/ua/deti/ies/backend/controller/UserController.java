@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
 
@@ -31,12 +32,14 @@ public class UserController {
     private HouseService houseService;
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserController(UserService userService, HouseService houseService, JwtService jwtService, AuthenticationService authenticationService) {
+    public UserController(BCryptPasswordEncoder bCryptPasswordEncoder, UserService userService, HouseService houseService, JwtService jwtService, AuthenticationService authenticationService) {
         this.userService = userService;
         this.houseService = houseService;
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @PostMapping(value = "/signUp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -47,13 +50,18 @@ public class UserController {
             @RequestParam("password") String password,
             @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
-            // Converta o arquivo em base64 (ou salve em algum lugar)
+            // Convert the uploaded file to Base64 format
             String encodedImage = Base64.getEncoder().encodeToString(profilePicture.getBytes());
 
-            User user = new User(houseId, email, name, password, encodedImage);
-            userService.signUpUser(user);
+            // Hash the password before saving
+            String hashedPassword = bCryptPasswordEncoder.encode(password);
 
-            House newHouse = houseService.createHouseWithRoomsAndDevices(user.getHouseId());
+            // Create a new user object with the hashed password
+            User user = new User(houseId, email, name, hashedPassword, encodedImage);
+
+            // Save the user and initialize the house and rooms
+            userService.signUpUser(user);
+            houseService.createHouseWithRoomsAndDevices(user.getHouseId());
 
             return ResponseEntity.ok("User successfully registered.");
         } catch (Exception e) {
@@ -84,8 +92,10 @@ public class UserController {
             return ResponseEntity.ok(Map.of(
                     "token", jwtToken,
                     "houseId", houseId,
-                    "username", authenticatedUser.getEmail()
+                    "username", authenticatedUser.getEmail(),
+                    "passwordField", authenticatedUser.getPassword() // Changed key name for testing
             ));
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {

@@ -12,6 +12,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+
+
 import java.util.List;
 
 @Configuration
@@ -33,7 +35,7 @@ public class SecurityConfiguration {
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/users/signUp", "/api/users/login", "/ws/**")
+                .requestMatchers("/api/users/signUp", "/api/users/login", "/ws/**", "/api/users/all", "api/automations")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

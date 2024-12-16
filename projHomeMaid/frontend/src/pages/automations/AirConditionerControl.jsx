@@ -3,6 +3,8 @@ import AutomationsHeader from "../../components/automationsPages/AutomationsHead
 import AirConditionerState from "../../components/automationsPages/AirConditionerPage/StateControl.jsx";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AirCondAutomation.jsx";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
 export default function AirConditionerControl() {
@@ -13,39 +15,82 @@ export default function AirConditionerControl() {
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
 
-    // Fetch device data and set WebSocket
+    // Fetch device data and set up WebSocket
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
+            console.error("Token not found. Redirecting to login.");
             navigate("/login");
             return;
         }
+
         const fetchDeviceData = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                    method : "GET",
-                    headers : {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/devices/${deviceId}`, {
+                    method: "GET",
+                    headers: {
                         Authorization: `Bearer ${token}`,
-                    }
+                    },
                 });
-                const data = await response.json();
-                setDeviceData(data);
-                setLoading(false);
-                if(response.ok){
-                    console.log("Fetched Device Data Success");
-                }else if(response.status === 403){
-                    console.log("Unauthorized Access");
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setDeviceData(data);
+                    console.log("Fetched Device Data Successfully");
+                } else if (response.status === 403) {
+                    console.error("Unauthorized Access. Redirecting to login.");
                     navigate("/login");
+                } else {
+                    throw new Error(`Failed to fetch data: ${response.status}`);
                 }
             } catch (error) {
                 console.error("Error fetching device data:", error);
+            } finally {
                 setLoading(false);
             }
         };
 
+        const openWebSocket = () => {
+            const client = new Client({
+                webSocketFactory: () =>
+                    new SockJS(
+                        `${import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")}?token=${token}`
+                    ),
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
+            });
+
+            client.onConnect = () => {
+                console.log("Connected to WebSocket STOMP!");
+
+                client.subscribe(`/topic/device-updates`, (message) => {
+                    const updatedData = JSON.parse(message.body);
+
+                    // Check if the update is for the current device
+                    if (updatedData.deviceId === deviceId) {
+                        setDeviceData((prev) => ({
+                            ...prev,
+                            ...updatedData,
+                        }));
+                        console.log("Updated data received via WebSocket:", updatedData);
+                    }
+                });
+            };
+
+            client.onStompError = (frame) => {
+                console.error("WebSocket STOMP error:", frame.headers["message"]);
+                console.error("Error details:", frame.body);
+            };
+
+            client.activate();
+
+            return () => client.deactivate();
+        };
+
         fetchDeviceData();
-    }, [deviceId]);
+        openWebSocket();
+    }, [deviceId, navigate]);
 
     if (loading) {
         return (

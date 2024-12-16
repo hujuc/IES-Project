@@ -1,123 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import alarmIcon from "../../../assets/automationsPages/devices/clock/alarm-clock.png"; // Replace with your actual path
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
 
-export default function StateControl({ deviceId }) {
-    const [lightOn, setLightOn] = useState(false); // Indicates if the alarm is ringing
-    const [timerActive, setTimerActive] = useState(false); // Track if the timer is active
-    const navigate = useNavigate(); // For navigation
-
-    // Fetch the initial state from the backend
-    useEffect(() => {
-        const token = localStorage.getItem("jwtToken");
-        if (!token) {
-            console.log("Token not found. Redirecting to login page.");
-            navigate("/login");
-            return;
-        }
-        const fetchDeviceState = async () => {
-            try {
-                const response = await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`,{
-                    method : "GET",
-                    headers : {
-                        Authorization: `Bearer ${token}`,
-                    }
-                });
-                const data = await response.json();
-
-                // Initialize `lightOn` with the ringing state from the backend
-                setLightOn(data.ringing || false);
-                if(response.ok){
-                    console.log("Fetched Data Success");
-                }else if(response.status === 403){
-                    console.log("Unauthrized Accesss");
-                    navigate("/login");
-                }
-            } catch (error) {
-                console.error("Error fetching device state:", error);
-            }
-        };
-
-        fetchDeviceState();
-    }, [deviceId]);
-
-    // Function to turn off the alarm manually
+export default function StateControl({ deviceId, lightOn, setLightOn, updateDeviceState }) {
     const toggleAlarm = () => {
         if (lightOn) {
             setLightOn(false); // Turn off the alarm manually
-            setTimerActive(false); // Deactivate the timer if turned off manually
-
-            // Update the backend state
-            updateDeviceState(false, false); // Set both `ringing` and `state` to false
+            updateDeviceState(false, false); // Update the backend
         }
     };
-
-    // Automatically turn off the red light after 30 seconds
-    useEffect(() => {
-        let timer;
-        if (lightOn && timerActive) {
-            timer = setTimeout(() => {
-                setLightOn(false); // Turn the light off after 30 seconds
-                setTimerActive(false); // Deactivate the timer
-
-                // Update the backend state
-                updateDeviceState(false, false); // Set both `ringing` and `state` to false
-            }, 30000);
-        }
-
-        return () => clearTimeout(timer); // Cleanup the timer on unmount or state change
-    }, [lightOn, timerActive]);
-
-    // Function to update the state in the backend
-    const updateDeviceState = async (ringing, state) => {
-        const token = localStorage.getItem("jwtToken");
-        if (!token) {
-            console.log("Token not found. Redirecting to login page.");
-            navigate("/login");
-            return;
-        }
-
-        try {
-            await fetch(import.meta.env.VITE_API_URL + `/devices/${deviceId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ ringing, state }),
-            });
-        } catch (error) {
-            console.error("Error updating device state:", error);
-        }
-    };
-
-    // Effect to handle WebSocket updates
-    useEffect(() => {
-        const handleWebSocketMessage = (message) => {
-            const updatedData = JSON.parse(message.body);
-
-            // Update the state if the deviceId matches
-            if (updatedData.deviceId === deviceId && "ringing" in updatedData) {
-                setLightOn(updatedData.ringing || false);
-            }
-        };
-
-        // Connect to WebSocket
-        const client = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000,
-        });
-
-        client.onConnect = () => {
-            client.subscribe(`/topic/device-updates`, handleWebSocketMessage);
-        };
-
-        client.activate();
-
-        return () => client.deactivate();
-    }, [deviceId]);
 
     return (
         <div className="flex flex-col items-center justify-center">

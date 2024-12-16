@@ -77,8 +77,7 @@ function CardSlider() {
                         image: HouseImage,
                         type: "House",
                         deviceObjects: data.devices,
-                    };
-
+                    }
                     const roomCards = data.rooms.map((room) => ({
                         id: room.type, // Ensure `type` is in the custom order
                         label: roomNames[room.type] || room.type, // Custom name or fallback to type
@@ -103,7 +102,11 @@ function CardSlider() {
                     // Redirect to login if token is invalid or expired
                     localStorage.removeItem("jwtToken");
                     navigate("/login");
-                } else {
+                } else if(response.status === 403){
+                    console.log("Unauthorized Access");
+                    navigate("/login")
+                }
+                else {
                     console.error("Failed to fetch house data");
                     setErrorMessage("Failed to fetch house data.");
                 }

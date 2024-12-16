@@ -81,10 +81,30 @@ function NotificationDropdown() {
 
     const markAsRead = async (notification) => {
         try {
-            await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/read`, {
-                mongoId: notification.mongoId,
-            });
+            // Get the JWT token from localStorage
+            const token = localStorage.getItem("jwtToken");
 
+            // If the token is not found, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
+            // Make the PATCH request with the token in the Authorization header
+            await axios.patch(
+                `${import.meta.env.VITE_API_URL}/notifications/read`,
+                {
+                    mongoId: notification.mongoId,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,  // Attach the token
+                    }
+                }
+            );
+
+            // Update the state of notifications
             setNotifications((prev) => {
                 const notificationToMark = prev.new.find((n) => n.mongoId === notification.mongoId);
                 if (notificationToMark) notificationToMark.read = true;
@@ -101,10 +121,25 @@ function NotificationDropdown() {
 
     const deleteNotification = async (notification) => {
         try {
+            // Get the JWT token from localStorage
+            const token = localStorage.getItem("jwtToken");
+
+            // If the token is not found, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
+            // Make the DELETE request with the token in the Authorization header
             await axios.delete(`${import.meta.env.VITE_API_URL}/notifications`, {
-                data: { mongoId: notification.mongoId },
+                headers: {
+                    Authorization: `Bearer ${token}`,  // Attach the token
+                },
+                data: { mongoId: notification.mongoId }, // Pass data (mongoId) in the body
             });
 
+            // Update the state to remove the deleted notification
             setNotifications((prev) => ({
                 ...prev,
                 read: prev.read.filter((n) => n.mongoId !== notification.mongoId),
@@ -116,7 +151,24 @@ function NotificationDropdown() {
 
     const deleteAllRead = async () => {
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`);
+            // Get the JWT token from localStorage
+            const token = localStorage.getItem("jwtToken");
+
+            // If the token is not found, redirect to login page
+            if (!token) {
+                console.log("Token not found. Redirecting to login page.");
+                navigate("/login");
+                return;
+            }
+
+            // Make the DELETE request with the token in the Authorization header
+            await axios.delete(`${import.meta.env.VITE_API_URL}/notifications/house/${houseId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,  // Attach the token
+                },
+            });
+
+            // Update the state to clear all read notifications
             setNotifications((prev) => ({
                 ...prev,
                 read: [],

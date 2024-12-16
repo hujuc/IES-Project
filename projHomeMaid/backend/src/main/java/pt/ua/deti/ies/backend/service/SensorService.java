@@ -18,6 +18,8 @@ import pt.ua.deti.ies.backend.repository.SensorRepository;
 import pt.ua.deti.ies.backend.repository.CustomSensorRepository;
 import java.util.Optional;
 import java.util.List;
+import pt.ua.deti.ies.backend.websocket.SensorUpdateMessage;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 public class SensorService {
@@ -25,11 +27,15 @@ public class SensorService {
     private final InfluxDBClient influxDBClient;
     private final SensorRepository sensorRepository;
     private final CustomSensorRepository customSensorRepository;
+    private final SimpMessagingTemplate messagingTemplate; // Add this line
 
-    public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository, CustomSensorRepository customSensorRepository) {
+    // Constructor with SimpMessagingTemplate injection
+    public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository,
+                         CustomSensorRepository customSensorRepository, SimpMessagingTemplate messagingTemplate) {
         this.influxDBClient = influxDBClient;
         this.sensorRepository = sensorRepository;
         this.customSensorRepository = customSensorRepository;
+        this.messagingTemplate = messagingTemplate; // Initialize the messagingTemplate
     }
 
     public List<Sensor> getAllSensors() {
@@ -63,6 +69,8 @@ public class SensorService {
 
         // Inserir os dados no InfluxDB
         saveToInfluxDB(sensorData);
+
+        sendSensorUpdateMessage(sensorData);
     }
 
     private void saveToInfluxDB(Sensor sensorData) {
@@ -86,8 +94,17 @@ public class SensorService {
         }
     }
 
+    private void sendSensorUpdateMessage(Sensor sensorData) {
+        // Create the SensorUpdateMessage
+        SensorUpdateMessage message = new SensorUpdateMessage(
+                sensorData.getRoomId(),
+                sensorData.getType(),
+                sensorData.getValue()
+        );
 
-
+        // Send the message to the "/topic/sensor-updates" WebSocket topic
+        messagingTemplate.convertAndSend("/topic/sensor-updates", message);
+    }
 
     public String getAverageTemperature(String id, String idType, String timeframe) {
         if (id == null || idType == null) {

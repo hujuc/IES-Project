@@ -11,6 +11,8 @@ import {
     Legend,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, TimeScale, Tooltip, Legend);
 
@@ -26,10 +28,17 @@ const RoomGraph = ({ houseId }) => {
     const [timeframe, setTimeframe] = useState("daily");
     const [rooms, setRooms] = useState([]);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
-    const [graphData, setGraphData] = useState(null);
+    const [graphData, setGraphData] = useState({ temperatures: [], humidities: [] });
     const [loading, setLoading] = useState(false);
+    const [client, setClient] = useState(null); // WebSocket client state
 
-    // Buscar os quartos da casa
+    // Custom order for the rooms
+    const customOrder = [
+        "hall", "livingRoom", "kitchen",
+        "masterBedroom", "guestBedroom", "bathroom", "office", "laundry",
+    ];
+
+    // Fetch rooms data
     useEffect(() => {
         const fetchRooms = async () => {
             const token = localStorage.getItem("jwtToken");
@@ -48,11 +57,19 @@ const RoomGraph = ({ houseId }) => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setRooms(data.rooms || []);
-                    setSelectedRoomId(data.rooms[0]?.roomId || null); // Seleciona o primeiro quarto por padrão
+
+                    // Sort rooms based on the customOrder
+                    const sortedRooms = data.rooms.sort((a, b) => {
+                        const aIndex = customOrder.indexOf(a.type);
+                        const bIndex = customOrder.indexOf(b.type);
+                        return aIndex - bIndex;
+                    });
+
+                    setRooms(sortedRooms);
+                    setSelectedRoomId(sortedRooms[0]?.roomId || null); // Select the first room by default
                 } else if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem("jwtToken");
-                    navigate("/login"); // Redireciona para login se o token for inválido
+                    navigate("/login"); // Redirect to login if token is invalid
                 } else {
                     console.error("Failed to fetch rooms");
                 }
@@ -64,7 +81,52 @@ const RoomGraph = ({ houseId }) => {
         fetchRooms();
     }, [houseId]);
 
-    // Buscar os dados para o gráfico
+    // WebSocket connection for real-time updates
+    useEffect(() => {
+        const socketClient = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        socketClient.onConnect = () => {
+            // Subscribe to the sensor updates topic
+            socketClient.subscribe(`/topic/sensor-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                const { roomId, field, value } = updatedData;
+
+                if (roomId === selectedRoomId) {
+                    // Update graph data based on the field (temperature or humidity)
+                    setGraphData((prevData) => {
+                        const updatedGraphData = { ...prevData };
+
+                        if (field === 'temperature') {
+                            updatedGraphData.temperatures.push({
+                                x: new Date(), // Set current time
+                                y: parseFloat(value).toFixed(2),
+                            });
+                        } else if (field === 'humidity') {
+                            updatedGraphData.humidities.push({
+                                x: new Date(), // Set current time
+                                y: parseFloat(value).toFixed(2),
+                            });
+                        }
+
+                        return updatedGraphData;
+                    });
+                }
+            });
+        };
+
+        socketClient.activate();
+        setClient(socketClient);
+
+        return () => socketClient.deactivate();
+    }, [selectedRoomId]);
+
+    // Fetch graph data based on selected room and timeframe
     useEffect(() => {
         const fetchGraphData = async () => {
             const token = localStorage.getItem("jwtToken");
@@ -90,30 +152,28 @@ const RoomGraph = ({ houseId }) => {
                 if (response.ok) {
                     const data = await response.json();
 
-                    // Prepara os dados para o gráfico
+                    // Prepare data for the chart
                     const temperatures = data.map((point) => ({
-                        x: new Date(point.time), // Certifique-se de que o formato é válido
+                        x: new Date(point.time), // Ensure the format is valid
                         y: point.temperature,
                     }));
 
                     const humidities = data.map((point) => ({
-                        x: new Date(point.time), // Certifique-se de que o formato é válido
+                        x: new Date(point.time), // Ensure the format is valid
                         y: point.humidity,
                     }));
-
-                    console.log("Graph data fetched:", { temperatures, humidities });
 
                     setGraphData({ temperatures, humidities });
                 } else if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem("jwtToken");
-                    navigate("/login"); // Redireciona para login se o token for inválido
+                    navigate("/login"); // Redirect to login if token is invalid
                 } else {
                     console.error("Failed to fetch graph data");
-                    setGraphData(null);
+                    setGraphData({ temperatures: [], humidities: [] });
                 }
             } catch (error) {
                 console.error("Error fetching graph data:", error);
-                setGraphData(null);
+                setGraphData({ temperatures: [], humidities: [] });
             } finally {
                 setLoading(false);
             }
@@ -126,7 +186,7 @@ const RoomGraph = ({ houseId }) => {
         datasets: [
             {
                 label: "Temperature (°C)",
-                data: graphData?.temperatures || [],
+                data: graphData.temperatures,
                 borderColor: "red",
                 backgroundColor: "rgba(255, 0, 0, 0.2)",
                 tension: 0.2,
@@ -134,7 +194,7 @@ const RoomGraph = ({ houseId }) => {
             },
             {
                 label: "Humidity (%)",
-                data: graphData?.humidities || [],
+                data: graphData.humidities,
                 borderColor: "blue",
                 backgroundColor: "rgba(0, 0, 255, 0.2)",
                 tension: 0.2,
@@ -150,7 +210,7 @@ const RoomGraph = ({ houseId }) => {
             x: {
                 type: "time",
                 time: {
-                    unit: timeframe === "daily" ? "hour" : "day", // Ajusta a granularidade conforme o timeframe
+                    unit: timeframe === "daily" ? "hour" : "day", // Adjust granularity based on timeframe
                 },
                 title: {
                     display: true,
@@ -174,7 +234,6 @@ const RoomGraph = ({ houseId }) => {
     return (
         <div className="bg-white rounded-lg shadow-lg p-4 mt-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Home Analysis Graph</h3>
-
 
             {/* Controles de Filtros */}
             <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
@@ -208,9 +267,9 @@ const RoomGraph = ({ houseId }) => {
 
             {/* Renderiza o gráfico ou mensagem de dados indisponíveis */}
             <div style={{ height: "400px" }}>
-                {graphData?.temperatures?.length > 0 || graphData?.humidities?.length > 0 ? (
+                {graphData.temperatures.length > 0 || graphData.humidities.length > 0 ? (
                     <Line
-                        key={`${selectedRoomId}-${timeframe}`} // Força o re-render quando o roomId ou timeframe mudam
+                        key={`${selectedRoomId}-${timeframe}`} // Force re-render when roomId or timeframe changes
                         data={chartData}
                         options={chartOptions}
                     />

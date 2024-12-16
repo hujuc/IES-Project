@@ -4,7 +4,9 @@ import Modal from "react-modal";
 import RoomInfo from "./RoomInfo";
 import Statistics from "./RoomStatistics.jsx";
 import RoomGraph from "./RoomGraph.jsx";
-import AddDeviceModal from "./AddDeviceModal.jsx"; // Novo componente
+import AddDeviceModal from "./AddDeviceModal.jsx"; // New component
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 // Default room images
 import HouseImage from "../../assets/homePage/roomsImages/house.jpg";
@@ -29,7 +31,10 @@ function CardSlider() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [deviceData, setDeviceData] = useState({ name: "", type: "", room: "" });
 
-    // Device types and room types
+    // State for WebSocket
+    const [client, setClient] = useState(null);
+    const [sensorData, setSensorData] = useState({ temperature: "N/A", humidity: "N/A" });
+
     const deviceTypes = [
         "airConditioner", "coffeeMachine", "heatedFloor", "lamp", "shutter",
         "stereo", "television", "washingMachine", "dryerMachine", "clock",
@@ -160,6 +165,53 @@ function CardSlider() {
         };
 
         fetchHouseData();
+
+        // Set up WebSocket connection
+        const socketClient = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        socketClient.onConnect = () => {
+            // Subscribe to the sensor updates topic
+            socketClient.subscribe(`/topic/sensor-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                // Destructure the data from the message
+                const { roomId, field, value } = updatedData;
+
+                // Round the value to 2 decimal places
+                const roundedValue = parseFloat(value).toFixed(2);
+
+                // Update the relevant card with the received data
+                setCards((prevCards) =>
+                    prevCards.map((card) => {
+                        if (card.id === roomId) {
+                            // Update temperature or humidity based on the field received
+                            if (field === 'temperature') {
+                                return {
+                                    ...card,
+                                    temperature: roundedValue, // Update temperature with rounded value
+                                };
+                            } else if (field === 'humidity') {
+                                return {
+                                    ...card,
+                                    humidity: roundedValue, // Update humidity with rounded value
+                                };
+                            }
+                        }
+                        return card; // Keep the rest of the cards unchanged
+                    })
+                );
+            });
+        };
+
+        socketClient.activate();
+        setClient(socketClient);
+
+        return () => socketClient.deactivate();
     }, [houseId, navigate]);
 
     const handlePrev = () => {
@@ -171,8 +223,6 @@ function CardSlider() {
     };
 
     const handleAddDevice = async (deviceData) => {
-        console.log("Received Device Data:", deviceData);
-
         try {
             const token = localStorage.getItem("jwtToken");
 
@@ -184,7 +234,7 @@ function CardSlider() {
                 },
                 body: JSON.stringify({
                     houseId,
-                    roomType: deviceData.room || "house", // Garantindo que 'house' seja enviado como roomType
+                    roomType: deviceData.room || "house", // Ensuring 'house' is sent as roomType
                     type: deviceData.type,
                     name: deviceData.name,
                 }),
@@ -192,9 +242,8 @@ function CardSlider() {
 
             if (response.ok) {
                 const newDevice = await response.json();
-                console.log("Device successfully added:", newDevice);
 
-                // Atualiza o card correto
+                // Update the correct card
                 const updatedCards = [...cards];
                 const targetCardIndex = updatedCards.findIndex(
                     (card) => card.type === (deviceData.room || "house")
@@ -208,8 +257,8 @@ function CardSlider() {
                 }
 
                 setCards(updatedCards);
-                setIsModalOpen(false); // Fecha o modal
-                setErrorMessage(""); // Reseta mensagens de erro
+                setIsModalOpen(false); // Close the modal
+                setErrorMessage(""); // Reset error messages
             } else {
                 console.error("Failed to add device:", response.statusText);
                 alert("Failed to add device. Please try again.");
@@ -226,10 +275,11 @@ function CardSlider() {
     const currentCard = cards[currentIndex];
 
     return (
-        <div className="relative flex flex-col items-center space-y-4">
+// CardSlider.jsx
 
+        <div className="relative flex flex-col items-center space-y-4">
             {/* Room Card */}
-            <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-64">
+            <div className="relative bg-gray-100 rounded-xl shadow-md w-96 h-auto">
                 <img
                     src={currentCard.image}
                     alt={currentCard.label}
@@ -257,7 +307,17 @@ function CardSlider() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Exibir informações apenas se o card for a "House" */}
+            {currentCard.id === "house" && (
+                <>
+                    {/* Exibe RoomInfo, Statistics e Graph apenas quando for a "House" */}
+                    <RoomInfo room={currentCard} />
+                    <Statistics houseId={houseId} />
+                    <RoomGraph houseId={houseId} />
+                </>
+            )}
+
+            {/* Modal para adicionar dispositivo */}
             <AddDeviceModal
                 isOpen={isModalOpen}
                 onRequestClose={() => setIsModalOpen(false)}
@@ -269,26 +329,13 @@ function CardSlider() {
             />
 
             <div className="flex space-x-4">
-                <button onClick={handlePrev}
-                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handlePrev} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Prev
                 </button>
-                <button onClick={handleNext}
-                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                <button onClick={handleNext} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-400">
                     Next
                 </button>
             </div>
-
-            {/*<RoomInfo room={currentCard}/>*/}
-            <RoomInfo key={currentCard.deviceObjects?.length} room={currentCard} />
-
-            {currentCard.id === "house" && (
-                <>
-                    <Statistics houseId={houseId}/>
-                    <RoomGraph houseId={houseId}/>
-                </>
-            )}
-
         </div>
     );
 }

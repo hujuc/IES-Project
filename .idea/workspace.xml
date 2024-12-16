@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/websocket/SensorState.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/websocket/SensorUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/websocket/SensorWebSocketController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/SecurityConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/config/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/SensorRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/repository/SensorRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/InfluxDBService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/SensorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/SensorService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomGraph.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomGraph.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomStatistics.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomStatistics.jsx" afterDir="false" />
@@ -36,20 +45,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "disable.download.node.interpreter.editor.notification": "true",
-    "git-widget-placeholder": "feature/fullStack-connect-generator-to-influx-77",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;disable.download.node.interpreter.editor.notification&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/fullStack-homepage-56&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/angelamar/Desktop/3ºano/IES/Projeto/ies-24-25-group-project-304&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/projHomeMaid/frontend/src/assets/automationsPages/devices/coffeeMachine" />

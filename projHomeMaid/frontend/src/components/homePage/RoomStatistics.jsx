@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 // Função para capitalizar a primeira letra de cada palavra
 const capitalizeWords = (str) => {
@@ -13,6 +15,13 @@ const RoomStatistics = ({ houseId }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(true); // Controle de autenticação
+    const [client, setClient] = useState(null);
+
+    // Custom order for the rooms
+    const customOrder = [
+        "hall", "livingRoom", "kitchen",
+        "masterBedroom", "guestBedroom", "bathroom", "office", "laundry",
+    ];
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -39,8 +48,15 @@ const RoomStatistics = ({ houseId }) => {
 
                 const houseData = await houseDataResponse.json();
 
-                setRooms(houseData.rooms);
-                setSelectedRoomId(houseData.rooms[0]?.roomId || null); // Seleciona o primeiro quarto como padrão
+                // Sort rooms based on the customOrder
+                const sortedRooms = houseData.rooms.sort((a, b) => {
+                    const aIndex = customOrder.indexOf(a.type);
+                    const bIndex = customOrder.indexOf(b.type);
+                    return aIndex - bIndex;
+                });
+
+                setRooms(sortedRooms);
+                setSelectedRoomId(sortedRooms[0]?.roomId || null); // Seleciona o primeiro quarto como padrão
             } catch (error) {
                 console.error("Error fetching rooms:", error);
                 setError("Failed to load rooms. Please try again later.");
@@ -51,6 +67,37 @@ const RoomStatistics = ({ houseId }) => {
 
         fetchRooms();
     }, [houseId]);
+
+    // Set up WebSocket connection and subscription for sensor updates
+    useEffect(() => {
+        const socketClient = new Client({
+            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        socketClient.onConnect = () => {
+            // Subscribe to the sensor updates topic
+            socketClient.subscribe(`/topic/sensor-updates`, (message) => {
+                const updatedData = JSON.parse(message.body);
+
+                const { roomId, field, value } = updatedData;
+                if (roomId === selectedRoomId) {
+                    // Only update if the message is for the selected room
+                    setSelectedRoomStats((prevStats) => ({
+                        ...prevStats,
+                        [field]: value.toFixed(2), // Round to two decimal places
+                    }));
+                }
+            });
+        };
+
+        socketClient.activate();
+        setClient(socketClient);
+
+        return () => socketClient.deactivate();
+    }, [selectedRoomId]);
 
     useEffect(() => {
         const fetchRoomStatistics = async () => {

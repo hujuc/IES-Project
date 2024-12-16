@@ -15,9 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import pt.ua.deti.ies.backend.repository.SensorRepository;
-
-
-
+import pt.ua.deti.ies.backend.repository.CustomSensorRepository;
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -25,10 +24,12 @@ public class SensorService {
 
     private final InfluxDBClient influxDBClient;
     private final SensorRepository sensorRepository;
+    private final CustomSensorRepository customSensorRepository;
 
-    public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository) {
+    public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository, CustomSensorRepository customSensorRepository) {
         this.influxDBClient = influxDBClient;
         this.sensorRepository = sensorRepository;
+        this.customSensorRepository = customSensorRepository;
     }
 
     public List<Sensor> getAllSensors() {
@@ -41,8 +42,30 @@ public class SensorService {
             throw new IllegalArgumentException("Todos os campos sensorId, roomId, houseId, type e value são obrigatórios.");
         }
 
-        sensorRepository.save(sensorData);
+        // Verificar se o sensor já existe
+        Optional<Sensor> existingSensor = sensorRepository.findBySensorId(sensorData.getSensorId());
 
+        if (existingSensor.isPresent()) {
+            // Atualizar apenas os campos do sensor existente
+            customSensorRepository.updateSensorFields(
+                    sensorData.getSensorId(),
+                    sensorData.getRoomId(),
+                    sensorData.getHouseId(),
+                    sensorData.getType(),
+                    sensorData.getValue(),
+                    sensorData.getUnit(),
+                    sensorData.getName()
+            );
+        } else {
+            // Criar um novo sensor no MongoDB
+            sensorRepository.save(sensorData);
+        }
+
+        // Inserir os dados no InfluxDB
+        saveToInfluxDB(sensorData);
+    }
+
+    private void saveToInfluxDB(Sensor sensorData) {
         try (WriteApi writeApi = influxDBClient.getWriteApi()) {
             String data = String.format(
                     "%s,sensor_id=%s,room_id=%s,house_id=%s,unit=%s value=%f",
@@ -62,6 +85,9 @@ public class SensorService {
             throw new RuntimeException("Erro ao salvar dados no InfluxDB: " + e.getMessage(), e);
         }
     }
+
+
+
 
     public String getAverageTemperature(String id, String idType, String timeframe) {
         if (id == null || idType == null) {

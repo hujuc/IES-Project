@@ -168,10 +168,15 @@ function CardSlider() {
 
         // Set up WebSocket connection
         const socketClient = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            webSocketFactory: () =>
+                new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/sensors")),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
+            onConnect: () => console.log("Connected to WebSocket!"),
+            onStompError: (frame) => {
+                console.error("WebSocket connection error:", frame);
+            },
         });
 
         socketClient.onConnect = () => {

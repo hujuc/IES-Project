@@ -71,10 +71,15 @@ const RoomStatistics = ({ houseId }) => {
     // Set up WebSocket connection and subscription for sensor updates
     useEffect(() => {
         const socketClient = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000,
+            webSocketFactory: () =>
+                new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/sensors")),
+            reconnectDelay: 5000, // Tenta reconectar a cada 5 segundos
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
+            onConnect: () => console.log("Connected to WebSocket!"),
+            onStompError: (frame) => {
+                console.error("WebSocket connection error:", frame);
+            },
         });
 
         socketClient.onConnect = () => {

@@ -35,8 +35,16 @@ public class SecurityConfiguration {
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/users/signUp", "/api/users/login", "/ws/**", "/api/users/all", "api/automations")
-                .permitAll()
+                // Rotas sem autenticação
+                .requestMatchers(
+                        "/api/users/signUp",
+                        "/api/users/login",
+                        "/ws/**",
+                        "/api/users/all",
+                        "/api/automations",
+                        "/api/sensors",       // Rota específica para o data_generator
+                        "/api/devices"        // Rota específica para o data_generator
+                ).permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

@@ -4,23 +4,22 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class InfluxDBConfig {
 
+    @Value("${influxdb.token}")
+    private String influxToken;
+
     @Bean
     public InfluxDBClient influxDBClient() {
-//        return InfluxDBClientFactory.create(
-//                "http://localhost:8086",      // URL do InfluxDB
-//                "6ShJLV6O6TJAXikzMo9CYN9ufzFAUzhwfE0itLOXJAKKPvkycdgbdQh6ZcW8G6W4zfHRHJpXzh8rlBdCuM0rlw==".toCharArray(), // Token gerado no InfluxDB
-//                "HomeMaidOrg",                // Organização
-//                "sensor_data"                 // Bucket
-//        );
         return InfluxDBClientFactory.create(
                 "http://influxdb:8086",      // URL do InfluxDB
-                "freltKC8NZ1U1x3CdkvBm-PSXRFEMi16VBPtu_X3h2c2tKsbO0uxfF0XLxZ92Tm2evKo5d8rdOcjcUhv8tdU7g==".toCharArray(), // Token gerado no InfluxDB
+                influxToken.toCharArray(),   // Token
                 "HomeMaidOrg",                // Organização
                 "sensor_data"                 // Bucket
         );
+
     }
 }

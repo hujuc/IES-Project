@@ -33,6 +33,7 @@ services:
       "logging.level.org.springframework":"INFO",
       "spring.main.web-application-type":"servlet"
       }'
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
 
   frontend:
     build:

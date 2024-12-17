@@ -11,6 +11,24 @@ function DeviceCard({ device, onToggle, getDeviceImage, loadingDeviceId }) {
                 device.type === "coffeeMachine") &&
             device.state);
 
+    const handleToggle = (e) => {
+        e.stopPropagation();
+
+        if (isToggleDisabled) return;
+
+        // Adiciona a lógica para o tipo "shutter"
+        let updatedDeviceData = {
+            state: !device.state,
+        };
+
+        if (device.type === "shutter") {
+            updatedDeviceData.openPercentage = !device.state ? 100 : 0;
+        }
+
+        // Chama a função de toggle passando os dados atualizados
+        onToggle(device.deviceId, device.state, device.type, updatedDeviceData);
+    };
+
     return (
         <div
             className="bg-white rounded-lg shadow-lg p-3 flex flex-col items-center justify-between transition-all duration-300 hover:shadow-xl cursor-pointer w-full"
@@ -36,12 +54,7 @@ function DeviceCard({ device, onToggle, getDeviceImage, loadingDeviceId }) {
             {/* Botão de Toggle */}
             <div className="flex items-center justify-center w-full mt-2">
                 <div
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isToggleDisabled) {
-                            onToggle(device.deviceId, device.state, device.type);
-                        }
-                    }}
+                    onClick={handleToggle}
                     className={`w-14 h-7 flex items-center rounded-full p-1 ${
                         isToggleDisabled ? "cursor-not-allowed" : "cursor-pointer"
                     } ${

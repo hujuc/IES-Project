@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import pt.ua.deti.ies.backend.websocket.NotificationMessage;
 
 @Component
 public class WashingMachineAutomationHandler implements DeviceAutomationHandler {
@@ -17,12 +18,12 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
     private final DeviceRepository deviceRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final DeviceService deviceService; // Adicionado para obter o houseId
+    private final DeviceService deviceService;
 
     public WashingMachineAutomationHandler(DeviceRepository deviceRepository,
                                            NotificationRepository notificationRepository,
                                            SimpMessagingTemplate simpMessagingTemplate,
-                                           DeviceService deviceService) { // Injetar o serviço de dispositivos
+                                           DeviceService deviceService) {
         this.deviceRepository = deviceRepository;
         this.notificationRepository = notificationRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
@@ -47,16 +48,6 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
             device.setTemperature(temperature);
             device.setMode(washMode);
             deviceRepository.save(device);
-            try {
-                String deviceJson = new ObjectMapper().writeValueAsString(device);
-                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            System.out.println("Washing Machine started with:");
-            System.out.println("Temperature: " + temperature);
-            System.out.println("Wash Mode: " + washMode);
 
             new Thread(() -> runWashCycle(device)).start();
         }
@@ -64,8 +55,8 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
 
     private void runWashCycle(Device device) {
         try {
-            Thread.sleep(120000); // Simulate 2-minute washing cycle
-            device.setState(false); // Set state to false after the cycle
+            Thread.sleep(120000);
+            device.setState(false);
             deviceRepository.save(device);
             try {
                 String deviceJson = new ObjectMapper().writeValueAsString(device);
@@ -74,10 +65,9 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
                 e.printStackTrace();
             }
 
-            System.out.println("Washing Machine cycle completed. Turned off.");
-
-            // Enviar notificação ao final do ciclo
-            sendCycleCompletedNotification(device);
+            if (Boolean.TRUE.equals(device.getReceiveAutomationNotification())) {
+                sendCycleCompletedNotification(device);
+            }
 
         } catch (InterruptedException e) {
             System.err.println("Washing Machine cycle was interrupted.");
@@ -97,11 +87,20 @@ public class WashingMachineAutomationHandler implements DeviceAutomationHandler 
                     notificationText,
                     LocalDateTime.now(),
                     false, // Não lida
-                    "cycleCompletedNotification" // Tipo de notificação
+                    "automationNotification" // Tipo de notificação
             );
 
-            notificationRepository.save(notification);
-            System.out.println("[INFO] Cycle completion notification created: " + notificationText);
+            Notification savedNotification = notificationRepository.save(notification); // Salva no banco
+
+            NotificationMessage notificationMessage = new NotificationMessage();
+            notificationMessage.setHouseId(savedNotification.getHouseId());
+            notificationMessage.setText(savedNotification.getText());
+            notificationMessage.setType(savedNotification.getType());
+            notificationMessage.setTimestamp(savedNotification.getTimestamp().toString());
+            notificationMessage.setMongoId(savedNotification.getMongoId()); // Inclui o mongoId gerado
+
+            simpMessagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
+
         } catch (Exception e) {
             System.err.println("[ERROR] Error creating cycle completion notification: " + e.getMessage());
         }

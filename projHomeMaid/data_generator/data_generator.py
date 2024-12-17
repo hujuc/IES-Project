@@ -149,4 +149,4 @@ if __name__ == "__main__":
             last_automation_time = current_time  # Atualizar o timestamp do último envio
 
         # Esperar 30 minutos antes de gerar os próximos dados de sensores
-        time.sleep(1800)
+        time.sleep(120)

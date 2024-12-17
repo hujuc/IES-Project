@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import DeviceCard from "./DeviceCard";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 // Importing images for devices
 import airConditioner from "../../assets/homePage/devicesImages/airConditioner.jpg";
@@ -20,6 +22,7 @@ function RoomInfo({ room }) {
     const [loadingDeviceId, setLoadingDeviceId] = useState(null);
     const [filter, setFilter] = useState("all");
     const navigate = useNavigate();
+    const stompClientRef = useRef(null);
 
     useEffect(() => {
         if (room && room.deviceObjects && room.deviceObjects.length > 0) {
@@ -32,6 +35,44 @@ function RoomInfo({ room }) {
     useEffect(() => {
         setFilter("all");
     }, [room]);
+
+    useEffect(() => {
+        // Setup WebSocket for real-time updates
+        const socket = new SockJS(`${import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")}`);
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+            onConnect: () => {
+                console.log("Connected to WebSocket for device updates.");
+
+                client.subscribe("/topic/device-updates", (message) => {
+                    const updatedDevice = JSON.parse(message.body);
+                    console.log("Received device update:", updatedDevice);
+
+                    setDeviceObjects((prevDevices) =>
+                        prevDevices.map((device) =>
+                            device.deviceId === updatedDevice.deviceId
+                                ? { ...device, state: updatedDevice.state }
+                                : device
+                        )
+                    );
+                });
+            },
+            onStompError: (frame) => {
+                console.error("WebSocket error:", frame);
+            },
+        });
+
+        client.activate();
+        stompClientRef.current = client;
+
+        return () => {
+            if (stompClientRef.current) {
+                stompClientRef.current.deactivate();
+                console.log("WebSocket disconnected.");
+            }
+        };
+    }, []);
 
     const getDeviceImage = (type) => {
         switch (type) {
@@ -60,10 +101,8 @@ function RoomInfo({ room }) {
         }
     };
 
-    const toggleDeviceState = async (deviceId, currentState, deviceType) => {
+    const toggleDeviceState = async (deviceId, currentState, deviceType, updatedDeviceData = {}) => {
         setLoadingDeviceId(deviceId);
-
-        let updatedState = !currentState;
 
         try {
             const token = localStorage.getItem("jwtToken");
@@ -72,108 +111,28 @@ function RoomInfo({ room }) {
                 return;
             }
 
-            // Regras específicas para washingMachine, dryerMachine e coffeeMachine
-            if (
-                (deviceType === "washingMachine" ||
-                    deviceType === "dryerMachine" ||
-                    deviceType === "coffeeMachine") &&
-                currentState === false
-            ) {
-                // Permitir mudar de false para true e iniciar o "ciclo"
-                updatedState = true;
+            const updatedState = {
+                state: !currentState,
+                ...updatedDeviceData,
+            };
 
-                await axios.patch(
-                    `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
-                    { state: updatedState },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                // Atualiza o estado local para mostrar como "ligado"
-                setDeviceObjects((prevDeviceObjects) =>
-                    prevDeviceObjects.map((device) =>
-                        device.deviceId === deviceId
-                            ? { ...device, state: updatedState }
-                            : device
-                    )
-                );
-
-                // Simular o ciclo e voltar a desligar após o tempo definido
-                const simulationTime =
-                    deviceType === "coffeeMachine" ? 30000 : 120000; // 30s para café, 2min para máquinas
-
-                setTimeout(async () => {
-                    try {
-                        await axios.patch(
-                            `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
-                            { state: false }, // Voltar para desligado
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            }
-                        );
-
-                        // Atualiza o estado local para desligado
-                        setDeviceObjects((prevDeviceObjects) =>
-                            prevDeviceObjects.map((device) =>
-                                device.deviceId === deviceId
-                                    ? { ...device, state: false }
-                                    : device
-                            )
-                        );
-                    } catch (error) {
-                        console.error(
-                            `Error resetting the state for ${deviceType}:`,
-                            error
-                        );
-                    }
-                }, simulationTime);
-
-                setLoadingDeviceId(null);
-                return;
-            }
-
-            // Regras específicas para os outros dispositivos
-            if (deviceType === "clock" && !currentState) {
-                console.warn("Cannot turn on the clock.");
-                setLoadingDeviceId(null);
-                return;
-            } else if (
-                (deviceType === "washingMachine" ||
-                    deviceType === "dryerMachine" ||
-                    deviceType === "coffeeMachine") &&
-                currentState === true
-            ) {
-                console.warn(`Cannot turn off the ${deviceType}.`);
-                setLoadingDeviceId(null);
-                return;
-            }
-
-            // Comportamento padrão: alternar estado
             await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
-                { state: updatedState },
+                updatedState,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 }
             );
 
-            // Atualiza o estado local
-            setDeviceObjects((prevDeviceObjects) =>
-                prevDeviceObjects.map((device) =>
+            setDeviceObjects((prevDevices) =>
+                prevDevices.map((device) =>
                     device.deviceId === deviceId
-                        ? { ...device, state: updatedState }
+                        ? { ...device, ...updatedState }
                         : device
                 )
             );
         } catch (error) {
-            console.error("Network or other error:", error);
+            console.error("Error updating device state:", error);
         } finally {
             setLoadingDeviceId(null);
         }

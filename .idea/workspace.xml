@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3b9b1eb-ad26-4648-9156-fe85978fe4d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/workers/deviceWorker.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/DeviceController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/data_generator/data_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/lampPage/StateControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/automationsPages/lampPage/StateControl.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/kafka/AutomationConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/kafka/AutomationConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/AuthenticationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/AuthenticationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/backend/src/main/java/pt/ua/deti/ies/backend/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/CardSlider.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/homePage/RoomInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/WashingMachinaControl.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/pages/automations/WashingMachinaControl.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/loginPage/LoginForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/projHomeMaid/frontend/src/components/loginPage/LoginForm.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

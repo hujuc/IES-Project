@@ -52,11 +52,12 @@ function LoginForm() {
             navigate(`/homePage/${houseId}`);
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                setErrorMessage(error.response.data.error);
+                setErrorMessage(error.response.data.error); // Usa a mensagem retornada pelo backend
             } else {
                 setErrorMessage("An error occurred. Please try again.");
             }
         }
+
     };
 
     return (

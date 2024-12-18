@@ -4,7 +4,6 @@ import axios from "axios";
 import DeviceCard from "./DeviceCard";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import WorkerScript from "../../workers/deviceWorker.js?worker";
 
 // Importing images for devices
 import airConditioner from "../../assets/homePage/devicesImages/airConditioner.jpg";

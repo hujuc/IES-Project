@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import AirConditionerState from "../../components/automationsPages/AirConditionerPage/StateControl.jsx";
+import WashingMachineState from "../../components/automationsPages/washingMachinePage/StateControl.jsx";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AirCondAutomation.jsx";
+import AutomatizeWashingMachine from "../../components/automationsPages/washingMachinePage/washerAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNavigate } from "react-router-dom"; // Import for redirecting to login
@@ -118,11 +118,11 @@ export default function AirConditionerControl() {
             </div>
 
             {/* State and Control Section */}
-            <AirConditionerState deviceId={deviceId} deviceData={deviceData} />
+            <WashingMachineState deviceId={deviceId} deviceData={deviceData} />
 
             {/* Automation Section */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeAirConditioner deviceId={deviceId} />
+                <AutomatizeWashingMachine deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

@@ -4,6 +4,7 @@ import axios from "axios";
 import DeviceCard from "./DeviceCard";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import WorkerScript from "../../workers/deviceWorker.js?worker";
 
 // Importing images for devices
 import airConditioner from "../../assets/homePage/devicesImages/airConditioner.jpg";
@@ -23,6 +24,7 @@ function RoomInfo({ room }) {
     const [filter, setFilter] = useState("all");
     const navigate = useNavigate();
     const stompClientRef = useRef(null);
+    const workerRef = useRef(null);
 
     useEffect(() => {
         if (room && room.deviceObjects && room.deviceObjects.length > 0) {
@@ -111,19 +113,20 @@ function RoomInfo({ room }) {
                 return;
             }
 
+            // Cria o novo estado inicial do dispositivo
             const updatedState = {
                 state: !currentState,
                 ...updatedDeviceData,
             };
 
+            // Atualiza o estado no servidor (PATCH)
             await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
                 updatedState,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            // Atualiza o estado local para refletir o novo estado
             setDeviceObjects((prevDevices) =>
                 prevDevices.map((device) =>
                     device.deviceId === deviceId
@@ -131,6 +134,55 @@ function RoomInfo({ room }) {
                         : device
                 )
             );
+
+            // Simula o ciclo para dispositivos específicos (ex.: coffeeMachine, dryerMachine, washingMachine)
+            if (["washingMachine", "dryerMachine", "coffeeMachine"].includes(deviceType) && updatedState.state) {
+                const cycleTime = deviceType === "coffeeMachine" ? 30000 : 120000; // 30s para coffeeMachine, 2min para outros
+
+                console.log(`Iniciando ciclo para ${deviceType}...`);
+
+                setTimeout(async () => {
+                    try {
+                        console.log(`Ciclo para ${deviceType} concluído. Atualizando estado para false...`);
+
+                        // Novo estado ao final do ciclo
+                        const finalState = { state: false };
+
+                        // Atualiza o servidor com o estado final (PATCH)
+                        await axios.patch(
+                            `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
+                            finalState,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+
+                        // Atualiza o estado local para refletir o fim do ciclo
+                        setDeviceObjects((prevDevices) =>
+                            prevDevices.map((device) =>
+                                device.deviceId === deviceId
+                                    ? { ...device, ...finalState }
+                                    : device
+                            )
+                        );
+
+                        // Publica a atualização no WebSocket para o tópico "/topic/device-updates"
+                        if (stompClientRef.current && stompClientRef.current.connected) {
+                            const deviceJson = JSON.stringify({
+                                deviceId: deviceId,
+                                state: false,
+                            });
+
+                            stompClientRef.current.publish({
+                                destination: "/topic/device-updates",
+                                body: deviceJson,
+                            });
+
+                            console.log(`${deviceType} ciclo concluído. Mensagem enviada via WebSocket: ${deviceJson}`);
+                        }
+                    } catch (error) {
+                        console.error(`Erro ao finalizar ciclo de ${deviceType}:`, error);
+                    }
+                }, cycleTime); // Tempo do ciclo (30s ou 120s)
+            }
         } catch (error) {
             console.error("Error updating device state:", error);
         } finally {

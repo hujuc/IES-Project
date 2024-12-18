@@ -20,6 +20,4 @@ public class LoginResponse {
      public void setExpiresIn(long expiresIn) {
          this.expiresIn = expiresIn;
      }
-
-     // Getters and setters...
 }

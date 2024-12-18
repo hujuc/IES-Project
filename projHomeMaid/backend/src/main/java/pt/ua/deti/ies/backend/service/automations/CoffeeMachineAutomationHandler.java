@@ -77,14 +77,14 @@ public class CoffeeMachineAutomationHandler implements DeviceAutomationHandler {
                     "automationNotification"
             );
 
-            Notification savedNotification = notificationRepository.save(notification); // Salva no banco
+            Notification savedNotification = notificationRepository.save(notification);
 
             NotificationMessage notificationMessage = new NotificationMessage();
             notificationMessage.setHouseId(savedNotification.getHouseId());
             notificationMessage.setText(savedNotification.getText());
             notificationMessage.setType(savedNotification.getType());
             notificationMessage.setTimestamp(savedNotification.getTimestamp().toString());
-            notificationMessage.setMongoId(savedNotification.getMongoId()); // Inclui o mongoId gerado
+            notificationMessage.setMongoId(savedNotification.getMongoId());
 
             simpMessagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
 

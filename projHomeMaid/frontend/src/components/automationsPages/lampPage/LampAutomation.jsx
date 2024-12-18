@@ -37,7 +37,6 @@ export default function LampAutomation({ deviceId }) {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -61,9 +60,6 @@ export default function LampAutomation({ deviceId }) {
                 }));
 
                 setAutomatizations(updatedAutomatizations);
-                if(response.ok){
-                    console.log("Fetched Automations Complete");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -79,8 +75,6 @@ export default function LampAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Lights Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -94,7 +88,6 @@ export default function LampAutomation({ deviceId }) {
                     ) {
                         updatedData.changes.colorName = getColorName(updatedData.changes.color);
                         setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
@@ -114,7 +107,6 @@ export default function LampAutomation({ deviceId }) {
     const addAutomatization = async () => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -144,8 +136,6 @@ export default function LampAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
-            }else {
-                console.log("Added Automation Successfully");
             }
 
             const data = await response.json();
@@ -160,7 +150,6 @@ export default function LampAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -174,8 +163,6 @@ export default function LampAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
-            }else {
-                console.log("Deteted Automation Successfully");
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

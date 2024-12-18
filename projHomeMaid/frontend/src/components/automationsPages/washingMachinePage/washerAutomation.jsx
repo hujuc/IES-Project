@@ -29,9 +29,7 @@ export default function WasherAutomation({ deviceId }) {
             try {
                 const token = localStorage.getItem("jwtToken");
 
-                // If token is missing, redirect to login page
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -56,10 +54,8 @@ export default function WasherAutomation({ deviceId }) {
                             washMode: reverseWashModeMapping[item.changes.washMode] || item.changes.washMode,
                         },
                     }));
-                    console.log("Automation Machine fetch Successful");
                     setAutomatizations(mappedAutomatizations);
                 } else if (response.status === 401) {
-                    console.log("Unauthorized. Redirecting to login page.");
                     navigate("/login");
                 } else {
                     console.error("Failed to fetch automatizations.");
@@ -79,8 +75,6 @@ export default function WasherAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Washer Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -147,7 +141,6 @@ export default function WasherAutomation({ deviceId }) {
 
             // If token is missing, redirect to login page
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -174,7 +167,6 @@ export default function WasherAutomation({ deviceId }) {
                     },
                 ]);
             } else if (response.status === 401) {
-                console.log("Unauthorized. Redirecting to login page.");
                 navigate("/login");
             } else {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
@@ -190,9 +182,7 @@ export default function WasherAutomation({ deviceId }) {
         try {
             const token = localStorage.getItem("jwtToken");
 
-            // If token is missing, redirect to login page
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -209,9 +199,7 @@ export default function WasherAutomation({ deviceId }) {
 
             if (response.ok) {
                 setAutomatizations((prev) => prev.filter((_, i) => i !== index));
-                console.log("Automation Deleted Successfully");
             } else if (response.status === 401) {
-                console.log("Unauthorized. Redirecting to login page.");
                 navigate("/login");
             } else {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);

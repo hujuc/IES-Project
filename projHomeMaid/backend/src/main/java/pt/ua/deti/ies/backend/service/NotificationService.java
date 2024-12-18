@@ -44,7 +44,7 @@ public class NotificationService {
     }
 
     public void deleteReadNotificationsByHouse(String houseId) {
-        List<Notification> readNotifications = notificationRepository.findByHouseIdAndRead(houseId, true); // Buscar notificações lidas
-        notificationRepository.deleteAll(readNotifications); // Deletar somente notificações lidas
+        List<Notification> readNotifications = notificationRepository.findByHouseIdAndRead(houseId, true);
+        notificationRepository.deleteAll(readNotifications);
     }
 }

@@ -14,7 +14,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
         const fetchAutomatizations = async () => {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -38,9 +37,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
                     },
                 }));
                 setAutomatizations(normalizedAutomatizations);
-                if(response.ok){
-                    console.log("Fetched automations Success");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -56,8 +52,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Coffee Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -69,7 +63,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
                     ) {
                         updatedData.changes.drinkType = capitalize(updatedData.changes.drinkType);
                         setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
@@ -94,11 +87,9 @@ export default function CoffeeMachAutomation({ deviceId }) {
         };
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
-
 
         try {
             const response = await fetch(API_BASE_URL, {
@@ -112,8 +103,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
-            }else {
-                console.log("Added Automation Success");
             }
 
             const data = await response.json();
@@ -128,7 +117,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -143,8 +131,6 @@ export default function CoffeeMachAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
-            }else {
-                console.log("Deleted Automation SUccess.")
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

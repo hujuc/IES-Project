@@ -20,7 +20,7 @@ public class NotificationController {
     public Notification createNotification(
             @RequestParam String houseId,
             @RequestParam String text,
-            @RequestParam String type // Adicionando o parâmetro type
+            @RequestParam String type
     ) {
         return notificationService.createNotification(houseId, text, type);
     }
@@ -42,6 +42,6 @@ public class NotificationController {
 
     @DeleteMapping("/house/{houseId}")
     public void deleteReadNotificationsByHouse(@PathVariable String houseId) {
-        notificationService.deleteReadNotificationsByHouse(houseId); // Somente as notificações lidas
+        notificationService.deleteReadNotificationsByHouse(houseId);
     }
 }

@@ -6,15 +6,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "sensors")
 public class Sensor {
 
-    private String sensorId; // ID único do sensor
-    private String roomId;   // ID do quarto ao qual o sensor pertence
-    private String houseId;  // ID da casa à qual o sensor pertence
-    private String type;     // Tipo do sensor: "temperature", "humidity", etc.
-    private Double value;    // Valor lido pelo sensor
-    private String unit;     // Unidade da leitura: "°C", "%", etc.
-    private String name;     // Nome descritivo do sensor
+    private String sensorId;
+    private String roomId;
+    private String houseId;
+    private String type;
+    private Double value;
+    private String unit;
+    private String name;
 
-    // Construtores
     public Sensor(String sensorId, String roomId, String houseId, String type, Double value, String unit, String name) {
         this.sensorId = sensorId;
         this.roomId = roomId;
@@ -27,7 +26,6 @@ public class Sensor {
 
     public Sensor() {}
 
-    // Getters e Setters
     public String getSensorId() {
         return sensorId;
     }

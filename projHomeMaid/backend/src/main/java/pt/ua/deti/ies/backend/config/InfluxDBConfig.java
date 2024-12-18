@@ -15,10 +15,10 @@ public class InfluxDBConfig {
     @Bean
     public InfluxDBClient influxDBClient() {
         return InfluxDBClientFactory.create(
-                "http://influxdb:8086",      // URL do InfluxDB
-                influxToken.toCharArray(),   // Token
-                "HomeMaidOrg",                // Organização
-                "sensor_data"                 // Bucket
+                "http://influxdb:8086",
+                influxToken.toCharArray(),
+                "HomeMaidOrg",
+                "sensor_data"
         );
 
     }

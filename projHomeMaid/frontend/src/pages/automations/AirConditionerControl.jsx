@@ -5,12 +5,12 @@ import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AirCondAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom"; 
 
 export default function AirConditionerControl() {
     const [deviceData, setDeviceData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
     const url = window.location.href;
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
@@ -36,7 +36,6 @@ export default function AirConditionerControl() {
                 if (response.ok) {
                     const data = await response.json();
                     setDeviceData(data);
-                    console.log("Fetched Device Data Successfully");
                 } else if (response.status === 403) {
                     console.error("Unauthorized Access. Redirecting to login.");
                     navigate("/login");
@@ -62,8 +61,6 @@ export default function AirConditionerControl() {
             });
 
             client.onConnect = () => {
-                console.log("Connected to WebSocket STOMP!");
-
                 client.subscribe(`/topic/device-updates`, (message) => {
                     const updatedData = JSON.parse(message.body);
 
@@ -73,7 +70,6 @@ export default function AirConditionerControl() {
                             ...prev,
                             ...updatedData,
                         }));
-                        console.log("Updated data received via WebSocket:", updatedData);
                     }
                 });
             };

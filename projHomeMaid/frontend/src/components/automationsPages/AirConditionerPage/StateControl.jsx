@@ -35,7 +35,6 @@ export default function StateControl({ deviceId, deviceData }) {
     const toggleAirConditioner = async () => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -54,7 +53,6 @@ export default function StateControl({ deviceId, deviceData }) {
             if (response.ok) {
                 setState(updatedState);
                 setIsDisabled(!updatedState);
-                console.log("Updated state successfully.");
             } else {
                 console.error("Failed to update state:", response.statusText);
             }

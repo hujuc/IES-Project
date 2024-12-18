@@ -16,7 +16,6 @@ export default function ShutterAutomation({ deviceId }) {
         const fetchAutomatizations = async () => {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -33,9 +32,6 @@ export default function ShutterAutomation({ deviceId }) {
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-                if(response.ok){
-                    console.log("Successfully fetched Automations");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -51,8 +47,6 @@ export default function ShutterAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Shutter Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -65,7 +59,6 @@ export default function ShutterAutomation({ deviceId }) {
                         updatedData.changes.openPercentage !== undefined
                     ) {
                         setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
@@ -95,7 +88,6 @@ export default function ShutterAutomation({ deviceId }) {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -111,8 +103,6 @@ export default function ShutterAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
-            }else {
-                console.log("Automation Successfully Added");
             }
 
             const data = await response.json();
@@ -126,7 +116,6 @@ export default function ShutterAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -142,8 +131,6 @@ export default function ShutterAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
-            }else {
-                console.log("Deleted Automation Successfully");
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

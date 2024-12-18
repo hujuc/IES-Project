@@ -18,7 +18,7 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
     private final DeviceRepository deviceRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final DeviceService deviceService; // For houseId retrieval
+    private final DeviceService deviceService;
 
     public DryerMachineAutomationHandler(DeviceRepository deviceRepository,
                                          NotificationRepository notificationRepository,
@@ -55,8 +55,8 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
 
     private void runDryCycle(Device device) {
         try {
-            Thread.sleep(120000); // Simulate 2-minute drying cycle
-            device.setState(false); // Set state to false after the cycle
+            Thread.sleep(120000);
+            device.setState(false);
             deviceRepository.save(device);
 
             try {
@@ -80,18 +80,18 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
 
     private void sendCycleCompletedNotification(Device device) {
         try {
-            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId()); // Get houseId
+            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId());
             String notificationText = "The drying cycle for " + device.getName() + " has completed.";
 
             Notification notification = new Notification(
                     houseId,
                     notificationText,
                     LocalDateTime.now(),
-                    false, // Mark as unread
-                    "automationNotification" // Notification type
+                    false,
+                    "automationNotification"
             );
 
-            Notification savedNotification = notificationRepository.save(notification); // Salva no banco
+            Notification savedNotification = notificationRepository.save(notification);
 
             NotificationMessage notificationMessage = new NotificationMessage();
             notificationMessage.setHouseId(savedNotification.getHouseId());

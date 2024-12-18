@@ -23,10 +23,8 @@ public class SensorDataConsumer {
     @KafkaListener(topics = "sensor_data", groupId = "sensor-data-group")
     public void consumeSensorData(ConsumerRecord<String, String> record) {
         try {
-            // Deserializar a mensagem recebida
             Map<String, Object> sensorData = objectMapper.readValue(record.value(), Map.class);
 
-            // Criar objeto Sensor com os dados
             Sensor sensor = new Sensor();
             sensor.setSensorId((String) sensorData.get("sensorId"));
             sensor.setRoomId((String) sensorData.get("roomId"));
@@ -36,7 +34,6 @@ public class SensorDataConsumer {
             sensor.setUnit((String) sensorData.get("unit"));
             sensor.setName((String) sensorData.get("name"));
 
-            // Salvar no MongoDB e InfluxDB
             sensorService.saveSensor(sensor);
 
             System.out.println("Dados do sensor processados e salvos: " + sensor);

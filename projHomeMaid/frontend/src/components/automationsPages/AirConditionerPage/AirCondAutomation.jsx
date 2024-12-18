@@ -9,22 +9,21 @@ const API_BASE_URL = import.meta.env.VITE_API_URL + "/automations";
 export default function AirCondAutomation({ deviceId }) {
     const [automatizations, setAutomatizations] = useState([]);
     const [onTime, setOnTime] = useState("08:00");
-    const [temperature, setTemperature] = useState(22.0); // Default temperature
-    const [mode, setMode] = useState("hot"); // Default mode
-    const [airFluxDirection, setAirFluxDirection] = useState("up"); // Default air flux direction
-    const [airFluxRate, setAirFluxRate] = useState("medium"); // Default air flux rate
+    const [temperature, setTemperature] = useState(22.0);
+    const [mode, setMode] = useState("hot");
+    const [airFluxDirection, setAirFluxDirection] = useState("up");
+    const [airFluxRate, setAirFluxRate] = useState("medium");
     const [action, setAction] = useState("Turn On");
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
 
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
-        // Fetch existing automatizations
+
         const fetchAutomatizations = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}`, {
@@ -38,9 +37,6 @@ export default function AirCondAutomation({ deviceId }) {
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-                if(response.ok){
-                    console.log("Fetched Automation Success");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -57,8 +53,6 @@ export default function AirCondAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Air Conditioner Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 if (
@@ -68,7 +62,6 @@ export default function AirCondAutomation({ deviceId }) {
                     (updatedData.changes.state === true || updatedData.changes.state === false)
                 ) {
                     setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
                 }
             });
         };
@@ -99,7 +92,6 @@ export default function AirCondAutomation({ deviceId }) {
         };
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -120,7 +112,6 @@ export default function AirCondAutomation({ deviceId }) {
 
             const data = await response.json();
             setAutomatizations([...automatizations, data]);
-            console.log("Automatization added successfully.");
         } catch (err) {
             console.error("Error adding automatization:", err);
         }
@@ -130,7 +121,6 @@ export default function AirCondAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -148,7 +138,6 @@ export default function AirCondAutomation({ deviceId }) {
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));
-            console.log("Automatization deleted successfully.");
         } catch (err) {
             console.error("Error deleting automatization:", err);
         }

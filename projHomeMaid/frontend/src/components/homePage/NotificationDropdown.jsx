@@ -5,7 +5,6 @@ import axios from "axios";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-// Notification Icons
 import automationNotificationIcon from "../../assets/homePage/notifications/automationNotificationIcon.png";
 import generalNotificationIcon from "../../assets/homePage/notifications/automationNotificationIcon.png";
 
@@ -46,7 +45,6 @@ function NotificationDropdown() {
 
         fetchNotifications();
 
-        // WebSocket setup
         const socket = new SockJS(
             `${import.meta.env.VITE_API_URL.replace("/api", "/ws/notifications")}`
         );
@@ -73,7 +71,6 @@ function NotificationDropdown() {
     }, [houseId, navigate]);
 
     useEffect(() => {
-        // Close dropdown if clicked outside
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);

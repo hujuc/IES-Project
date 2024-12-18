@@ -11,20 +11,20 @@ export default function TvAutomation({ deviceId }) {
         isTVOn: false,
         volume: 50,
         brightness: 50,
-    }); // Estado atual da TV
+    });
+
     const [onTime, setOnTime] = useState("08:00");
     const [volume, setVolume] = useState(50);
     const [brightness, setBrightness] = useState(50);
     const [action, setAction] = useState("Turn On");
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAutomatizations = async () => {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -39,9 +39,6 @@ export default function TvAutomation({ deviceId }) {
                 const data = await response.json();
                 const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
-                if (response.ok){
-                    console.log("Automations Fetched Successfully")
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
                 setError("Failed to fetch automatizations.");
@@ -52,7 +49,6 @@ export default function TvAutomation({ deviceId }) {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -66,7 +62,6 @@ export default function TvAutomation({ deviceId }) {
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    console.log("Device State fetched Successfully")
                     setCurrentState({
                         isTVOn: data.state,
                         volume: data.volume || 50,
@@ -91,8 +86,6 @@ export default function TvAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for TV Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -162,7 +155,6 @@ export default function TvAutomation({ deviceId }) {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -174,9 +166,7 @@ export default function TvAutomation({ deviceId }) {
                 },
                 body: JSON.stringify(newAutomatization),
             });
-            if (response.ok){
-                console.log("Automation added Successfully");
-            }
+
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
             }
@@ -193,7 +183,6 @@ export default function TvAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -208,9 +197,7 @@ export default function TvAutomation({ deviceId }) {
                     },
                 }
             );
-            if(response.ok){
-                console.log("Automation Deleted Successfully")
-            }
+
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }

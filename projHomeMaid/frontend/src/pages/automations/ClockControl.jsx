@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Import useParams from React Router
+import { useParams } from "react-router-dom"; 
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/clockPage/StateControl.jsx";
 import ClockAutomation from "../../components/automationsPages/clockPage/clockAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 export default function ClockControl() {
-    const { deviceId } = useParams(); // Capture deviceId from the URL
-    const [deviceName, setDeviceName] = useState("Clock"); // Default device name
-    const [lightOn, setLightOn] = useState(false); // Ringing state
+    const { deviceId } = useParams();
+    const [deviceName, setDeviceName] = useState("Clock");
+    const [lightOn, setLightOn] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,7 +22,6 @@ export default function ClockControl() {
 
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -41,7 +40,6 @@ export default function ClockControl() {
                     setDeviceName(data.name || "Clock");
                     setLightOn(data.ringing || false); // Initialize the ringing state
                 } else if (response.status === 403) {
-                    console.log("Unauthorized Access");
                     navigate("/login");
                 }
             } catch (err) {
@@ -60,8 +58,6 @@ export default function ClockControl() {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
 
@@ -80,7 +76,6 @@ export default function ClockControl() {
     const updateDeviceState = async (ringing, state) => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }

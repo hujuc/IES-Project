@@ -2,14 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 function Footer() {
-    const navigate = useNavigate(); // Hook para redirecionamento
+    const navigate = useNavigate();
 
     return (
         <div
             className="bg-white py-4 flex justify-center space-x-6 text-gray-600 text-sm"
-            style={{ boxShadow: "0 -4px 6px -2px rgba(0, 0, 0, 0.1)" }} // Custom top shadow
+            style={{ boxShadow: "0 -4px 6px -2px rgba(0, 0, 0, 0.1)" }}
         >
-            {/* Link para Help */}
             <button
                 onClick={() => navigate("/help")}
                 className="flex items-center hover:text-orange-500"
@@ -19,7 +18,6 @@ function Footer() {
 
             <span className="border-l border-gray-300 h-5"></span>
 
-            {/* Link para About Us */}
             <button
                 onClick={() => navigate("/aboutUs")}
                 className="flex items-center hover:text-orange-500"

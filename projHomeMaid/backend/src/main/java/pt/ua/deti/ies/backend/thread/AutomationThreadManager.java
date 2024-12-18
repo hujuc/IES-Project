@@ -32,7 +32,7 @@ public class AutomationThreadManager {
     private final NotificationRepository notificationRepository;
     private final AutomationHandlerFactory automationHandlerFactory;
     private final DeviceService deviceService;
-    private final SimpMessagingTemplate simpMessagingTemplate; // Adicione esta variável
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ExecutorService executorService;
 
     public AutomationThreadManager(AutomationRepository automationRepository,
@@ -40,14 +40,14 @@ public class AutomationThreadManager {
                                    NotificationRepository notificationRepository,
                                    AutomationHandlerFactory automationHandlerFactory,
                                    DeviceService deviceService,
-                                   SimpMessagingTemplate simpMessagingTemplate) { // Injetando no construtor
+                                   SimpMessagingTemplate simpMessagingTemplate) {
         this.automationRepository = automationRepository;
         this.deviceRepository = deviceRepository;
         this.notificationRepository = notificationRepository;
         this.automationHandlerFactory = automationHandlerFactory;
         this.deviceService = deviceService;
-        this.simpMessagingTemplate = simpMessagingTemplate; // Inicializando
-        this.executorService = Executors.newFixedThreadPool(10); // Fixed thread pool
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.executorService = Executors.newFixedThreadPool(30);
     }
 
     @PostConstruct
@@ -121,14 +121,11 @@ public class AutomationThreadManager {
                 throw new RuntimeException("[ERROR] House associated with device not found.");
             }
 
-            // Execute the automation logic
             DeviceAutomationHandler handler = automationHandlerFactory.getHandler(device.getType());
             handler.executeAutomation(device, automation.getChanges());
 
-            // Broadcast device update (independent of receiveAutomationNotification)
             broadcastDeviceUpdate(device);
 
-            // Send notification to /topic/notifications only if the device allows it
             if (Boolean.TRUE.equals(device.getReceiveAutomationNotification())) {
                 createAndSendNotification(device, houseId);
             }
@@ -151,7 +148,6 @@ public class AutomationThreadManager {
 
     private void createAndSendNotification(Device device, String houseId) {
         try {
-            // Criar e salvar a notificação no repositório
             Notification notification = new Notification(
                     houseId,
                     "The automation for " + device.getName() + " was activated.",
@@ -160,14 +156,14 @@ public class AutomationThreadManager {
                     "automationNotification"
             );
 
-            Notification savedNotification = notificationRepository.save(notification); // Salva no banco
+            Notification savedNotification = notificationRepository.save(notification);
 
             NotificationMessage notificationMessage = new NotificationMessage();
             notificationMessage.setHouseId(savedNotification.getHouseId());
             notificationMessage.setText(savedNotification.getText());
             notificationMessage.setType(savedNotification.getType());
             notificationMessage.setTimestamp(savedNotification.getTimestamp().toString());
-            notificationMessage.setMongoId(savedNotification.getMongoId()); // Inclui o mongoId gerado
+            notificationMessage.setMongoId(savedNotification.getMongoId());
 
             simpMessagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
 

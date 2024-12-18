@@ -35,7 +35,6 @@ export default function StateControl({ deviceId }) {
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -57,15 +56,14 @@ export default function StateControl({ deviceId }) {
                         temperature: data.temperature || 40,
                         washMode: data.mode || "regularWash",
                     });
-                    setIsRunning(data.state); // Sync "isRunning" with the current state
-                    console.log("Fetched Data Success");
+                    setIsRunning(data.state);
                 } else {
                     console.error("Failed to fetch device state:", data);
                 }
             } catch (error) {
                 console.error("Error fetching device state:", error);
             } finally {
-                setLoading(false); // Set loading to false once fetch is complete
+                setLoading(false);
             }
         };
 
@@ -88,8 +86,6 @@ export default function StateControl({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Washer updates!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 if (updatedData.deviceId === deviceId) {
@@ -100,7 +96,6 @@ export default function StateControl({ deviceId }) {
                         washMode: updatedData.mode ?? prevState.washMode,
                     }));
                     setIsRunning(updatedData.state ?? false); // Sync "isRunning" with backend state
-                    console.log("Updated washer state received via WebSocket:", updatedData);
                 }
             });
         };
@@ -116,7 +111,6 @@ export default function StateControl({ deviceId }) {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -136,8 +130,6 @@ export default function StateControl({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to update device state: ${response.statusText}`);
-            } else {
-                console.log("Updated Device Success");
             }
 
             const updatedState = await response.json();

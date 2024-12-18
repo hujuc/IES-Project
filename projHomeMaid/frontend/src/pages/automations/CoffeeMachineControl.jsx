@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/coffeeMachinePage/StateControl.jsx"; // Chamar o novo StateControl unificado
+import StateControl from "../../components/automationsPages/coffeeMachinePage/StateControl.jsx"; 
 import CoffeeMachAutomation from "../../components/automationsPages/coffeeMachinePage/coffeeMachAutomation.jsx";
 import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 export default function CoffeeMachineControl() {
-    const { deviceId } = useParams(); // Extrair deviceId da URL
+    const { deviceId } = useParams();
     const [deviceData, setDeviceData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
-    // Buscar dados do dispositivo pela API
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -33,10 +31,8 @@ export default function CoffeeMachineControl() {
                 const data = await response.json();
                 setDeviceData(data);
                 setLoading(false);
-                if(response.ok){
-                    console.log("Coffe Machine Data Fetched Success");
-                }else if (response.status === 403){
-                    console.log("Unauthorized Access");
+
+                if (response.status === 403){
                     navigate("/login")
                 }
             } catch (error) {
@@ -50,22 +46,17 @@ export default function CoffeeMachineControl() {
         // Conectar ao WebSocket com SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Reconectar automaticamente após 5 segundos se desconectado
-            heartbeatIncoming: 4000, // Checar o servidor a cada 4 segundos
-            heartbeatOutgoing: 4000, // Informar ao servidor que o cliente está ativo a cada 4 segundos
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket STOMP!");
-
-            // Subscribing para atualizações do dispositivo específico
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                    console.log("Data updated in frontend:", updatedData);
                 }
             });
         };

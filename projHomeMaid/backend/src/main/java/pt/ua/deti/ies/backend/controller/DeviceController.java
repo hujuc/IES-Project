@@ -95,18 +95,17 @@ public class DeviceController {
 
             if (houseId == null || roomType == null || type == null || name == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(null); // Retorna erro se algum parâmetro estiver ausente
+                        .body(null);
             }
 
-            // Adicionar o dispositivo à casa e ao Room correspondente
             Device newDevice = deviceService.addDeviceByUser(houseId, roomType, type, name);
             return ResponseEntity.status(HttpStatus.CREATED).body(newDevice);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Erro de validação
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Room não encontrado
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Outro erro
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

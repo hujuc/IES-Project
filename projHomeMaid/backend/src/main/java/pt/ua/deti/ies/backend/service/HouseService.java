@@ -20,26 +20,21 @@ public class HouseService {
 
     private final HouseRepository houseRepository;
     private final RoomRepository roomRepository;
-    private final ImageStorageService imageStorageService;
-    private final DeviceService deviceService;  // Adicionando o serviço de Device
-    private final RoomService roomService;      // Adicionando o serviço de Room
+    private final DeviceService deviceService;
+    private final RoomService roomService;
     private final SensorService sensorService;
 
-    // Injeção das dependências no construtor
     public HouseService(HouseRepository houseRepository, RoomRepository roomRepository,
-                        ImageStorageService imageStorageService, DeviceService deviceService,
+                        DeviceService deviceService,
                         RoomService roomService, SensorService sensorService) {
         this.houseRepository = houseRepository;
         this.roomRepository = roomRepository;
-        this.imageStorageService = imageStorageService;
-        this.deviceService = deviceService;  // Inicializando o DeviceService
-        this.roomService = roomService;      // Inicializando o RoomService
+        this.deviceService = deviceService;
+        this.roomService = roomService;
         this.sensorService = sensorService;
     }
 
     public boolean userHasAccessToHouse(User user, String houseId) {
-        // Retrieve the house from the repository
-        // Check if the house exists and whether the user's houseId matches
         return houseId.equals(user.getHouseId());
     }
 
@@ -76,20 +71,16 @@ public class HouseService {
         for (String roomType : roomTypes) {
             String roomId = roomType + "_" + houseId;
 
-            // Criar os devices associados ao room
             List<Device> devices = createDevicesForRoom(roomType, houseId);
 
-            // Salvar os devices
             List<String> savedDeviceIds = new ArrayList<>();
             for (Device device : devices) {
                 Device savedDevice = deviceService.createDevice(device);
                 savedDeviceIds.add(savedDevice.getDeviceId());
             }
 
-            // Criar e salvar os sensores associados ao room
             createSensorsForRoom(roomId, houseId);
 
-            // Criar o room com os devices
             Room room = new Room(roomId, savedDeviceIds, roomType);
             roomService.saveRoom(room);
 
@@ -97,7 +88,6 @@ public class HouseService {
             deviceIds.addAll(savedDeviceIds);
         }
 
-        // Criar a casa com os rooms e devices
         House house = new House(houseId, roomIds, deviceIds);
         return houseRepository.save(house);
     }
@@ -368,20 +358,18 @@ public class HouseService {
     }
 
     private void createSensorsForRoom(String roomId, String houseId) {
-        // Sensor de temperatura
         Sensor temperatureSensor = new Sensor(
                 "temperatureSensor_" + roomId, roomId, houseId,
                 "temperature", 20.0, "°C", "Temperature Sensor"
         );
         System.out.println("here");
-        sensorService.saveSensor(temperatureSensor); // Salvar no banco
+        sensorService.saveSensor(temperatureSensor);
 
-        // Sensor de umidade
         Sensor humiditySensor = new Sensor(
                 "humiditySensor_" + roomId, roomId, houseId,
                 "humidity", 50.0, "%", "Humidity Sensor"
         );
-        sensorService.saveSensor(humiditySensor); // Salvar no banco
+        sensorService.saveSensor(humiditySensor);
     }
 
 }

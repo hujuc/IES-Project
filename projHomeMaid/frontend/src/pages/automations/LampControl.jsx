@@ -5,18 +5,17 @@ import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
 import LampAutomation from "../../components/automationsPages/lampPage/LampAutomation.jsx";
 import StateControl from "../../components/automationsPages/lampPage/StateControl.jsx";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 
 export default function LampControl() {
     const [isLightOn, setIsLightOn] = useState(false);
-    const [brightness, setBrightness] = useState(50); // Brilho padrão
-    const [color, setColor] = useState("#ffffff"); // Cor padrão (branca)
-    const [deviceName, setDeviceName] = useState("Light Bulb"); // Nome padrão
+    const [brightness, setBrightness] = useState(50);
+    const [color, setColor] = useState("#ffffff");
+    const [deviceName, setDeviceName] = useState("Light Bulb");
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
-    // Obter ID do dispositivo da URL
     const url = window.location.href;
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
@@ -26,7 +25,6 @@ export default function LampControl() {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -38,15 +36,12 @@ export default function LampControl() {
                 });
                 const data = await response.json();
 
-                // Atualizar os estados com os valores retornados do backend
-                setIsLightOn(data.state || false); // Estado inicial
-                setBrightness(data.brightness || 50); // Brilho inicial
-                setColor(data.color || "#ffffff"); // Cor inicial
-                setDeviceName(data.name || "Light Bulb"); // Nome do dispositivo
-                if (response.ok){
-                    console.log("Fetched Light Data Successfully");
-                }else if(response.status === 403){
-                    console.log("Unauthorized Access");
+                setIsLightOn(data.state || false);
+                setBrightness(data.brightness || 50);
+                setColor(data.color || "#ffffff");
+                setDeviceName(data.name || "Light Bulb");
+
+                if(response.status === 403){
                     navigate("/login");
                 }
             } catch (err) {
@@ -57,7 +52,6 @@ export default function LampControl() {
 
         fetchLightData();
 
-        // Conectar ao WebSocket com SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -66,19 +60,14 @@ export default function LampControl() {
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
-
-            // Subscribing to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Mensagem recebida via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsLightOn(updatedData.state);
                     if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
                     if (updatedData.color !== undefined) setColor(updatedData.color);
                     if (updatedData.name !== undefined) setDeviceName(updatedData.name);
-                    console.log("Dados atualizados no frontend:", updatedData);
                 }
             });
         };
@@ -90,20 +79,17 @@ export default function LampControl() {
 
         client.activate();
 
-        return () => client.deactivate(); // Fecha a conexão ao desmontar o componente
+        return () => client.deactivate();
     }, [deviceId]);
 
     return (
         <div className="relative flex flex-col items-center w-screen min-h-screen bg-[#433F3C] text-white">
-            {/* Top Bar com o AutomationsHeader */}
             <AutomationsHeader />
 
-            {/* Título do dispositivo */}
             <div className="flex flex-col items-center justify-center mt-4">
                 <span className="text-2xl font-semibold">{deviceName}</span>
             </div>
 
-            {/* Controle de Estado */}
             <StateControl
                 isLightOn={isLightOn}
                 setIsLightOn={setIsLightOn}
@@ -115,7 +101,6 @@ export default function LampControl() {
                 error={error}
             />
 
-            {/* Automatização */}
             <AutomationBox deviceId={deviceId}>
                 <LampAutomation deviceId={deviceId} />
             </AutomationBox>

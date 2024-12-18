@@ -5,7 +5,6 @@ import DeviceCard from "./DeviceCard";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-// Importing images for devices
 import airConditioner from "../../assets/homePage/devicesImages/airConditioner.jpg";
 import coffeMachine from "../../assets/homePage/devicesImages/coffeeMachine.jpg";
 import heatedFloor from "../../assets/homePage/devicesImages/heatedFloor.jpg";
@@ -38,17 +37,13 @@ function RoomInfo({ room }) {
     }, [room]);
 
     useEffect(() => {
-        // Setup WebSocket for real-time updates
         const socket = new SockJS(`${import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")}`);
         const client = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             onConnect: () => {
-                console.log("Connected to WebSocket for device updates.");
-
                 client.subscribe("/topic/device-updates", (message) => {
                     const updatedDevice = JSON.parse(message.body);
-                    console.log("Received device update:", updatedDevice);
 
                     setDeviceObjects((prevDevices) =>
                         prevDevices.map((device) =>
@@ -70,7 +65,6 @@ function RoomInfo({ room }) {
         return () => {
             if (stompClientRef.current) {
                 stompClientRef.current.deactivate();
-                console.log("WebSocket disconnected.");
             }
         };
     }, []);
@@ -112,20 +106,17 @@ function RoomInfo({ room }) {
                 return;
             }
 
-            // Cria o novo estado inicial do dispositivo
             const updatedState = {
                 state: !currentState,
                 ...updatedDeviceData,
             };
 
-            // Atualiza o estado no servidor (PATCH)
             await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
                 updatedState,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Atualiza o estado local para refletir o novo estado
             setDeviceObjects((prevDevices) =>
                 prevDevices.map((device) =>
                     device.deviceId === deviceId
@@ -134,27 +125,19 @@ function RoomInfo({ room }) {
                 )
             );
 
-            // Simula o ciclo para dispositivos específicos (ex.: coffeeMachine, dryerMachine, washingMachine)
             if (["washingMachine", "dryerMachine", "coffeeMachine"].includes(deviceType) && updatedState.state) {
-                const cycleTime = deviceType === "coffeeMachine" ? 30000 : 120000; // 30s para coffeeMachine, 2min para outros
-
-                console.log(`Iniciando ciclo para ${deviceType}...`);
+                const cycleTime = deviceType === "coffeeMachine" ? 30000 : 120000;
 
                 setTimeout(async () => {
                     try {
-                        console.log(`Ciclo para ${deviceType} concluído. Atualizando estado para false...`);
-
-                        // Novo estado ao final do ciclo
                         const finalState = { state: false };
 
-                        // Atualiza o servidor com o estado final (PATCH)
                         await axios.patch(
                             `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
                             finalState,
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
 
-                        // Atualiza o estado local para refletir o fim do ciclo
                         setDeviceObjects((prevDevices) =>
                             prevDevices.map((device) =>
                                 device.deviceId === deviceId
@@ -163,7 +146,6 @@ function RoomInfo({ room }) {
                             )
                         );
 
-                        // Publica a atualização no WebSocket para o tópico "/topic/device-updates"
                         if (stompClientRef.current && stompClientRef.current.connected) {
                             const deviceJson = JSON.stringify({
                                 deviceId: deviceId,
@@ -174,13 +156,11 @@ function RoomInfo({ room }) {
                                 destination: "/topic/device-updates",
                                 body: deviceJson,
                             });
-
-                            console.log(`${deviceType} ciclo concluído. Mensagem enviada via WebSocket: ${deviceJson}`);
                         }
                     } catch (error) {
                         console.error(`Erro ao finalizar ciclo de ${deviceType}:`, error);
                     }
-                }, cycleTime); // Tempo do ciclo (30s ou 120s)
+                }, cycleTime); 
             }
         } catch (error) {
             console.error("Error updating device state:", error);

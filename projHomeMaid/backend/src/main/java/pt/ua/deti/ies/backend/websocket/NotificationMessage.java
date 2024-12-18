@@ -8,7 +8,6 @@ public class NotificationMessage {
     private String timestamp;
     private String mongoId;
 
-    // Getters e setters
     public String getHouseId() {
         return houseId;
     }

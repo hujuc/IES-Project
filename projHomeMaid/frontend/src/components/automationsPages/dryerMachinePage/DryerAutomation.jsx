@@ -29,7 +29,6 @@ export default function DryerAutomation({ deviceId }) {
         const token = localStorage.getItem("jwtToken");
 
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -39,9 +38,7 @@ export default function DryerAutomation({ deviceId }) {
                 const response = await fetch(`${API_BASE_URL}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if(response.ok) {
-                    console.log("Dryer Machine Automation Data Fetched")
-                }
+
                 if (!response.ok) throw new Error("Failed to fetch automatizations");
 
                 const data = await response.json();
@@ -69,9 +66,6 @@ export default function DryerAutomation({ deviceId }) {
                     }
                 );
                 if (!response.ok) throw new Error("Failed to fetch device state");
-                if(response.ok){
-                    console.log("Dryer Machine Data Fetched Successfully");
-                }
 
                 const data = await response.json();
                 setCurrentState({
@@ -102,8 +96,6 @@ export default function DryerAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Dryer Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -194,9 +186,6 @@ export default function DryerAutomation({ deviceId }) {
             });
 
             if (!response.ok) throw new Error("Failed to add automatization");
-            if(response.ok){
-                console.log("Added Automation Successfully");
-            }
 
             const data = await response.json();
             setAutomatizations((prev) => [
@@ -228,9 +217,6 @@ export default function DryerAutomation({ deviceId }) {
             );
 
             if (!response.ok) throw new Error("Failed to delete automatization");
-            if(response.ok){
-                console.log("Automation Deleted Successfully")
-            }
 
             setAutomatizations((prev) => prev.filter((_, i) => i !== index));
         } catch (err) {

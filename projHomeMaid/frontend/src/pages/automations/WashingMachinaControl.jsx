@@ -37,7 +37,6 @@ export default function AirConditionerControl() {
                 if (response.ok) {
                     const data = await response.json();
                     setDeviceData(data);
-                    console.log("Fetched Device Data Successfully");
                 } else if (response.status === 403) {
                     console.error("Unauthorized Access. Redirecting to login.");
                     navigate("/login");
@@ -63,14 +62,11 @@ export default function AirConditionerControl() {
             });
 
             client.onConnect = () => {
-                console.log("Connected to WebSocket STOMP!");
-
                 client.subscribe(`/topic/device-updates`, (message) => {
                     const updatedData = JSON.parse(message.body);
 
                     if (updatedData.deviceId === deviceId) {
                         setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                        console.log("Updated data received via WebSocket:", updatedData);
                     }
                 });
             };

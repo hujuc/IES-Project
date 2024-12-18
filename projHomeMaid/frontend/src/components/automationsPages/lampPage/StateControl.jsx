@@ -34,7 +34,6 @@ export default function StateControl({
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -51,8 +50,6 @@ export default function StateControl({
 
             if (!response.ok) {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
-            }else {
-                console.log("Toggle Light Success")
             }
 
             setIsLightOn(updatedState);
@@ -61,13 +58,11 @@ export default function StateControl({
         }
     };
 
-    // Atualizar o brilho
     const updateBrightness = async (newBrightness) => {
         try {
             setBrightness(newBrightness);
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -84,8 +79,6 @@ export default function StateControl({
 
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
-                }else {
-                    console.log("Updated brightness success");
                 }
             }
         } catch (err) {
@@ -99,7 +92,6 @@ export default function StateControl({
             setColor(newColor);
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -116,8 +108,6 @@ export default function StateControl({
 
                 if (!response.ok) {
                     throw new Error(`Erro na resposta da API: ${response.status}`);
-                }else {
-                    console.log("Updated Color Success");
                 }
             }
         } catch (err) {

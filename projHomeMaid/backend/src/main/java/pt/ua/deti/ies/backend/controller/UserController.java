@@ -50,56 +50,53 @@ public class UserController {
             @RequestParam("password") String password,
             @RequestParam("profilePicture") MultipartFile profilePicture) {
         try {
-            // Convert the uploaded file to Base64 format
+            // Validação da imagem
+            if (profilePicture == null || profilePicture.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Profile picture is required."));
+            }
+
             String encodedImage = Base64.getEncoder().encodeToString(profilePicture.getBytes());
 
-            // Hash the password before saving
             String hashedPassword = bCryptPasswordEncoder.encode(password);
 
-            // Create a new user object with the hashed password
             User user = new User(houseId, email, name, hashedPassword, encodedImage);
 
-            // Save the user and initialize the house and rooms
             userService.signUpUser(user);
+
             houseService.createHouseWithRoomsAndDevices(user.getHouseId());
 
-            return ResponseEntity.ok("User successfully registered.");
+            return ResponseEntity.ok(Map.of("message", "User successfully registered."));
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Validation Error: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred."));
         }
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginUserDto loginUserDto) {
         try {
-            // Authenticate the user
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
-
-            // Generate JWT token
             String jwtToken = jwtService.generateToken(authenticatedUser);
 
-            // Create response object
-            LoginResponse loginResponse = new LoginResponse();
-            loginResponse.setToken(jwtToken);
-            loginResponse.setExpiresIn(jwtService.getExpirationTime());
-
-            // Retrieve houseId
-            String houseId = userService.loginUser(authenticatedUser.getEmail(), authenticatedUser.getPassword());
-
-            // Return response with token and houseId only
             return ResponseEntity.ok(Map.of(
                     "token", jwtToken,
-                    "houseId", houseId,
-                    "username", authenticatedUser.getEmail(),
-                    "passwordField", authenticatedUser.getPassword() // Changed key name for testing
+                    "houseId", authenticatedUser.getHouseId(),
+                    "username", authenticatedUser.getEmail()
             ));
-
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Internal server error."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Internal server error."));
         }
     }
 
@@ -128,29 +125,23 @@ public class UserController {
     @GetMapping("/{houseId}")
     public ResponseEntity<?> getUserByHouseId(@PathVariable String houseId) {
         try {
-            // Get the authenticated user from the security context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            // Ensure the user is authenticated
             if (authentication == null || !authentication.isAuthenticated()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized.");
             }
 
-            // Retrieve the authenticated user details
             User authenticatedUser = (User) authentication.getPrincipal();
 
-            // Optional: Add authorization logic to ensure user has permission to access this houseId
             if (!authenticatedUser.getHouseId().equals(houseId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
             }
 
-            // Fetch the user by houseId from the service
             User user = userService.getUserByHouseId(houseId);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
             }
 
-            // Return the user information
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error.");

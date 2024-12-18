@@ -27,15 +27,14 @@ public class SensorService {
     private final InfluxDBClient influxDBClient;
     private final SensorRepository sensorRepository;
     private final CustomSensorRepository customSensorRepository;
-    private final SimpMessagingTemplate messagingTemplate; // Add this line
+    private final SimpMessagingTemplate messagingTemplate;
 
-    // Constructor with SimpMessagingTemplate injection
     public SensorService(InfluxDBClient influxDBClient, SensorRepository sensorRepository,
                          CustomSensorRepository customSensorRepository, SimpMessagingTemplate messagingTemplate) {
         this.influxDBClient = influxDBClient;
         this.sensorRepository = sensorRepository;
         this.customSensorRepository = customSensorRepository;
-        this.messagingTemplate = messagingTemplate; // Initialize the messagingTemplate
+        this.messagingTemplate = messagingTemplate;
     }
 
     public List<Sensor> getAllSensors() {
@@ -48,11 +47,9 @@ public class SensorService {
             throw new IllegalArgumentException("Todos os campos sensorId, roomId, houseId, type e value são obrigatórios.");
         }
 
-        // Verificar se o sensor já existe
         Optional<Sensor> existingSensor = sensorRepository.findBySensorId(sensorData.getSensorId());
 
         if (existingSensor.isPresent()) {
-            // Atualizar apenas os campos do sensor existente
             customSensorRepository.updateSensorFields(
                     sensorData.getSensorId(),
                     sensorData.getRoomId(),
@@ -63,11 +60,9 @@ public class SensorService {
                     sensorData.getName()
             );
         } else {
-            // Criar um novo sensor no MongoDB
             sensorRepository.save(sensorData);
         }
 
-        // Inserir os dados no InfluxDB
         saveToInfluxDB(sensorData);
 
         sendSensorUpdateMessage(sensorData);
@@ -95,14 +90,12 @@ public class SensorService {
     }
 
     private void sendSensorUpdateMessage(Sensor sensorData) {
-        // Create the SensorUpdateMessage
         SensorUpdateMessage message = new SensorUpdateMessage(
                 sensorData.getRoomId(),
                 sensorData.getType(),
                 sensorData.getValue()
         );
 
-        // Send the message to the "/topic/sensor-updates" WebSocket topic
         messagingTemplate.convertAndSend("/topic/sensor-updates", message);
     }
 
@@ -152,7 +145,6 @@ public class SensorService {
         }
     }
 
-
     public String getAverageHumidity(String id, String idType, String timeframe) {
         if (id == null || idType == null) {
             throw new IllegalArgumentException("O ID e o tipo de ID são obrigatórios.");
@@ -173,12 +165,10 @@ public class SensorService {
                 throw new IllegalArgumentException("Timeframe inválido. Use 'daily', 'weekly' ou 'monthly'.");
         }
 
-        // Define o filtro com base no idType
         String filter = idType.equalsIgnoreCase("house")
                 ? String.format("r[\"house_id\"] == \"%s\"", id)
                 : String.format("r[\"room_id\"] == \"%s\"", id);
 
-        // Monta a query Flux para calcular a humidade média
         String fluxQuery = String.format(
                 "from(bucket: \"sensor_data\") " +
                         "|> range(start: %s) " +
@@ -190,12 +180,11 @@ public class SensorService {
 
         QueryApi queryApi = influxDBClient.getQueryApi();
         try {
-            // Executa a query
             List<FluxTable> tables = queryApi.query(fluxQuery);
             if (tables.isEmpty() || tables.get(0).getRecords().isEmpty()) {
                 return "Média de humidade: Nenhum dado encontrado.";
             }
-            // Extrai o valor da média
+
             Object meanValue = tables.get(0).getRecords().get(0).getValue();
             return String.format("Média de humidade: %.2f", Double.parseDouble(meanValue.toString()));
         } catch (Exception e) {
@@ -283,13 +272,11 @@ public class SensorService {
         try {
             List<FluxTable> tables = queryApi.query(fluxQuery);
 
-            // Debug: Verifique se algum dado foi retornado
             if (tables.isEmpty()) {
                 System.err.println("Nenhum dado retornado do InfluxDB.");
                 return Collections.emptyList();
             }
 
-            // Debug: Itere sobre as tabelas para inspecionar os dados
             for (FluxTable table : tables) {
                 for (FluxRecord record : table.getRecords()) {
                     System.out.println("Registro encontrado: " + record);

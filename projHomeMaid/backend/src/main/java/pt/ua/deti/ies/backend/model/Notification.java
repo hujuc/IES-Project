@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 public class Notification {
 
     @Id
-    private String mongoId; // MongoDB unique ID
-    private String houseId; // Identificador da casa
-    private String text; // Texto da notificação
-    private LocalDateTime timestamp; // Data e hora da notificação
-    private boolean read; // Status de leitura
-    private String type; // Tipo da notificação
+    private String mongoId;
+    private String houseId;
+    private String text;
+    private LocalDateTime timestamp;
+    private boolean read;
+    private String type;
 
     public Notification() {
     }

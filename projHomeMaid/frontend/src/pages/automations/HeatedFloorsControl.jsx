@@ -2,27 +2,25 @@ import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
 import StateControl from "../../components/automationsPages/heatedFloorsControlPage/StateControl.jsx";
 import HeatedFloorAutomation from "../../components/automationsPages/heatedFloorsControlPage/heatedFloorAutomation.jsx";
-import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; // Import the new component
+import AutomationBox from "../../components/automationsPages/AutomationBox.jsx"; 
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 export default function HeatedFloorsControl() {
     const [isHeatedOn, setIsHeatedOn] = useState(false);
     const [temperature, setTemperature] = useState(20.0);
-    const [name, setName] = useState(""); // State to store device name
+    const [name, setName] = useState("");
     const [error, setError] = useState(null);
 
     const url = window.location.href;
     const deviceId = url.split("/").pop();
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
-    // Function to fetch device data
     const fetchHeatedFloorsData = async () => {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -44,13 +42,10 @@ export default function HeatedFloorsControl() {
             }
 
             if (data.name !== undefined) {
-                setName(data.name); // Set the device name
+                setName(data.name);
             }
 
-            if(response.ok){
-                console.log("Fetched Data Success");
-            }else if (response.status === 403){
-                console.log("Unauthorized Access, redirecting to the login");
+            if (response.status === 403){
                 navigate("/login");
             }
         } catch (err) {
@@ -59,31 +54,24 @@ export default function HeatedFloorsControl() {
         }
     };
 
-    // Initialize data and WebSocket
     useEffect(() => {
         fetchHeatedFloorsData();
 
-        // Setup WebSocket with SockJS
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
-            reconnectDelay: 5000, // Retry connection every 5 seconds
-            heartbeatIncoming: 4000, // Check server every 4 seconds
-            heartbeatOutgoing: 4000, // Inform server every 4 seconds
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket STOMP!");
-
-            // Subscribe to updates for the specific device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
-                console.log("Message received via WebSocket:", updatedData);
 
                 if (updatedData.deviceId === deviceId) {
                     if (updatedData.state !== undefined) setIsHeatedOn(updatedData.state);
                     if (updatedData.temperature !== undefined) setTemperature(updatedData.temperature);
                     if (updatedData.name !== undefined) setName(updatedData.name); // Update name if available
-                    console.log("Updated data in frontend:", updatedData);
                 }
             });
         };
@@ -132,7 +120,6 @@ export default function HeatedFloorsControl() {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -147,10 +134,7 @@ export default function HeatedFloorsControl() {
 
             if (!response.ok) {
                 throw new Error(`API response error: ${response.status}`);
-            }else {
-                console.log("Saved data to database Successfully");
             }
-
         } catch (err) {
             console.error("Error saving state and temperature to database:", err);
             setError("Failed to save state and temperature to database.");

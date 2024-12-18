@@ -17,7 +17,6 @@ function EditProfile() {
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -32,9 +31,6 @@ function EditProfile() {
                 const { name, profilePicture } = response.data;
                 setFormData({ name, profilePicture });
                 setPreview(profilePicture);
-                if(response.ok){
-                    console.log("Fetched User Data Success")
-                }
             } catch (error) {
                 console.error("Error fetching user data:", error);
             } finally {
@@ -67,7 +63,6 @@ function EditProfile() {
         }
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -82,10 +77,8 @@ function EditProfile() {
             setMessage({ text: "Profile updated successfully!", type: "success" });
             // Redireciona para a HomePage após 2 segundos
             setTimeout(() => navigate(-1), 1000);
-            if(response.ok){
-                console.log("Changed Data Successfully");
-            }else if(response.status === 403){
-                console.log("Unauthorized access");
+
+            if(response.status === 403){
                 navigate("/login");
             }
         } catch (error) {

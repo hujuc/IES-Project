@@ -15,12 +15,9 @@ export default function AutomationBox({ deviceId, children }) {
                     return;
                 }
 
-                // Retrieve the token from localStorage
                 const token = localStorage.getItem("jwtToken");
 
-                // If token is missing, redirect to login page
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -41,8 +38,6 @@ export default function AutomationBox({ deviceId, children }) {
                         setReceiveNotifications(true); // Default value if not set
                     }
                 } else if (response.status === 401) {
-                    // If the token is invalid or expired, redirect to login
-                    console.log("Unauthorized. Redirecting to login page.");
                     navigate("/login");
                 } else {
                     console.error("Failed to fetch notification preference. Please try again.");
@@ -58,15 +53,12 @@ export default function AutomationBox({ deviceId, children }) {
     const handleNotificationChange = async (e) => {
         const newValue = e.target.value === "yes";
         const previousValue = receiveNotifications;
-        setReceiveNotifications(newValue); // Optimistically update state
+        setReceiveNotifications(newValue);
 
         try {
-            // Retrieve the token from localStorage
             const token = localStorage.getItem("jwtToken");
 
-            // If token is missing, redirect to login page
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -80,11 +72,7 @@ export default function AutomationBox({ deviceId, children }) {
                 body: JSON.stringify({ receiveAutomationNotification: newValue }),
             });
 
-            if (response.ok) {
-                console.log("Notification preference updated successfully:", newValue);
-            } else if (response.status === 401) {
-                // If the token is invalid or expired, redirect to login
-                console.log("Unauthorized. Redirecting to login page.");
+           if (response.status === 401) {
                 navigate("/login");
             } else {
                 throw new Error(`Failed to update notification preference: ${response.statusText}`);

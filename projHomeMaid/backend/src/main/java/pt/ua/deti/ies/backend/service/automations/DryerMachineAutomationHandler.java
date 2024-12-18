@@ -5,6 +5,7 @@ import pt.ua.deti.ies.backend.model.Device;
 import pt.ua.deti.ies.backend.model.Notification;
 import pt.ua.deti.ies.backend.repository.DeviceRepository;
 import pt.ua.deti.ies.backend.repository.NotificationRepository;
+import pt.ua.deti.ies.backend.websocket.NotificationMessage;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
     private final DeviceRepository deviceRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final DeviceService deviceService; // For houseId retrieval
+    private final DeviceService deviceService;
 
     public DryerMachineAutomationHandler(DeviceRepository deviceRepository,
                                          NotificationRepository notificationRepository,
@@ -32,11 +33,9 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
     @Override
     public void executeAutomation(Device device, Map<String, Object> changes) {
         if (changes.containsKey("state") && (boolean) changes.get("state")) {
-            // Fetch values from changes or use current device values
             Object temperatureObj = changes.getOrDefault("temperature", device.getTemperature());
             double temperature = 0;
 
-            // Handle temperature as a double
             if (temperatureObj instanceof Double) {
                 temperature = (Double) temperatureObj;
             } else if (temperatureObj instanceof Integer) {
@@ -45,32 +44,21 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
 
             String dryMode = (String) changes.getOrDefault("dryMode", device.getMode());
 
-            // Update device state
             device.setState(true);
             device.setTemperature(temperature);
             device.setMode(dryMode);
             deviceRepository.save(device);
-            try {
-                String deviceJson = new ObjectMapper().writeValueAsString(device);
-                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            System.out.println("Dryer Machine started with:");
-            System.out.println("Temperature: " + temperature);
-            System.out.println("Dry Mode: " + dryMode);
-
-            // Simulate drying cycle using a separate thread
             new Thread(() -> runDryCycle(device)).start();
         }
     }
 
     private void runDryCycle(Device device) {
         try {
-            Thread.sleep(120000); // Simulate 2-minute drying cycle
-            device.setState(false); // Set state to false after the cycle
+            Thread.sleep(120000);
+            device.setState(false);
             deviceRepository.save(device);
+
             try {
                 String deviceJson = new ObjectMapper().writeValueAsString(device);
                 simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
@@ -78,10 +66,9 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
                 e.printStackTrace();
             }
 
-            System.out.println("Dryer Machine cycle completed. Turned off.");
-
-            // Send notification for cycle completion
-            sendCycleCompletedNotification(device);
+            if (Boolean.TRUE.equals(device.getReceiveAutomationNotification())) {
+                sendCycleCompletedNotification(device);
+            }
 
         } catch (InterruptedException e) {
             System.err.println("Dryer Machine cycle was interrupted.");
@@ -93,19 +80,27 @@ public class DryerMachineAutomationHandler implements DeviceAutomationHandler {
 
     private void sendCycleCompletedNotification(Device device) {
         try {
-            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId()); // Get houseId
+            String houseId = deviceService.getHouseIdByDeviceId(device.getDeviceId());
             String notificationText = "The drying cycle for " + device.getName() + " has completed.";
 
             Notification notification = new Notification(
                     houseId,
                     notificationText,
                     LocalDateTime.now(),
-                    false, // Mark as unread
-                    "cycleCompletedNotification" // Notification type
+                    false,
+                    "automationNotification"
             );
 
-            notificationRepository.save(notification);
-            System.out.println("[INFO] Cycle completion notification created: " + notificationText);
+            Notification savedNotification = notificationRepository.save(notification);
+
+            NotificationMessage notificationMessage = new NotificationMessage();
+            notificationMessage.setHouseId(savedNotification.getHouseId());
+            notificationMessage.setText(savedNotification.getText());
+            notificationMessage.setType(savedNotification.getType());
+            notificationMessage.setTimestamp(savedNotification.getTimestamp().toString());
+            notificationMessage.setMongoId(savedNotification.getMongoId());
+
+            simpMessagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
         } catch (Exception e) {
             System.err.println("[ERROR] Error creating cycle completion notification: " + e.getMessage());
         }

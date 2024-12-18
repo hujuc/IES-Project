@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-// Função para capitalizar a primeira letra de cada palavra
 const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
 };
@@ -14,10 +13,9 @@ const RoomStatistics = ({ houseId }) => {
     const [timeframe, setTimeframe] = useState("daily");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(true); // Controle de autenticação
+    const [isAuthenticated, setIsAuthenticated] = useState(true);
     const [client, setClient] = useState(null);
 
-    // Custom order for the rooms
     const customOrder = [
         "hall", "livingRoom", "kitchen",
         "masterBedroom", "guestBedroom", "bathroom", "office", "laundry",
@@ -29,26 +27,25 @@ const RoomStatistics = ({ houseId }) => {
             setError(null);
 
             try {
-                const token = localStorage.getItem("jwtToken"); // Pega o token JWT do localStorage
+                const token = localStorage.getItem("jwtToken");
 
                 if (!token) {
-                    setIsAuthenticated(false); // Se não houver token, o usuário não está autenticado
+                    setIsAuthenticated(false);
                     return;
                 }
 
                 const houseDataResponse = await fetch(`${import.meta.env.VITE_API_URL}/houses/${houseId}`, {
-                    headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                    headers: { Authorization: `Bearer ${token}` }
                 });
 
                 if (houseDataResponse.status === 401 || houseDataResponse.status === 403) {
-                    localStorage.removeItem("jwtToken"); // Remove o token se a resposta for de erro de autorização
-                    setIsAuthenticated(false); // Marca o usuário como não autenticado
+                    localStorage.removeItem("jwtToken");
+                    setIsAuthenticated(false);
                     return;
                 }
 
                 const houseData = await houseDataResponse.json();
 
-                // Sort rooms based on the customOrder
                 const sortedRooms = houseData.rooms.sort((a, b) => {
                     const aIndex = customOrder.indexOf(a.type);
                     const bIndex = customOrder.indexOf(b.type);
@@ -56,7 +53,7 @@ const RoomStatistics = ({ houseId }) => {
                 });
 
                 setRooms(sortedRooms);
-                setSelectedRoomId(sortedRooms[0]?.roomId || null); // Seleciona o primeiro quarto como padrão
+                setSelectedRoomId(sortedRooms[0]?.roomId || null);
             } catch (error) {
                 console.error("Error fetching rooms:", error);
                 setError("Failed to load rooms. Please try again later.");
@@ -68,26 +65,28 @@ const RoomStatistics = ({ houseId }) => {
         fetchRooms();
     }, [houseId]);
 
-    // Set up WebSocket connection and subscription for sensor updates
     useEffect(() => {
         const socketClient = new Client({
-            webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
+            webSocketFactory: () =>
+                new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/sensors")),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
+            onConnect: () => {},
+            onStompError: (frame) => {
+                console.error("WebSocket connection error:", frame);
+            },
         });
 
         socketClient.onConnect = () => {
-            // Subscribe to the sensor updates topic
             socketClient.subscribe(`/topic/sensor-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
 
                 const { roomId, field, value } = updatedData;
                 if (roomId === selectedRoomId) {
-                    // Only update if the message is for the selected room
                     setSelectedRoomStats((prevStats) => ({
                         ...prevStats,
-                        [field]: value.toFixed(2), // Round to two decimal places
+                        [field]: value.toFixed(2),
                     }));
                 }
             });
@@ -107,7 +106,7 @@ const RoomStatistics = ({ houseId }) => {
                 const token = localStorage.getItem("jwtToken");
 
                 if (!token) {
-                    setIsAuthenticated(false); // Se não houver token, marca o usuário como não autenticado
+                    setIsAuthenticated(false);
                     return;
                 }
 
@@ -116,16 +115,16 @@ const RoomStatistics = ({ houseId }) => {
 
                 const [roomTemperatureResponse, roomHumidityResponse] = await Promise.all([
                     fetch(roomTemperatureEndpoint, {
-                        headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                        headers: { Authorization: `Bearer ${token}` }
                     }),
                     fetch(roomHumidityEndpoint, {
-                        headers: { Authorization: `Bearer ${token}` } // Inclui o token na requisição
+                        headers: { Authorization: `Bearer ${token}` }
                     }),
                 ]);
 
                 if (roomTemperatureResponse.status === 401 || roomHumidityResponse.status === 401) {
-                    localStorage.removeItem("jwtToken"); // Remove o token se a resposta for de erro de autorização
-                    setIsAuthenticated(false); // Marca o usuário como não autenticado
+                    localStorage.removeItem("jwtToken");
+                    setIsAuthenticated(false);
                     return;
                 }
 
@@ -167,10 +166,8 @@ const RoomStatistics = ({ houseId }) => {
 
     return (
         <div className="w-full bg-white rounded-lg shadow-lg p-6 mt-6">
-            {/* Título da Seção */}
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Home Analysis</h3>
 
-            {/* Controles de Filtros */}
             <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
                 <div>
                     <label className="text-sm font-medium text-gray-700 block mb-1">Select Timeframe:</label>
@@ -193,14 +190,13 @@ const RoomStatistics = ({ houseId }) => {
                     >
                         {rooms.map((room) => (
                             <option key={room.roomId} value={room.roomId}>
-                                {capitalizeWords(room.type)} {/* Capitaliza o nome do quarto */}
+                                {capitalizeWords(room.type)}
                             </option>
                         ))}
                     </select>
                 </div>
             </div>
 
-            {/* Estatísticas do Quarto Selecionado */}
             {selectedRoomId && (
                 <div className="bg-gray-50 p-6 rounded-lg text-center shadow-inner">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">Selected Room Statistics</h4>

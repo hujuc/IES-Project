@@ -34,6 +34,9 @@ services:
       "spring.main.web-application-type":"servlet"
       }'
       INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_URL: "http://influxdb:8086"  # Endereço do InfluxDB
+      INFLUXDB_BUCKET: "sensor_data"       # Bucket configurado
+      INFLUXDB_ORG: "HomeMaidOrg"          # Organização configurada
 
   frontend:
     build:
@@ -72,6 +75,9 @@ services:
       KAFKA_LOG_RETENTION_MS: 10000
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Aumentar o tamanho das mensagens
+      KAFKA_MESSAGE_MAX_BYTES: 1048576000    # 1 GB
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 1048576000
     healthcheck:
       test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092" ]
       interval: 30s

@@ -19,9 +19,6 @@ const AddDeviceModal = ({
     const [deviceData, setDeviceData] = useState({ name: "", type: "", room: "" });
 
     const handleAddDevice = () => {
-        console.log("Device Data Before Validation:", deviceData);
-
-        // Validação dos campos
         if (!deviceData.name.trim() || !deviceData.type) {
             alert("Device name and type are required.");
             return;
@@ -39,10 +36,8 @@ const AddDeviceModal = ({
             room: currentCard.type === "House" ? deviceData.room : currentCard.type,
         };
 
-        console.log("Final Device Data:", finalDeviceData);
         onAddDevice(finalDeviceData);
 
-        // Reset do formulário
         setDeviceData({ name: "", type: "", room: "" });
     };
 

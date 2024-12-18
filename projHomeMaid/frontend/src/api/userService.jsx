@@ -6,7 +6,7 @@ export const signUpUser = async (formData) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/signUp`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data', // Importante para envio de arquivos
+                'Content-Type': 'multipart/form-data',
             },
         });
         return response.data;

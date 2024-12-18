@@ -55,8 +55,6 @@ public class SensorController {
         }
     }
 
-
-    // Temperatura média por divisão
     @GetMapping("/rooms/{roomId}/average-temperature")
     public ResponseEntity<String> getAverageTemperatureByRoom(
             @PathVariable String roomId,
@@ -66,7 +64,6 @@ public class SensorController {
         return ResponseEntity.ok(result);
     }
 
-    // Temperatura média por casa
     @GetMapping("/houses/{houseId}/average-temperature")
     public ResponseEntity<String> getAverageTemperatureByHouse(
             @PathVariable String houseId,
@@ -76,7 +73,6 @@ public class SensorController {
         return ResponseEntity.ok(result);
     }
 
-    // Humidade média por divisão
     @GetMapping("/rooms/{roomId}/average-humidity")
     public ResponseEntity<String> getAverageHumidityByRoom(
             @PathVariable String roomId,
@@ -86,7 +82,6 @@ public class SensorController {
         return ResponseEntity.ok(result);
     }
 
-    // Humidade média por casa
     @GetMapping("/houses/{houseId}/average-humidity")
     public ResponseEntity<String> getAverageHumidityByHouse(
             @PathVariable String houseId,
@@ -123,16 +118,15 @@ public class SensorController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", Double.NaN)); // Caso ocorra erro
+                    .body(Map.of("error", Double.NaN));
         }
     }
+
     @GetMapping("/rooms/{roomId}/data")
     public ResponseEntity<List<Map<String, Object>>> getRoomGraphData(
             @PathVariable String roomId,
             @RequestParam(value = "timeframe", defaultValue = "daily") String timeframe
     ) {
-        System.out.println("Recebido pedido para roomId: " + roomId + ", timeframe: " + timeframe); // Log dos parâmetros
-
         try {
             List<Map<String, Object>> data = sensorService.getRoomGraphData(roomId, timeframe);
             return ResponseEntity.ok(data);

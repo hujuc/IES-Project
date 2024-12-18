@@ -17,11 +17,9 @@ export default function ShutterControl() {
     const url = window.location.href;
     const deviceId = url.split("/").pop();
 
-    // Fetch initial data and set up WebSocket
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -40,7 +38,6 @@ export default function ShutterControl() {
                     setIsShutterOpen(data.state || false);
                     setOpenPercentage(data.openPercentage != null ? Number(data.openPercentage) : DEFAULT_OPEN_PERCENTAGE);
                 } else if (response.status === 403) {
-                    console.log("Unauthorized access. Redirecting to login.");
                     navigate("/login");
                 }
             } catch (err) {
@@ -51,7 +48,6 @@ export default function ShutterControl() {
 
         fetchShutterData();
 
-        // WebSocket setup
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -60,7 +56,6 @@ export default function ShutterControl() {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket!");
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 if (updatedData.deviceId === deviceId) {
@@ -84,7 +79,6 @@ export default function ShutterControl() {
     const saveStateToDatabase = async (state, percentage) => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -101,7 +95,6 @@ export default function ShutterControl() {
 
             if (!response.ok) {
                 if (response.status === 403) {
-                    console.log("Unauthorized access. Redirecting to login.");
                     navigate("/login");
                 }
                 throw new Error("Error saving state to database");

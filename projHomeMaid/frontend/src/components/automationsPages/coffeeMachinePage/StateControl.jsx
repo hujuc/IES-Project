@@ -23,7 +23,6 @@ export default function StateControl({ deviceId }) {
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -42,9 +41,6 @@ export default function StateControl({ deviceId }) {
                 setLightOn(data.state || false);
                 setIsLocked(data.state || false);
                 setSelectedOption(capitalize(data.drinkType || "Espresso"));
-                if(response.ok){
-                    console.log("Device Data Fetched Success");
-                }
             } catch (err) {
                 console.error("Error fetching device data:", err);
                 setError("Failed to fetch device data.");
@@ -64,7 +60,6 @@ export default function StateControl({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket STOMP!");
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedDevice = JSON.parse(message.body);
 
@@ -74,7 +69,6 @@ export default function StateControl({ deviceId }) {
                     if (updatedDevice.drinkType) {
                         setSelectedOption(capitalize(updatedDevice.drinkType));
                     }
-                    console.log("Device updated via WebSocket:", updatedDevice);
                 }
             });
         };
@@ -87,7 +81,6 @@ export default function StateControl({ deviceId }) {
     const toggleLight = async () => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -138,25 +131,22 @@ export default function StateControl({ deviceId }) {
     const updateDrinkType = async (optionName) => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
 
         try {
-            // Update drink type
             await axios.patch(
                 `${import.meta.env.VITE_API_URL}/devices/${deviceId}`,
                 { drinkType: optionName.toLowerCase() },
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`, // Authorization header
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             );
 
             setSelectedOption(optionName);
-            console.log("Drink type updated successfully");
         } catch (err) {
             console.error("Error updating drink type:", err);
             setError("Failed to update the selected drink type.");

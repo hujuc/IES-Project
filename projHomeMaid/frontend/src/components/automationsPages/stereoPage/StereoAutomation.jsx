@@ -19,7 +19,6 @@ export default function StereoAutomation({ deviceId }) {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -34,7 +33,6 @@ export default function StereoAutomation({ deviceId }) {
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-                console.log("Fetched Automations Successfully")
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -51,8 +49,6 @@ export default function StereoAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Speaker Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 try {
                     const updatedData = JSON.parse(message.body);
@@ -66,7 +62,6 @@ export default function StereoAutomation({ deviceId }) {
                         (updatedData.changes.state === false || updatedData.changes.volume !== undefined)
                     ) {
                         setAutomatizations((prev) => [...prev, updatedData]);
-                        console.log("Updated automatization received via WebSocket:", updatedData);
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
@@ -98,7 +93,6 @@ export default function StereoAutomation({ deviceId }) {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -110,9 +104,6 @@ export default function StereoAutomation({ deviceId }) {
                 },
                 body: JSON.stringify(newAutomatization),
             });
-            if(response.ok){
-                console.log("Added Automation Successfully")
-            }
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
@@ -129,7 +120,6 @@ export default function StereoAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -142,9 +132,7 @@ export default function StereoAutomation({ deviceId }) {
                     Authorization: `Bearer ${token}`,
                 }}
             );
-            if(response.ok){
-                console.log("Deleted Automation Successfully");
-            }
+
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
             }

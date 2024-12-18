@@ -1,6 +1,6 @@
 package pt.ua.deti.ies.backend.service;
 
-import org.apache.commons.codec.digest.DigestUtils; // Ensure this import is present
+import org.apache.commons.codec.digest.DigestUtils;
 import pt.ua.deti.ies.backend.model.User;
 import pt.ua.deti.ies.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,15 +16,20 @@ import java.util.Base64;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestPart;
 import java.io.IOException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private static final String SECRET_KEY = "!a04h09r07r18!";
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -44,16 +49,11 @@ public class UserService {
             throw new IllegalArgumentException("Email is already in use.");
         }
 
-        // Check if houseId is already in use
         if (userRepository.findByHouseId(user.getHouseId()).isPresent()) {
             throw new IllegalArgumentException("House ID is already in use.");
         }
 
-        // Encrypt the password with SHA-256
-        //String encryptedPassword = DigestUtils.sha256Hex(user.getPassword());
         user.setPassword(user.getPassword());
-
-        // Save the user in the database
         return userRepository.save(user);
     }
 
@@ -80,16 +80,15 @@ public class UserService {
 
         User user = userOptional.get();
 
-       // String encryptedPassword = DigestUtils.sha256Hex(password);
-        if (!user.getPassword().equals(password)) {
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Incorrect password.");
         }
 
         return user.getHouseId();
     }
 
+
     public User updateUserProfile(String houseId, String name, MultipartFile file) {
-        // Busca o usuário pelo houseId
         Optional<User> userOpt = userRepository.findByHouseId(houseId);
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found.");
@@ -97,12 +96,10 @@ public class UserService {
 
         User user = userOpt.get();
 
-        // Atualiza o nome, se fornecido
         if (name != null && !name.isEmpty()) {
             user.setName(name);
         }
 
-        // Atualiza a imagem de perfil, se fornecida
         if (file != null && !file.isEmpty()) {
             try {
                 String base64Image = Base64.getEncoder().encodeToString(file.getBytes());
@@ -112,7 +109,6 @@ public class UserService {
             }
         }
 
-        // Salva o usuário atualizado no MongoDB
         return userRepository.save(user);
     }
 

@@ -6,17 +6,14 @@ import pt.ua.deti.ies.backend.repository.DeviceRepository;
 
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Component
 public class ShutterAutomationHandler implements DeviceAutomationHandler {
 
     private final DeviceRepository deviceRepository;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public ShutterAutomationHandler(DeviceRepository deviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
+    public ShutterAutomationHandler(DeviceRepository deviceRepository) {
         this.deviceRepository = deviceRepository;
-        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -27,16 +24,7 @@ public class ShutterAutomationHandler implements DeviceAutomationHandler {
 
             device.setState(state);
             device.setOpenPercentage(openPercentage);
-
-            System.out.println("Shutter state: " + state + ", Open Percentage: " + openPercentage);
             deviceRepository.save(device);
-            try {
-                String deviceJson = new ObjectMapper().writeValueAsString(device);
-                System.out.println("Broadcasting update: " + deviceJson);
-                simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 }

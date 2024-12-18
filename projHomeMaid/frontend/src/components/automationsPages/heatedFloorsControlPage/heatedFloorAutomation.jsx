@@ -19,7 +19,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -34,9 +33,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
                     (item) => item.deviceId === deviceId
                 );
                 setAutomatizations(deviceAutomatizations);
-                if(response.ok){
-                    console.log("Autmations Fetched Successfully");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
             }
@@ -53,8 +49,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket for Heated Floors Automatizations!");
-
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
                 if (
@@ -64,7 +58,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
                     (updatedData.changes.state === true || updatedData.changes.state === false)
                 ) {
                     setAutomatizations((prev) => [...prev, updatedData]);
-                    console.log("Updated automatization received via WebSocket:", updatedData);
                 }
             });
         };
@@ -89,11 +82,9 @@ export default function HeatedFloorAutomation({ deviceId }) {
         };
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
-
 
         try {
             const response = await fetch(API_BASE_URL, {
@@ -107,8 +98,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
-            }else {
-                console.log("Added Automation Successfully");
             }
 
             const data = await response.json();
@@ -122,11 +111,9 @@ export default function HeatedFloorAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
-
 
         try {
             const response = await fetch(`${API_BASE_URL}/${automatization.deviceId}/${automatization.executionTime}`, {
@@ -138,8 +125,6 @@ export default function HeatedFloorAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
-            }else {
-                console.log("Deleted Automations Successfully");
             }
 
             setAutomatizations(automatizations.filter((_, i) => i !== index));

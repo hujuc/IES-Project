@@ -12,11 +12,9 @@ import java.util.*;
 public class RoomService {
 
     private final RoomRepository roomRepository;
-    private final ImageStorageService imageStorageService; // Adicionado o serviço de armazenamento de imagens
 
-    public RoomService(RoomRepository roomRepository, ImageStorageService imageStorageService) {
+    public RoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
-        this.imageStorageService = imageStorageService;
     }
 
     public Optional<Room> getRoomById(String roomId) {
@@ -30,9 +28,9 @@ public class RoomService {
     public Room addDeviceToRoom(String roomId, String deviceId) {
         return roomRepository.findById(roomId).map(room -> {
             List<String> devices = room.getDevices();
-            devices.add(deviceId); // Adicionar o novo dispositivo à lista
+            devices.add(deviceId);
             room.setDevices(devices);
-            return roomRepository.save(room); // Salvar as alterações no banco de dados
+            return roomRepository.save(room);
         }).orElseThrow(() -> new RuntimeException("Room not found: " + roomId));
     }
 

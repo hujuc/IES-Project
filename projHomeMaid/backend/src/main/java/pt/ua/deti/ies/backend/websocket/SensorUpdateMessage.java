@@ -5,8 +5,6 @@ public class SensorUpdateMessage {
     private String field;
     private double value;
 
-    // Constructor, getters and setters
-
     public SensorUpdateMessage(String roomId, String field, double value) {
         this.roomId = roomId;
         this.field = field;

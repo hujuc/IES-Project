@@ -3,7 +3,7 @@ package pt.ua.deti.ies.backend.websocket;
 public class DeviceState {
 
     private String deviceId;
-    private boolean state; // Ex.: ligado/desligado
+    private boolean state;
     private int volume;
     private int brightness;
 

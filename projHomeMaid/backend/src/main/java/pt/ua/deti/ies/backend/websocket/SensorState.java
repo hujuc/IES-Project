@@ -34,7 +34,4 @@ public class SensorState {
     public void setHumidity(double humidity) {
         this.humidity = humidity;
     }
-
-    // Getters e Setters
-    // ...
 }

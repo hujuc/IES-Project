@@ -30,7 +30,6 @@ export default function ClockAutomation({ deviceId }) {
     useEffect(() => {
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -45,9 +44,6 @@ export default function ClockAutomation({ deviceId }) {
                 const data = await response.json();
                 const deviceAutomatizations = data.filter((item) => item.deviceId === deviceId);
                 setAutomatizations(deviceAutomatizations);
-                if(response.ok){
-                    console.log("Fetched Automations Success");
-                }
             } catch (err) {
                 console.error("Error fetching automatizations:", err);
                 setError("Failed to fetch automatizations.");
@@ -65,8 +61,6 @@ export default function ClockAutomation({ deviceId }) {
             });
 
             client.onConnect = () => {
-                console.log("Connected to WebSocket for Alarm Clock Automatizations!");
-
                 client.subscribe(`/topic/device-updates`, (message) => {
                     try {
                         const updatedData = JSON.parse(message.body);
@@ -76,7 +70,6 @@ export default function ClockAutomation({ deviceId }) {
                             updatedData.changes
                         ) {
                             setAutomatizations((prev) => [...prev, updatedData]);
-                            console.log("Updated automatization received via WebSocket:", updatedData);
                         }
                     } catch (error) {
                         console.error("Error parsing WebSocket message:", error);
@@ -115,7 +108,6 @@ export default function ClockAutomation({ deviceId }) {
         };
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -132,8 +124,6 @@ export default function ClockAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to add automatization: ${response.statusText}`);
-            }else{
-                console.log("Add Automations Success");
             }
 
             const data = await response.json();
@@ -148,7 +138,6 @@ export default function ClockAutomation({ deviceId }) {
         const automatization = automatizations[index];
         const token = localStorage.getItem("jwtToken");
         if (!token) {
-            console.log("Token not found. Redirecting to login page.");
             navigate("/login");
             return;
         }
@@ -163,10 +152,7 @@ export default function ClockAutomation({ deviceId }) {
 
             if (!response.ok) {
                 throw new Error(`Failed to delete automatization: ${response.statusText}`);
-            }else {
-                console.log("Deleted Automation Success")
             }
-
             setAutomatizations(automatizations.filter((_, i) => i !== index));
         } catch (err) {
             console.error("Error deleting automatization:", err);

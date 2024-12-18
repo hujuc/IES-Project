@@ -5,21 +5,20 @@ import TvAutomation from "../../components/automationsPages/tvPage/tvAutomation.
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 export default function TVControl() {
     const [isTVOn, setIsTVOn] = useState(false);
-    const [volume, setVolume] = useState(50); // Volume inicial
-    const [brightness, setBrightness] = useState(50); // Brilho inicial
-    const [deviceName, setDeviceName] = useState("Television"); // Nome do dispositivo
-    const navigate = useNavigate(); // For navigation
+    const [volume, setVolume] = useState(50);
+    const [brightness, setBrightness] = useState(50);
+    const [deviceName, setDeviceName] = useState("Television");
+    const navigate = useNavigate();
     const [error, setError] = useState(null);
 
     const url = window.location.href;
     const urlParts = url.split("/");
     const deviceId = urlParts[urlParts.length - 1];
 
-    // Fetch TV data from API and setup WebSocket
     useEffect(() => {
         const fetchTVData = async () => {
             try {
@@ -41,12 +40,9 @@ export default function TVControl() {
                 setIsTVOn(data.state || false);
                 setVolume(data.volume != null ? data.volume : 50);
                 setBrightness(data.brightness != null ? data.brightness : 50);
-                setDeviceName(data.name || "Television"); // Atualiza o nome do dispositivo
+                setDeviceName(data.name || "Television");
                 if(response.status === 403){
-                    console.log("Non authorized Access, navigating to login");
                     navigate("/login");
-                }else if (response.ok){
-                    console.log("Tv Data Fetched Successfully")
                 }
             } catch (err) {
                 console.error("Erro ao buscar os dados da TV:", err);
@@ -56,7 +52,6 @@ export default function TVControl() {
 
         fetchTVData();
 
-        // Setup WebSocket
         const client = new Client({
             webSocketFactory: () => new SockJS(import.meta.env.VITE_API_URL.replace("/api", "/ws/devices")),
             reconnectDelay: 5000,
@@ -65,9 +60,6 @@ export default function TVControl() {
         });
 
         client.onConnect = () => {
-            console.log("Conectado ao WebSocket STOMP!");
-
-            // Subscribe to updates for this device
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
 
@@ -76,7 +68,6 @@ export default function TVControl() {
                     if (updatedData.volume !== undefined) setVolume(updatedData.volume);
                     if (updatedData.brightness !== undefined) setBrightness(updatedData.brightness);
                     if (updatedData.name !== undefined) setDeviceName(updatedData.name); // Atualiza o nome em tempo real
-                    console.log("Dados atualizados via WebSocket:", updatedData);
                 }
             });
         };
@@ -153,9 +144,6 @@ export default function TVControl() {
                 }),
             });
 
-            if(response.ok){
-                console.log("Saved Data Succes")
-            }
             if (!response.ok) {
                 throw new Error(`Erro na resposta da API: ${response.status}`);
             }

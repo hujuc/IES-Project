@@ -13,6 +13,7 @@ import java.util.TimerTask;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import pt.ua.deti.ies.backend.websocket.NotificationMessage;
 
 @Component
 public class CoffeeMachineAutomationHandler implements DeviceAutomationHandler {
@@ -20,7 +21,7 @@ public class CoffeeMachineAutomationHandler implements DeviceAutomationHandler {
     private final DeviceRepository deviceRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final DeviceService deviceService; // Para obter houseId
+    private final DeviceService deviceService;
 
     public CoffeeMachineAutomationHandler(DeviceRepository deviceRepository,
                                           NotificationRepository notificationRepository,
@@ -34,43 +35,30 @@ public class CoffeeMachineAutomationHandler implements DeviceAutomationHandler {
 
     @Override
     public void executeAutomation(Device device, Map<String, Object> changes) {
-        System.out.println("Executing automation for Coffee Machine: " + device.getDeviceId());
 
         if (changes.containsKey("drinkType")) {
             device.setDrinkType((String) changes.get("drinkType"));
-            System.out.println("Set drinkType to: " + changes.get("drinkType"));
         }
 
         device.setState(true);
         deviceRepository.save(device);
-        System.out.println("Device state set to ON");
 
-        try {
-            String deviceJson = new ObjectMapper().writeValueAsString(device);
-            System.out.println("Broadcasting update: " + deviceJson);
-            simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Simula a preparação da bebida por 30 segundos
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 device.setState(false);
                 deviceRepository.save(device);
-                System.out.println("Device state set to OFF after 30 seconds");
 
                 try {
                     String deviceJson = new ObjectMapper().writeValueAsString(device);
-                    System.out.println("Broadcasting update after timeout: " + deviceJson);
                     simpMessagingTemplate.convertAndSend("/topic/device-updates", deviceJson);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                // Enviar notificação de conclusão do ciclo
-                sendCycleCompletedNotification(device, changes.get("drinkType"));
+                if (Boolean.TRUE.equals(device.getReceiveAutomationNotification())) {
+                    sendCycleCompletedNotification(device, changes.get("drinkType"));
+                }
             }
         }, 30000);
     }
@@ -85,12 +73,21 @@ public class CoffeeMachineAutomationHandler implements DeviceAutomationHandler {
                     houseId,
                     notificationText,
                     LocalDateTime.now(),
-                    false, // Não lida
-                    "cycleCompletedNotification" // Tipo de notificação
+                    false,
+                    "automationNotification"
             );
 
-            notificationRepository.save(notification);
-            System.out.println("[INFO] Cycle completion notification created: " + notificationText);
+            Notification savedNotification = notificationRepository.save(notification);
+
+            NotificationMessage notificationMessage = new NotificationMessage();
+            notificationMessage.setHouseId(savedNotification.getHouseId());
+            notificationMessage.setText(savedNotification.getText());
+            notificationMessage.setType(savedNotification.getType());
+            notificationMessage.setTimestamp(savedNotification.getTimestamp().toString());
+            notificationMessage.setMongoId(savedNotification.getMongoId());
+
+            simpMessagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
+
         } catch (Exception e) {
             System.err.println("[ERROR] Error creating cycle completion notification: " + e.getMessage());
         }

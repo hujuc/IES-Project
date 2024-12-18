@@ -11,20 +11,34 @@ function DeviceCard({ device, onToggle, getDeviceImage, loadingDeviceId }) {
                 device.type === "coffeeMachine") &&
             device.state);
 
+    const handleToggle = (e) => {
+        e.stopPropagation();
+
+        if (isToggleDisabled) return;
+
+        let updatedDeviceData = {
+            state: !device.state,
+        };
+
+        if (device.type === "shutter") {
+            updatedDeviceData.openPercentage = !device.state ? 100 : 0;
+        }
+
+        onToggle(device.deviceId, device.state, device.type, updatedDeviceData);
+    };
+
     return (
         <div
             className="bg-white rounded-lg shadow-lg p-3 flex flex-col items-center justify-between transition-all duration-300 hover:shadow-xl cursor-pointer w-full"
-            style={{ minHeight: "230px" }} // Altura mínima ajustada
+            style={{ minHeight: "230px" }}
             onClick={() => navigate(`/${device.type}/${device.deviceId}`)}
         >
-            {/* Título */}
             <div className="flex items-center justify-center w-full mb-0 min-h-[40px] mt-3">
                 <h4 className="text-base font-semibold text-gray-800 text-center leading-snug break-words">
                     {device.name || "Unnamed Device"}
                 </h4>
             </div>
 
-            {/* Imagem */}
             <div className="flex items-center justify-center w-full h-20 mb-0">
                 <img
                     src={getDeviceImage(device.type)}
@@ -33,15 +47,9 @@ function DeviceCard({ device, onToggle, getDeviceImage, loadingDeviceId }) {
                 />
             </div>
 
-            {/* Botão de Toggle */}
             <div className="flex items-center justify-center w-full mt-2">
                 <div
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isToggleDisabled) {
-                            onToggle(device.deviceId, device.state, device.type);
-                        }
-                    }}
+                    onClick={handleToggle}
                     className={`w-14 h-7 flex items-center rounded-full p-1 ${
                         isToggleDisabled ? "cursor-not-allowed" : "cursor-pointer"
                     } ${

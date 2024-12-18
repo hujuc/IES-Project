@@ -14,9 +14,10 @@ TOPIC_DEVICE_AUTOMATIONS = "device_automations"
 BACKEND_SENSORS_URL = "http://backend:8080/api/sensors"
 BACKEND_DEVICES_URL = "http://backend:8080/api/devices"
 
-# Criar o Kafka producer
-producer = KafkaProducer(bootstrap_servers=[KAFKA_BROKER],
-                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(
+    bootstrap_servers="kafka:9092",
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
 
 # Dispositivos que não podem ser desligados
 CANNOT_BE_TURNED_OFF = ["clock", "dryerMachine", "washingMachine", "coffeeMachine"]

@@ -3,8 +3,8 @@ package pt.ua.deti.ies.backend.websocket;
 public class DeviceUpdateMessage {
 
     private String deviceId;
-    private String field; // Campo atualizado (ex.: state, volume, brightness)
-    private Object value; // Valor atualizado
+    private String field;
+    private Object value;
 
     public DeviceUpdateMessage() {}
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import AirConditionerState from "../../components/automationsPages/AirConditionerPage/StateControl.jsx";
+import WashingMachineState from "../../components/automationsPages/washingMachinePage/StateControl.jsx";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import AutomatizeAirConditioner from "../../components/automationsPages/AirConditionerPage/AirCondAutomation.jsx";
+import AutomatizeWashingMachine from "../../components/automationsPages/washingMachinePage/washerAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNavigate } from "react-router-dom"; // Import for redirecting to login
@@ -37,7 +37,6 @@ export default function AirConditionerControl() {
                 if (response.ok) {
                     const data = await response.json();
                     setDeviceData(data);
-                    console.log("Fetched Device Data Successfully");
                 } else if (response.status === 403) {
                     console.error("Unauthorized Access. Redirecting to login.");
                     navigate("/login");
@@ -63,14 +62,11 @@ export default function AirConditionerControl() {
             });
 
             client.onConnect = () => {
-                console.log("Connected to WebSocket STOMP!");
-
                 client.subscribe(`/topic/device-updates`, (message) => {
                     const updatedData = JSON.parse(message.body);
 
                     if (updatedData.deviceId === deviceId) {
                         setDeviceData((prev) => ({ ...prev, ...updatedData }));
-                        console.log("Updated data received via WebSocket:", updatedData);
                     }
                 });
             };
@@ -118,11 +114,11 @@ export default function AirConditionerControl() {
             </div>
 
             {/* State and Control Section */}
-            <AirConditionerState deviceId={deviceId} deviceData={deviceData} />
+            <WashingMachineState deviceId={deviceId} deviceData={deviceData} />
 
             {/* Automation Section */}
             <AutomationBox deviceId={deviceId}>
-                <AutomatizeAirConditioner deviceId={deviceId} />
+                <AutomatizeWashingMachine deviceId={deviceId} />
             </AutomationBox>
         </div>
     );

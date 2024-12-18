@@ -35,8 +35,15 @@ public class SecurityConfiguration {
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/users/signUp", "/api/users/login", "/ws/**", "/api/users/all", "api/automations")
-                .permitAll()
+                .requestMatchers(
+                        "/api/users/signUp",
+                        "/api/users/login",
+                        "/ws/**",
+                        "/api/users/all",
+                        "/api/automations",
+                        "/api/sensors",
+                        "/api/devices"
+                ).permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

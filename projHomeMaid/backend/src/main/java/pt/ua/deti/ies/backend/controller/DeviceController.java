@@ -85,36 +85,6 @@ public class DeviceController {
         return ResponseEntity.ok(deviceService.getAllDevices());
     }
 
-    @PostMapping("/{deviceId}/toggle")
-    public ResponseEntity<?> toggleDeviceState(@PathVariable String deviceId) {
-        Optional<Device> optionalDevice = deviceService.getDeviceById(deviceId); // Handle Optional here
-
-        if (optionalDevice.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found.");
-        }
-
-        Device device = optionalDevice.get(); // Extract the Device from Optional
-
-        if (device.getState()) { // Ensure the `getState()` method matches the getter in the `Device` class
-            return ResponseEntity.badRequest().body("Device is already on.");
-        }
-
-        // Turn on the device
-        device.setState(true);
-        deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
-
-        // Schedule state reset after 30 seconds
-        new Timer().schedule(new TimerTask() { // Ensure Timer and TimerTask are imported
-            @Override
-            public void run() {
-                device.setState(false);
-                deviceService.updateDevice(deviceId, device); // Include deviceId to match the service's update method signature
-            }
-        }, 30000); // 30 seconds
-
-        return ResponseEntity.ok(device);
-    }
-
     @PostMapping("/add")
     public ResponseEntity<Device> addDeviceByUser(@RequestBody Map<String, String> payload) {
         try {
@@ -125,18 +95,17 @@ public class DeviceController {
 
             if (houseId == null || roomType == null || type == null || name == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(null); // Retorna erro se algum parâmetro estiver ausente
+                        .body(null);
             }
 
-            // Adicionar o dispositivo à casa e ao Room correspondente
             Device newDevice = deviceService.addDeviceByUser(houseId, roomType, type, name);
             return ResponseEntity.status(HttpStatus.CREATED).body(newDevice);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Erro de validação
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Room não encontrado
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Outro erro
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

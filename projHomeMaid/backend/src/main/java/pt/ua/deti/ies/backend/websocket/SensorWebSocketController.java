@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SensorWebSocketController {
 
-    @MessageMapping("/sensor-update") // Recebe mensagens enviadas para "/app/sensor-update"
-    @SendTo("/topic/sensor-updates") // Envia mensagens para todos inscritos em "/topic/sensor-updates"
+    @MessageMapping("/sensor-update")
+    @SendTo("/topic/sensor-updates")
     public SensorState handleSensorUpdate(SensorUpdateMessage message) {
         System.out.println("Received sensor update: " + message);
         return new SensorState(

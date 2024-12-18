@@ -12,21 +12,19 @@ public class Room {
 
     @Id
     private String roomId;
-    private List<String> devices = new ArrayList<>(); // Inicializar como lista vazia
-    private List<Device> deviceObjects = new ArrayList<>(); // Inicializar como lista vazia
+    private List<String> devices = new ArrayList<>();
+    private List<Device> deviceObjects = new ArrayList<>();
     private String type;
 
-    // Construtores
     public Room() {}
 
     public Room(String roomId, List<String> devices, String type) {
         this.roomId = roomId;
-        this.devices = devices != null ? devices : new ArrayList<>(); // Garantir lista não-nula
-        this.deviceObjects = new ArrayList<>(); // Inicializar como lista vazia
+        this.devices = devices != null ? devices : new ArrayList<>();
+        this.deviceObjects = new ArrayList<>();
         this.type = type;
     }
 
-    // Getters e Setters
     public String getRoomId() {
         return roomId;
     }
@@ -40,7 +38,7 @@ public class Room {
     }
 
     public void setDevices(List<String> devices) {
-        this.devices = devices != null ? devices : new ArrayList<>(); // Garantir lista não-nula
+        this.devices = devices != null ? devices : new ArrayList<>();
     }
 
     public List<Device> getDeviceObjects() {
@@ -48,9 +46,8 @@ public class Room {
     }
 
     public void setDeviceObjects(List<Device> deviceObjects) {
-        this.deviceObjects = deviceObjects != null ? deviceObjects : new ArrayList<>(); // Garantir lista não-nula
+        this.deviceObjects = deviceObjects != null ? deviceObjects : new ArrayList<>();
 
-        // Sincronizar a lista de IDs de dispositivos com `deviceObjects`
         this.devices = this.deviceObjects.stream()
                 .map(Device::getDeviceId)
                 .collect(Collectors.toList());

@@ -9,13 +9,11 @@ public class HouseDetailsResponse {
     private String houseId;
     private List<Room> rooms;
 
-    // Construtor
     public HouseDetailsResponse(String houseId, List<Room> rooms) {
         this.houseId = houseId;
         this.rooms = rooms;
     }
 
-    // Getters e Setters
     public String getHouseId() {
         return houseId;
     }

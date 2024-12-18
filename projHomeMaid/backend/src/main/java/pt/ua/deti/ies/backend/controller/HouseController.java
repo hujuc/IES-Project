@@ -18,7 +18,6 @@ import pt.ua.deti.ies.backend.model.User;
 
 import java.util.*;
 
-
 @RestController
 @RequestMapping("/api/houses")
 public class HouseController {
@@ -31,34 +30,27 @@ public class HouseController {
         this.deviceService = deviceService;
     }
 
-    // Buscar detalhes da casa pelo ID
     @GetMapping("/{houseId}")
     public ResponseEntity<?> getHouseDetails(@PathVariable String houseId) {
         try {
-            // Retrieve the authenticated user from the security context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            // Ensure the user is authenticated
             if (authentication == null || !authentication.isAuthenticated()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized.");
             }
 
-            // Retrieve the authenticated user details
             User authenticatedUser = (User) authentication.getPrincipal();
 
-            // Optional: Add authorization logic (e.g., check if the user has access to the house)
             if (!houseService.userHasAccessToHouse(authenticatedUser, houseId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
             }
 
-            // Fetch house details by houseId
             Optional<House> houseOptional = houseService.getHouseById(houseId);
 
             if (houseOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House with ID " + houseId + " not found.");
             }
 
-            // Populate house details, rooms, and devices
             House house = houseOptional.get();
             List<String> roomIds = house.getRooms();
             List<Room> rooms = houseService.getRoomsByIds(roomIds);
@@ -69,7 +61,6 @@ public class HouseController {
                 room.setDeviceObjects(devices);
             }
 
-            // Return house details as a response
             return ResponseEntity.ok(new HouseDetailsResponse(
                     house.getHouseId(),
                     rooms
@@ -79,8 +70,6 @@ public class HouseController {
         }
     }
 
-
-    // Criar uma nova casa
     @PostMapping
     public ResponseEntity<?> createHouse(@RequestBody @Valid House house) {
         try {

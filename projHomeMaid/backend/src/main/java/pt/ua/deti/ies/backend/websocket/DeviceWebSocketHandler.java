@@ -21,7 +21,6 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         System.out.println("Received: " + message.getPayload());
-        // Aqui você pode processar mensagens recebidas dos clientes
     }
 
     @Override
@@ -30,7 +29,6 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
         System.out.println("WebSocket connection closed: " + session.getId());
     }
 
-    // Método para enviar atualizações para todos os clientes
     public void broadcast(String message) {
         for (WebSocketSession session : sessions) {
             try {

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import AutomationsHeader from "../../components/automationsPages/AutomationsHeader.jsx";
-import StateControl from "../../components/automationsPages/stereoPage/StateControl.jsx"; // Novo StateControl combinado
+import StateControl from "../../components/automationsPages/stereoPage/StateControl.jsx";
 import StereoAutomation from "../../components/automationsPages/stereoPage/StereoAutomation.jsx";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import AutomationBox from "../../components/automationsPages/AutomationBox.jsx";
-import { useNavigate } from "react-router-dom"; // Import for redirecting to login
+import { useNavigate } from "react-router-dom";
 
 export default function StereoControl() {
     const DEFAULT_VOLUME = 50;
     const [isSpeakerOn, setIsSpeakerOn] = useState(false);
     const [volume, setVolume] = useState(DEFAULT_VOLUME);
-    const [deviceName, setDeviceName] = useState("Speaker"); // Nome padrão
+    const [deviceName, setDeviceName] = useState("Speaker");
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
 
     const url = window.location.href;
     const deviceId = url.split("/").pop();
@@ -24,7 +24,6 @@ export default function StereoControl() {
             try {
                 const token = localStorage.getItem("jwtToken");
                 if (!token) {
-                    console.log("Token not found. Redirecting to login page.");
                     navigate("/login");
                     return;
                 }
@@ -39,10 +38,8 @@ export default function StereoControl() {
                 setIsSpeakerOn(data.state || false);
                 setVolume(data.volume != null ? Number(data.volume) : DEFAULT_VOLUME);
                 setDeviceName(data.name || "Speaker"); // Define o nome do dispositivo
-                if(response.ok){
-                    console.log("Fetched Speaker Data Successfully")
-                }else if(response.status === 403){
-                    console.log("Unauthorizes Access. Redirecting to Login");
+
+                if(response.status === 403){
                     navigate("/login");
                 }
 
@@ -63,9 +60,6 @@ export default function StereoControl() {
         });
 
         client.onConnect = () => {
-            console.log("Connected to WebSocket STOMP!");
-
-            // Subscribe to device updates
             client.subscribe(`/topic/device-updates`, (message) => {
                 const updatedData = JSON.parse(message.body);
 
@@ -73,7 +67,6 @@ export default function StereoControl() {
                     if (updatedData.state !== undefined) setIsSpeakerOn(updatedData.state);
                     if (updatedData.volume !== undefined) setVolume(Number(updatedData.volume));
                     if (updatedData.name !== undefined) setDeviceName(updatedData.name);
-                    console.log("Speaker updated via WebSocket:", updatedData);
                 }
             });
         };
@@ -118,7 +111,6 @@ export default function StereoControl() {
         try {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -131,9 +123,7 @@ export default function StereoControl() {
                 },
                 body: JSON.stringify({ state, volume }),
             });
-            if(response.ok){
-                console.log("Saved Stereo Data Successfully")
-            }
+
             if (!response.ok) {
                 throw new Error(`API response error: ${response.status}`);
             }

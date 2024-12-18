@@ -14,12 +14,9 @@ export default function AutomationsHeader() {
 
     const handleRemoveDevice = async () => {
         try {
-            // Retrieve the token from localStorage
             const token = localStorage.getItem("jwtToken");
 
-            // If token is missing, redirect to login page
             if (!token) {
-                console.log("Token not found. Redirecting to login page.");
                 navigate("/login");
                 return;
             }
@@ -37,15 +34,10 @@ export default function AutomationsHeader() {
                 const houseId = deviceId.split("_")[2]; // Extract the houseId from the deviceId
                 navigate(`/homePage/${houseId}`); // Redirect to the homePage of the house
             } else if (response.status === 401) {
-                // If the token is invalid or expired, redirect to login
-                console.log("Unauthorized. Redirecting to login page.");
                 navigate("/login");
-            } else {
-                console.log("Failed to remove device. Please try again.");
             }
         } catch (error) {
             console.error("Error removing device:", error);
-            console.log("An error occurred. Please try again.");
         }
     };
 

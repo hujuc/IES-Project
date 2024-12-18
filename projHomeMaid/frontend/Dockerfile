@@ -1,5 +1,5 @@
 # Build vite project and put it in a nginx container
-FROM node:20 AS build-stage
+FROM node:18 AS build-stage
 
 WORKDIR /app
 
